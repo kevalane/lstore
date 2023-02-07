@@ -1,5 +1,3 @@
-import struct
-
 DATA_SIZE = 8   # int64
 PAGE_SIZE = 4096
 STORAGE_OPTION = 'big'
