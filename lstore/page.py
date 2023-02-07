@@ -14,8 +14,10 @@ class Page:
         return self.num_records*DATA_SIZE < PAGE_SIZE
 
     def write(self, value):
+        if (self.has_capacity() == False):
+            raise Exception("Page is full")
+        
         # convert value to bytes
-        # https://stackoverflow.com/questions/6187699/how-to-convert-integer-value-to-array-of-four-bytes-in-python
         value_to_bytes = value.to_bytes(DATA_SIZE, 
                                         byteorder=STORAGE_OPTION, 
                                         signed=False)
