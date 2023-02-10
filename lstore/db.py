@@ -18,6 +18,9 @@ class Database():
     :param name: string         #Table name
     :param num_columns: int     #Number of Columns: all columns are integer
     :param key: int             #Index of table key in columns
+    
+    @returns Table | None       Returns the created table 
+                                or None if table already exists
     """
     def create_table(self, name, num_columns, key_index):
         if (self.get_table(name) == None):
@@ -31,6 +34,11 @@ class Database():
     
     """
     # Deletes the specified table
+
+    :param name: string         #Table name
+
+    @returns boolean            Returns True if table was deleted,
+                                False if table does not exist
     """
     def drop_table(self, name):
         if (self.get_table(name) != None):
@@ -43,6 +51,11 @@ class Database():
     
     """
     # Returns table with the passed name
+
+    :param name: string         #Table name
+
+    @returns Table | None       Returns the table with given name 
+                                or None if table does not exist
     """
     def get_table(self, name):
         if name in self.tables:
