@@ -28,3 +28,13 @@ class DatabaseTestCase(unittest.TestCase):
         db = Database()
         name = "test_table"
         self.assertEquals(db.drop_table(name), False)
+
+    def test_drop_table(self):
+        db = Database()
+        name = "test_table"
+        db.create_table(name, 4, 1)
+        self.assertNotEquals(db.tables, {})
+        self.assertEquals(db.get_table(name).name, name)
+
+        self.assertEquals(db.drop_table(name), True)
+        self.assertEquals(db.tables, {})
