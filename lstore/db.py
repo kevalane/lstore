@@ -20,9 +20,13 @@ class Database():
     :param key: int             #Index of table key in columns
     """
     def create_table(self, name, num_columns, key_index):
-        table = Table(name, num_columns, key_index)
-        self.tables[str(table.name)] = table
-        return table
+        if (self.get_table(name) == None):
+            # Table does not exist, create it
+            table = Table(name, num_columns, key_index)
+            self.tables[str(table.name)] = table
+            return table
+        else:
+            return None
 
     
     """
@@ -36,7 +40,7 @@ class Database():
     # Returns table with the passed name
     """
     def get_table(self, name):
-        if (self.tables[str(name)]):
+        if name in self.tables:
             return self.tables[str(name)]
         else:
-            return -1
+            return None
