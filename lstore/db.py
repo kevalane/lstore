@@ -33,7 +33,12 @@ class Database():
     # Deletes the specified table
     """
     def drop_table(self, name):
-        pass
+        if (self.get_table(name) != None):
+            # Table exists, delete it
+            del self.tables[str(name)]
+            return True
+        else:
+            return False
 
     
     """
