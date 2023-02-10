@@ -3,7 +3,7 @@ from lstore.table import Table
 class Database():
 
     def __init__(self):
-        self.tables = []
+        self.tables = {} # hashtable for O(1) delete / get
         pass
 
     # Not required for milestone1
@@ -21,6 +21,7 @@ class Database():
     """
     def create_table(self, name, num_columns, key_index):
         table = Table(name, num_columns, key_index)
+        self.tables[str(table.name)] = table
         return table
 
     
@@ -35,4 +36,7 @@ class Database():
     # Returns table with the passed name
     """
     def get_table(self, name):
-        pass
+        if (self.tables[str(name)]):
+            return self.tables[str(name)]
+        else:
+            return -1
