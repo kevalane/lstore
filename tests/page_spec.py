@@ -39,7 +39,23 @@ class PageTestCase(unittest.TestCase):
         self.assertEqual(page.num_records, 3)
         self.assertEqual(page.data[16:24], b'\x00\x00\x00\x00\x50\xA7\x88\xEE')
 
-    
+    def test_put(self):
+        page = Page()
+        page.write(256)
+        self.assertEqual(page.num_records, 1)
+        self.assertEqual(page.data[0:8], b'\x00\x00\x00\x00\x00\x00\x01\x00')
+
+        page.write(512)
+        self.assertEqual(page.num_records, 2)
+        self.assertEqual(page.data[8:16], b'\x00\x00\x00\x00\x00\x00\x02\x00')
+
+        page.write(1353156846)
+        self.assertEqual(page.num_records, 3)
+        self.assertEqual(page.data[16:24], b'\x00\x00\x00\x00\x50\xA7\x88\xEE')
+
+        page.put(1353156846, 0)
+        self.assertEqual(page.num_records, 3)
+        self.assertEqual(page.data[0:8], b'\x00\x00\x00\x00\x50\xA7\x88\xEE')
 
 if __name__ == '__main__':
     unittest.main()

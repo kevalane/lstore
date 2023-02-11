@@ -71,10 +71,10 @@ class Page:
                                         signed=False)
 
         # calc offset
-        offset = self.num_records * DATA_SIZE
+        byte_offset = offset * DATA_SIZE
 
         # write the value to the page
-        self.data[offset:offset+DATA_SIZE] = value_to_bytes
+        self.data[byte_offset:byte_offset+DATA_SIZE] = value_to_bytes
 
 
 
