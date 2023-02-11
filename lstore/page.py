@@ -40,6 +40,13 @@ class Page:
 
         return True
 
+    """
+    Updates a value in the page on a given offset
+    :param  value: int64        The value to write to the page
+    :param  offset: int         The offset to write the value to
+    @returns    True if the value was written to the page,
+                False otherwise
+    """
     def put(self, value, offset):
         if (offset < 0 or offset >= PAGE_SIZE/DATA_SIZE):
             return False # out of bounds offset
@@ -47,7 +54,9 @@ class Page:
         if (offset >= self.num_records):
             return False # offset outside of current records
 
-        # convert value to bytes
+        self._insert(value, offset)
+
+        return True
     
 
     """
