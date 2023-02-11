@@ -33,6 +33,29 @@ class Page:
         if (self.has_capacity() == False):
             return False
         
+        self._insert(value, self.num_records)
+
+        # increment num_records
+        self.num_records += 1
+
+        return True
+
+    def put(self, value, offset):
+        if (offset < 0 or offset >= PAGE_SIZE/DATA_SIZE):
+            return False # out of bounds offset
+
+        if (offset >= self.num_records):
+            return False # offset outside of current records
+
+        # convert value to bytes
+    
+
+    """
+    Inserts and converts value into the page at the given offset
+    :param  value: int64        The value to write to the page
+    :param  offset: int         The offset to write the value to
+    """
+    def _insert(self, value, offset):
         # convert value to bytes
         value_to_bytes = value.to_bytes(DATA_SIZE, 
                                         byteorder=STORAGE_OPTION, 
@@ -44,9 +67,5 @@ class Page:
         # write the value to the page
         self.data[offset:offset+DATA_SIZE] = value_to_bytes
 
-        # increment num_records
-        self.num_records += 1
-
-        return True
 
 
