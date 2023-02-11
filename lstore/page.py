@@ -119,5 +119,7 @@ class Page:
         if (offset >= self.num_records):
             return False # offset outside of current records
 
+        return True
+
 
 
