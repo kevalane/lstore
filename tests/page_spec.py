@@ -18,8 +18,8 @@ class PageTestCase(unittest.TestCase):
             if (i == 511):
                 self.assertTrue(page.has_capacity())
             if (i > 511):
-                with self.assertRaises(Exception):
-                    page.write(i*400)
+                self.assertFalse(page.has_capacity())
+                self.assertFalse(page.write(i*400))
             else:
                 page.write(i*400)
 
