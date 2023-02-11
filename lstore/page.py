@@ -67,7 +67,26 @@ class Page:
     def delete(self, offset):
         return self.put(0, offset)
 
-        
+    """
+    Gets value stored in the page at the given offset
+    :param  offset: int         The offset to check
+
+    @returns    The value stored in the page at the given offset,
+                -1 if the offset is invalid
+    """
+    def get(self, offset):
+        if (self._valid_offset(offset) == False):
+            return -1
+
+        # calc offset
+        byte_offset = offset * DATA_SIZE
+
+        # read the value from the page
+        value = int.from_bytes(self.data[byte_offset:byte_offset+DATA_SIZE], 
+                               byteorder=STORAGE_OPTION, 
+                               signed=False)
+
+        return value
     
 
     """
