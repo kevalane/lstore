@@ -1,6 +1,6 @@
-DATA_SIZE = 8   # int64
-PAGE_SIZE = 4096
-STORAGE_OPTION = 'big'
+DATA_SIZE       =    8       # int64
+PAGE_SIZE       =    4096
+STORAGE_OPTION  =    'big'
 
 """
 Class to represent a page in the database
@@ -120,6 +120,3 @@ class Page:
             return False # offset outside of current records
 
         return True
-
-
-
