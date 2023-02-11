@@ -26,6 +26,7 @@ class Page:
     """
     Writes a value to the page
     :param  value: int64        The value to write to the page
+
     @returns    True if the value was written to the page,
                 False otherwise
     """
@@ -44,19 +45,34 @@ class Page:
     Updates a value in the page on a given offset
     :param  value: int64        The value to write to the page
     :param  offset: int         The offset to write the value to
+
     @returns    True if the value was written to the page,
                 False otherwise
     """
     def put(self, value, offset):
-        if (offset < 0 or offset >= PAGE_SIZE/DATA_SIZE):
-            return False # out of bounds offset
-
-        if (offset >= self.num_records):
-            return False # offset outside of current records
+        if (self._valid_offset(offset) == False):
+            return False
 
         self._insert(value, offset)
 
         return True
+
+    """
+    Deletes a value in the page on a given offset (sets to 0)
+    :param  offset: int         The offset to write the value to
+
+    @returns    True if the value 0 was written to the given field,
+                False otherwise
+    """
+    def delete(self, offset):
+        if (self._valid_offset(offset) == False):
+            return False
+
+        self._insert(0, offset)
+
+        return True
+
+        
     
 
     """
@@ -75,6 +91,19 @@ class Page:
 
         # write the value to the page
         self.data[byte_offset:byte_offset+DATA_SIZE] = value_to_bytes
+
+    """
+    Checks if the given offset is valid
+    :param  offset: int         The offset to write the value to
+
+    @returns   True if the offset is valid, False otherwise
+    """
+    def _valid_offset(self, offset):
+        if (offset < 0 or offset >= PAGE_SIZE/DATA_SIZE):
+            return False # out of bounds offset
+
+        if (offset >= self.num_records):
+            return False # offset outside of current records
 
 
 
