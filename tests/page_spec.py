@@ -75,6 +75,7 @@ class PageTestCase(unittest.TestCase):
         page.delete(1)
         self.assertEqual(page.num_records, 3)
         self.assertEqual(page.data[8:16], b'\x00\x00\x00\x00\x00\x00\x00\x00')
+        self.assertNotEqual(page.data[16:24], b'\x00\x00\x00\x00\x00\x00\x00\x00')
 
 if __name__ == '__main__':
     unittest.main()

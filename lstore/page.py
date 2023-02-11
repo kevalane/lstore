@@ -65,12 +65,7 @@ class Page:
                 False otherwise
     """
     def delete(self, offset):
-        if (self._valid_offset(offset) == False):
-            return False
-
-        self._insert(0, offset)
-
-        return True
+        return self.put(0, offset)
 
         
     
