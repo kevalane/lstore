@@ -34,9 +34,9 @@ class Base_Page:
         if not self.columns[0].has_capacity():
             return False
         # first, insert the metadata
-        self.columns[INDIRECTION_COLUMN].write()
+        self.columns[INDIRECTION_COLUMN].write(None) # UPDATE
         self.columns[RID_COLUMN].write(record.rid)
-        self.columns[TIMESTAMP_COLUMN].write(None)
+        self.columns[TIMESTAMP_COLUMN].write(None) # UPDATE
         self.columns[SCHEMA_ENCODING_COLUMN].write(0000)
         for page in self.columns:
             page.write(record)
@@ -65,7 +65,7 @@ class Table:
         self.num_columns = num_columns
         self.page_directory = {}
         self.index = Index(self)
-        self.base_pages = []
+        self.base_pages = [Base_Page(num_columns, key_index)]
         self.tail_pages = []
         pass
 
