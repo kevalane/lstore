@@ -17,7 +17,8 @@ class Record:
 
 class Base_Page:
 
-    def __init__(self, num_columns, key):
+    def __init__(self, num_columns, key_index):
+        key_index = key_index
         self.columns = []
         for col in range(num_columns):
             self.columns.append(Page())
@@ -25,21 +26,21 @@ class Base_Page:
 
 class Tail_Page:
 
-    def __init__(self):
-        pass
+    def __init__(self, num_columns, key_index):
+        key_index = key_index
 
 class Table:
 
     """
     :param name: string         #Table name
     :param num_columns: int     #Number of Columns: all columns are integer
-    :param key: int             #Index of table key in columns
+    :param key_index: int       #Index of table key in columns
     :param page_directory: dict #Directory of all base and tail pages
     :param index: object        #Index object
     """
-    def __init__(self, name, num_columns, key):
+    def __init__(self, name, num_columns, key_index):
         self.name = name
-        self.key = key
+        self.key = key_index
         self.num_columns = num_columns
         self.page_directory = {}
         self.index = Index(self)
