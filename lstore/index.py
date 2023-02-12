@@ -6,7 +6,7 @@ class Index:
 
     def __init__(self, table):
         # One index for each table. All our empty initially.
-        self.indices = [None] *  table.num_columns
+        self.indices = {}
         pass
 
     
@@ -47,23 +47,42 @@ class Index:
     """
     # optional: Create index on specific column
     """
-indices = {}
-
-    def create_index(self, column_number):
-        #for column number, create an empty dictionary. go through records, 
-        #store column value as value, RID column as key list. loop through each record 
+def create_index(self, column_number):
+        #for column number, create an empty dictionary. go through records,
+        #store column value as value, RID column as key list. loop through each record
         #and append to key list if value already exists, else create new dictionary entry
-        index = {}
-        for record in Table:
-            value = Table[column_number]
-            RID = Table[0]
-            if value in index:
-                index[value].append(RID)
+        if column_number not in indices:
+            indices[column_number] = {}
+            return True
+        else:
+            return False
+
+    def push_record_to_index(self,record):
+        RID = record.rid 
+        for i, value in enumerate(record.columns):
+            self.create_index(i)
+            working_index = indices.get(i)
+            if value in working_index:
+                rid_flag = 0
+                for current_RID in working_index.values():
+                    if current_RID = RID:
+                        rid_flag = 1
+                        break
+                if rid_flag = 0:
+                    working_index[value].append(RID)
             else:
-                index[value] = [RID]
-        indices[column_number] = index
-        
-        return indices
+                working_index[value] = [RID]
+
+    def remove_record_from_index(self,record):
+        RID = record.RID
+        for i, value in enumerate(record.columns):
+            if indices.get(i) == False:
+                continue
+            else:
+                working_index = indices.get(i)
+                if value in working_index and RID in working_index[value]:
+                    working_index[value].remove(RID)
+            
 
     """
     # optional: Drop index of specific column
