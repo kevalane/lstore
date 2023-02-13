@@ -2,6 +2,8 @@
 A data strucutre holding indices for various columns of a table. Key column should be indexd by default, other columns can be indexed through this object. Indices are usually B-Trees, but other data structures can be used as well.
 """
 
+INCLUSIVE = 1 # 0/1 for exclusive/inclusive range
+
 class Index:
 
     def __init__(self, table):
@@ -33,8 +35,8 @@ class Index:
 
     def locate_range(self, begin, end, column):
         range_RID_list = []
-        for i in range[begin,end]:
-            range_RID_list.append(self.locate(column,i))
+        for i in range(begin,end+INCLUSIVE):
+            range_RID_list.extend(self.locate(column,i))
 
         return range_RID_list
         #given a range of values and a column number, go through the corresponding column index
@@ -64,7 +66,7 @@ class Index:
             working_index = self.indices.get(i)
             if value in working_index:
                 rid_flag = 0
-                for current_RID in working_index.values():
+                for current_RID in working_index[value]:
                     if current_RID == RID:
                         rid_flag = 1
                         break
@@ -74,11 +76,9 @@ class Index:
                 working_index[value] = [RID]
 
     def remove_record_from_index(self,record):
-        RID = record.RID
+        RID = record.rid
         for i, value in enumerate(record.columns):
-            if self.indices.get(i) == False:
-                continue
-            else:
+            if self.indices.get(i):
                 working_index = self.indices.get(i)
                 if value in working_index and RID in working_index[value]:
                     working_index[value].remove(RID)

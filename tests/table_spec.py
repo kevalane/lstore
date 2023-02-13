@@ -12,4 +12,4 @@ class TableTestCase(unittest.TestCase):
         self.assertEqual(table.page_directory, {})
         #self.assertEqual(table.index, None) #something
         self.assertEqual(table.tail_pages, [])
-        self.assertEqual(len(table.base_pages), columns)
+        self.assertEqual(type(table.base_pages[0]), Base_Page)
