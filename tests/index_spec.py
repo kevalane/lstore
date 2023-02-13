@@ -9,7 +9,7 @@ class IndexTestCase(unittest.TestCase):
         self.assertEquals(index.indices, {})
 
     def setup(self):
-        table = Table("test", 3, 0)
+        table = Table("test", 4, 0)
         index = Index(table)
         col = 0
         self.assertTrue(index.create_index(col))
@@ -52,5 +52,20 @@ class IndexTestCase(unittest.TestCase):
         self.assertEquals(index.indices[0][244], [])
         self.assertEquals(index.indices[1][24], [])
         self.assertEquals(index.indices[2][2], [0, 1, 22])
+
+    def test_locate(self):
+        # setup
+        index, table = self.setup()
+        index, table = self.insert_records(index, table)
+        self.assertEquals(index.locate(0, 0), [0, 1])
+        self.assertEquals(index.locate(0, 55), [22])
+        self.assertEquals(index.locate(1, 33), [1, 22])
+        self.assertEquals(index.locate(2, 2), [0, 1, 22])
+        self.assertEquals(index.locate(2, 3), [])
+
+        record = Record(44, 0, [244, 24, 2, 5])
+        self.assertEquals(index.locate(3, 5), [])
+        index.push_record_to_index(record)
+        self.assertEquals(index.locate(3, 5), [44])
 
     
