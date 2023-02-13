@@ -75,12 +75,14 @@ class PageTestCase(unittest.TestCase):
         page = self.setup()
 
         self.assertEqual(page.get(3), -1)
+        self.assertEqual(page.get(513), -1)
 
     def test_invalid_put(self):
         page = self.setup()
 
         self.assertFalse(page.put(1353156846, 3))
         self.assertFalse(page.put(1353156846, -1))
+        self.assertFalse(page.put(1353156846, 512))
 
 if __name__ == '__main__':
     unittest.main()
