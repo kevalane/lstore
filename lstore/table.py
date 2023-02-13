@@ -33,7 +33,8 @@ class Tail_Page:
     def __init__(self, num_columns, key_index):
         key_index = key_index
         self.columns = []
-        for col in range(num_columns):
+        for col in range(num_columns+4):
+            # Add a column for every column being added, plus 4 for the metadata columns
             self.columns.append(Page())
 
 class Table:
@@ -53,6 +54,7 @@ class Table:
         self.index = Index(self)
         self.base_pages = [Base_Page(num_columns, key_index)]
         self.tail_pages = []
+        self.rid_generator = 0 #Keeps track of the RID to be generated each time a record is added
         pass
 
     def get_record(self, rid):
@@ -69,19 +71,27 @@ class Table:
     def update_record(self, record):
         pass
 
-    def add_record(self, record): # CHANGE TO COLUMNS NOT RECORD OBJECT
+    def add_record(self, columns):
         """
-        :param record: Record object    # The record to be inserted
+        :param record: list    # List of column values
         """
         if not self.columns[0].has_capacity():
-            return False
+            self.base_pages.append(Base_Page(num_columns, key_index))
         # first, insert the metadata
-        self.columns[INDIRECTION_COLUMN].write(None) # UPDATE
-        self.columns[RID_COLUMN].write(record.rid)
-        self.columns[TIMESTAMP_COLUMN].write(None) # UPDATE
-        self.columns[SCHEMA_ENCODING_COLUMN].write(0000)
+        self.columns[0].write(None) # UPDATE # INDIRECTION COLUMN
+        self.columns[1].write(record.rid) # RID COLUMN
+        self.columns[TIMESTAMP_COLUMN].write(0) # UPDATE # TIMESTAMP COLUMN
+        self.columns[SCHEMA_ENCODING_COLUMN].write(0000) # SCHEMA ENCODING COLUMN
         for page in self.columns:
-            page.write(record)
+            page.write()
+
+    def assign_rid(self):
+        """
+        Keeps track of creating new RIDs for new records
+        """
+        rid = self.rid_generator
+        self.rid_generator += 1
+        return rid
 
     '''
     MERGE WILL BE IMPLEMENTED IN MILESTONE 2
