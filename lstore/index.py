@@ -66,7 +66,7 @@ class Index:
             working_index = self.indices.get(i)
             if value in working_index:
                 rid_flag = 0
-                for current_RID in working_index.values():
+                for current_RID in working_index[value]:
                     if current_RID == RID:
                         rid_flag = 1
                         break
@@ -78,9 +78,7 @@ class Index:
     def remove_record_from_index(self,record):
         RID = record.rid
         for i, value in enumerate(record.columns):
-            if self.indices.get(i) == False:
-                continue
-            else:
+            if self.indices.get(i):
                 working_index = self.indices.get(i)
                 if value in working_index and RID in working_index[value]:
                     working_index[value].remove(RID)

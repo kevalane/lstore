@@ -86,4 +86,38 @@ class IndexTestCase(unittest.TestCase):
         self.assertEquals(index.locate_range(1, 245, 0), [22, 44])
         self.assertEquals(index.locate_range(5, 34, 1), [44, 1, 22])
 
+    def test_drop_index(self):
+        # setup
+        index, table = self.setup()
+        index, table = self.insert_records(index, table)
+        index.drop_index(0)
+
+    def test_remove_no_index(self):
+        table = Table("test", 4, 0)
+        index = Index(table)
+        record = Record(0, 0, [0, 1, 2])
+        self.assertEqual(index.indices, {})
+        index.remove_record_from_index(record)
+        self.assertEqual(index.indices, {})
+
+    def test_push_duplicate(self):
+        # setup
+        index, table = self.setup()
+        index, table = self.insert_records(index, table)
+        record = Record(12, 0, [0, 1, 2])
+        index.push_record_to_index(record)
+        self.assertEquals(index.indices[0][0], [0, 1, 12])
+        self.assertEquals(index.indices[0][55], [22])
+        self.assertEquals(index.indices[1][33], [1, 22])
+        self.assertEquals(index.indices[2][2], [0, 1, 22, 12])
+
+        # test push duplicate
+        index.push_record_to_index(record)
+        self.assertEquals(index.indices[0][0], [0, 1, 12])
+        self.assertEquals(index.indices[0][55], [22])
+        self.assertEquals(index.indices[1][33], [1, 22])
+        self.assertEquals(index.indices[2][2], [0, 1, 22, 12])
+        
+        
+        
     
