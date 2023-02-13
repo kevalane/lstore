@@ -2,4 +2,4 @@ test:
 	python3 run_unit_tests.py
 
 clean:
-	rm -rf .coverage */__pycache__/
+	rm -rf htmlcov/ .coverage */__pycache__/
