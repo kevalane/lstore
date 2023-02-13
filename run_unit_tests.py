@@ -2,7 +2,7 @@ import unittest
 import coverage
 
 if __name__ == '__main__':
-    cov = coverage.Coverage()
+    cov = coverage.Coverage(source=['lstore'], omit=['*/tests/*', '*/__init__.py', '*/run_unit_tests.py'])
     cov.start()
 
     test_suite = unittest.defaultTestLoader.discover('tests', pattern='*_spec.py')
