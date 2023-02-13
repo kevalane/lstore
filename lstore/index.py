@@ -87,6 +87,12 @@ class Index:
     """
     # optional: Drop index of specific column
     """
-
     def drop_index(self, column_number):
-        pass
+        if column_number in self.indices:
+            del self.indices[column_number]
+            return True
+        else:
+            return False
+
+
+    
