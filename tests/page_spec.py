@@ -24,49 +24,34 @@ class PageTestCase(unittest.TestCase):
                 page.write(i*400)
 
         self.assertFalse(page.has_capacity())
+
+    def setup(self):
+        page = Page()
+        page.write(256)
+        self.assertEqual(page.num_records, 1)
+        self.assertEqual(page.data[0:8], b'\x00\x00\x00\x00\x00\x00\x01\x00')
+
+        page.write(512)
+        self.assertEqual(page.num_records, 2)
+        self.assertEqual(page.data[8:16], b'\x00\x00\x00\x00\x00\x00\x02\x00')
+
+        page.write(1353156846)
+        self.assertEqual(page.num_records, 3)
+        self.assertEqual(page.data[16:24], b'\x00\x00\x00\x00\x50\xA7\x88\xEE')
+        return page
     
     def test_write(self):
-        page = Page()
-        page.write(256)
-        self.assertEqual(page.num_records, 1)
-        self.assertEqual(page.data[0:8], b'\x00\x00\x00\x00\x00\x00\x01\x00')
-
-        page.write(512)
-        self.assertEqual(page.num_records, 2)
-        self.assertEqual(page.data[8:16], b'\x00\x00\x00\x00\x00\x00\x02\x00')
-
-        page.write(1353156846)
-        self.assertEqual(page.num_records, 3)
-        self.assertEqual(page.data[16:24], b'\x00\x00\x00\x00\x50\xA7\x88\xEE')
+        page = self.setup()
 
     def test_put(self):
-        page = Page()
-        page.write(256)
-        self.assertEqual(page.num_records, 1)
-        self.assertEqual(page.data[0:8], b'\x00\x00\x00\x00\x00\x00\x01\x00')
-
-        page.write(512)
-        self.assertEqual(page.num_records, 2)
-        self.assertEqual(page.data[8:16], b'\x00\x00\x00\x00\x00\x00\x02\x00')
-
-        page.write(1353156846)
-        self.assertEqual(page.num_records, 3)
-        self.assertEqual(page.data[16:24], b'\x00\x00\x00\x00\x50\xA7\x88\xEE')
+        page = self.setup()
 
         page.put(1353156846, 0)
         self.assertEqual(page.num_records, 3)
         self.assertEqual(page.data[0:8], b'\x00\x00\x00\x00\x50\xA7\x88\xEE')
 
     def test_delete(self):
-        page = Page()
-        page.write(256)
-        self.assertEqual(page.num_records, 1)
-
-        page.write(512)
-        self.assertEqual(page.num_records, 2)
-
-        page.write(1353156846)
-        self.assertEqual(page.num_records, 3)
+        page = self.setup()
 
         page.delete(0)
         self.assertEqual(page.num_records, 3)
@@ -78,15 +63,7 @@ class PageTestCase(unittest.TestCase):
         self.assertNotEqual(page.data[16:24], b'\x00\x00\x00\x00\x00\x00\x00\x00')
 
     def test_get(self):
-        page = Page()
-        page.write(256)
-        self.assertEqual(page.num_records, 1)
-
-        page.write(512)
-        self.assertEqual(page.num_records, 2)
-
-        page.write(1353156846)
-        self.assertEqual(page.num_records, 3)
+        page = self.setup()
 
         self.assertEqual(page.get(0), 256)
         self.assertEqual(page.get(1), 512)
