@@ -10,7 +10,7 @@ SCHEMA_ENCODING_COLUMN = 3
 
 class Record:
 
-    def __init__(self, rid, key, columns):
+    def __init__(self, key, columns, rid=None):
         self.rid = rid
         self.key = key
         self.columns = columns
@@ -26,6 +26,20 @@ class Base_Page:
         for col in range(num_columns+4):
             # Add a column for every column being added, plus 4 for the metadata columns
             self.columns.append(Page())
+    
+    def add_page(self, columns):
+        """
+        :param columns: list    # List of column values
+        """
+        if not self.columns[0].has_capacity():
+            self.base_pages.append(Base_Page(len(columns), key_index))
+        # first, insert the metadata
+        self.columns[0].write(None) # UPDATE # INDIRECTION COLUMN
+        self.columns[1].write(record.rid) # RID COLUMN # UPDATE
+        self.columns[2].write(0) # TIMESTAMP COLUMN
+        self.columns[3].write(0) # SCHEMA ENCODING COLUMN
+        for page in self.columns:
+            page.write()
 
 
 class Tail_Page:
@@ -75,15 +89,7 @@ class Table:
         """
         :param record: list    # List of column values
         """
-        if not self.columns[0].has_capacity():
-            self.base_pages.append(Base_Page(num_columns, key_index))
-        # first, insert the metadata
-        self.columns[0].write(None) # UPDATE # INDIRECTION COLUMN
-        self.columns[1].write(record.rid) # RID COLUMN
-        self.columns[TIMESTAMP_COLUMN].write(0) # UPDATE # TIMESTAMP COLUMN
-        self.columns[SCHEMA_ENCODING_COLUMN].write(0000) # SCHEMA ENCODING COLUMN
-        for page in self.columns:
-            page.write()
+        pass
 
     def assign_rid(self):
         """
