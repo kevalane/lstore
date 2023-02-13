@@ -15,13 +15,13 @@ class Index:
         #find the value 
         #if you find the value, return the corresponding key list
         #else, return an empty list
-        if column in indices: #indicates whether index already made for given column
-            working_index = indices.get(column) #gets the index associated with the column number
+        if column in self.indices: #indicates whether index already made for given column
+            working_index = self.indices.get(column) #gets the index associated with the column number
             RID_list = working_index.get(value,[]) #gets the keys associated with the value
 
         else:
             self.create_index(column)
-            working_index = indices.get(column) #gets the index associated with the column number
+            working_index = self.indices.get(column) #gets the index associated with the column number
             RID_list = working_index.get(value,[]) #gets the keys associated with the value
 
         return RID_list 
@@ -47,12 +47,12 @@ class Index:
     """
     # optional: Create index on specific column
     """
-def create_index(self, column_number):
+    def create_index(self, column_number):
         #for column number, create an empty dictionary. go through records,
         #store column value as value, RID column as key list. loop through each record
         #and append to key list if value already exists, else create new dictionary entry
-        if column_number not in indices:
-            indices[column_number] = {}
+        if column_number not in self.indices:
+            self.indices[column_number] = {}
             return True
         else:
             return False
@@ -61,14 +61,14 @@ def create_index(self, column_number):
         RID = record.rid 
         for i, value in enumerate(record.columns):
             self.create_index(i)
-            working_index = indices.get(i)
+            working_index = self.indices.get(i)
             if value in working_index:
                 rid_flag = 0
                 for current_RID in working_index.values():
-                    if current_RID = RID:
+                    if current_RID == RID:
                         rid_flag = 1
                         break
-                if rid_flag = 0:
+                if rid_flag == 0:
                     working_index[value].append(RID)
             else:
                 working_index[value] = [RID]
@@ -76,10 +76,10 @@ def create_index(self, column_number):
     def remove_record_from_index(self,record):
         RID = record.RID
         for i, value in enumerate(record.columns):
-            if indices.get(i) == False:
+            if self.indices.get(i) == False:
                 continue
             else:
-                working_index = indices.get(i)
+                working_index = self.indices.get(i)
                 if value in working_index and RID in working_index[value]:
                     working_index[value].remove(RID)
             
