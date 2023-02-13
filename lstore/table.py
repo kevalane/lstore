@@ -23,7 +23,7 @@ class Base_Page:
     def __init__(self, num_columns, key_index):
         self.key_index = key_index
         self.columns = []
-        for col in range(num_columns)+4:
+        for col in range(num_columns+4):
             # Add a column for every column being added, plus 4 for the metadata columns
             self.columns.append(Page())
 
