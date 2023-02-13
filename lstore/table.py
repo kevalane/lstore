@@ -50,6 +50,9 @@ class Tail_Page:
         for col in range(num_columns):
             self.columns.append(Page())
 
+    def update_record(self, record):
+        pass
+
 class Table:
 
     """
@@ -67,6 +70,16 @@ class Table:
         self.index = Index(self)
         self.base_pages = [Base_Page(num_columns, key_index)]
         self.tail_pages = []
+        pass
+
+    def get_record(self, rid):
+        pass
+
+    def delete_record(self, rid):
+        pass
+
+    def get_column(self, column):
+        # The column parameter will be an index for which column is to be retrieved
         pass
 
     '''
