@@ -74,7 +74,7 @@ class Index:
                 working_index[value] = [RID]
 
     def remove_record_from_index(self,record):
-        RID = record.RID
+        RID = record.rid
         for i, value in enumerate(record.columns):
             if self.indices.get(i) == False:
                 continue
