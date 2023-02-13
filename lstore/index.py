@@ -2,6 +2,8 @@
 A data strucutre holding indices for various columns of a table. Key column should be indexd by default, other columns can be indexed through this object. Indices are usually B-Trees, but other data structures can be used as well.
 """
 
+INCLUSIVE = 1 # 0/1 for exclusive/inclusive range
+
 class Index:
 
     def __init__(self, table):
@@ -33,8 +35,8 @@ class Index:
 
     def locate_range(self, begin, end, column):
         range_RID_list = []
-        for i in range[begin,end]:
-            range_RID_list.append(self.locate(column,i))
+        for i in range(begin,end+INCLUSIVE):
+            range_RID_list.extend(self.locate(column,i))
 
         return range_RID_list
         #given a range of values and a column number, go through the corresponding column index

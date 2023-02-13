@@ -68,4 +68,22 @@ class IndexTestCase(unittest.TestCase):
         index.push_record_to_index(record)
         self.assertEquals(index.locate(3, 5), [44])
 
+    def test_locate_range(self):
+        # setup
+        index, table = self.setup()
+        index, table = self.insert_records(index, table)
+        self.assertEquals(index.locate_range(0, 0, 0), [0, 1])
+        self.assertEquals(index.locate_range(0, 55, 0), [0, 1, 22])
+        self.assertEquals(index.locate_range(1, 33, 1), [0, 1, 22])
+        self.assertEquals(index.locate_range(2, 33, 1), [1, 22])
+        self.assertEquals(index.locate_range(1, 3, 2), [0, 1, 22])
+
+        record = Record(44, 0, [244, 24, 2, 5])
+
+        self.assertEquals(index.locate_range(1, 245, 0), [22])
+        self.assertEquals(index.locate_range(5, 34, 1), [1, 22])
+        index.push_record_to_index(record)
+        self.assertEquals(index.locate_range(1, 245, 0), [22, 44])
+        self.assertEquals(index.locate_range(5, 34, 1), [44, 1, 22])
+
     
