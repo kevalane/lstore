@@ -27,20 +27,6 @@ class Base_Page:
             # Add a column for every column being added, plus 4 for the metadata columns
             self.columns.append(Page())
 
-    def add_record(self, record):
-        """
-        :param record: Record object    # The record to be inserted
-        """
-        if not self.columns[0].has_capacity():
-            return False
-        # first, insert the metadata
-        self.columns[INDIRECTION_COLUMN].write(None) # UPDATE
-        self.columns[RID_COLUMN].write(record.rid)
-        self.columns[TIMESTAMP_COLUMN].write(None) # UPDATE
-        self.columns[SCHEMA_ENCODING_COLUMN].write(0000)
-        for page in self.columns:
-            page.write(record)
-
 
 class Tail_Page:
 
@@ -68,6 +54,34 @@ class Table:
         self.base_pages = [Base_Page(num_columns, key_index)]
         self.tail_pages = []
         pass
+
+    def get_record(self, rid):
+        pass
+        # Returns a record object
+
+    def delete_record(self, rid):
+        pass
+
+    def get_column(self, column):
+        # The column parameter will be an index for which column is to be retrieved
+        pass
+
+    def update_record(self, record):
+        pass
+
+    def add_record(self, record): # CHANGE TO COLUMNS NOT RECORD OBJECT
+        """
+        :param record: Record object    # The record to be inserted
+        """
+        if not self.columns[0].has_capacity():
+            return False
+        # first, insert the metadata
+        self.columns[INDIRECTION_COLUMN].write(None) # UPDATE
+        self.columns[RID_COLUMN].write(record.rid)
+        self.columns[TIMESTAMP_COLUMN].write(None) # UPDATE
+        self.columns[SCHEMA_ENCODING_COLUMN].write(0000)
+        for page in self.columns:
+            page.write(record)
 
     '''
     MERGE WILL BE IMPLEMENTED IN MILESTONE 2
