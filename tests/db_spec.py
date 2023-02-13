@@ -38,3 +38,17 @@ class DatabaseTestCase(unittest.TestCase):
 
         self.assertEquals(db.drop_table(name), True)
         self.assertEquals(db.tables, {})
+
+    
+    # MILESTONE 2
+    def test_open(self):
+        db = Database()
+        path = "test.db"
+        db.open(path)
+
+    def test_close(self):
+        db = Database()
+        path = "test.db"
+        db.open(path)
+        db.close()
+
