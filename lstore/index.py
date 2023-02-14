@@ -59,33 +59,42 @@ class Index:
         return range_RID_list
 
     """
-    # optional: Create index on specific column
+    # Create index on specific column
+    :param  column_number: int   The column number to index
+
+    @returns boolean             True if index created,
+                                 False if index already exists
     """
-    def create_index(self, column_number):
-        #for column number, create an empty dictionary. go through records,
-        #store column value as value, RID column as key list. loop through each record
-        #and append to key list if value already exists, else create new dictionary entry
+    def create_index(self, column_number: int) -> bool:
         if column_number not in self.indices:
+            # create index {} for column
             self.indices[column_number] = {}
             return True
         else:
             return False
 
-    def push_record_to_index(self,record):
-        RID = record.rid 
+    """
+    # Add a record to all relevant indices
+    :param  record: Record       The record to add to the indices
+    """
+    def push_record_to_index(self, record) -> None:
+        RID = record.rid
+        # iterate through each column in the record
         for i, value in enumerate(record.columns):
+            # if index not made, make one
             self.create_index(i)
+
+            # get the index {} associated with the column number
             working_index = self.indices.get(i)
-            if value in working_index:
-                rid_flag = 0
-                for current_RID in working_index[value]:
-                    if current_RID == RID:
-                        rid_flag = 1
-                        break
-                if rid_flag == 0:
-                    working_index[value].append(RID)
-            else:
-                working_index[value] = [RID]
+
+            if value not in working_index:
+                # create a list for the value if it doesn't exist
+                working_index[value] = []
+
+            if RID not in working_index[value]:
+                # add the RID to the list if it's not already there
+                working_index[value].append(RID)
+
 
     def remove_record_from_index(self,record):
         RID = record.rid
