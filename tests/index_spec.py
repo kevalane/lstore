@@ -124,6 +124,29 @@ class IndexTestCase(unittest.TestCase):
         self.assertEquals(index.indices[0][55], [22])
         self.assertEquals(index.indices[1][33], [1, 22])
         self.assertEquals(index.indices[2][2], [0, 1, 22, 12])
+
+    def test_update_index(self):
+        # setup
+        index, table = self.setup()
+        index, table = self.insert_records(index, table)
+        record = Record(0, [0, 1, 2], 12)
+        index.push_record_to_index(record)
+        self.assertEquals(index.indices[0][0], [0, 1, 12])
+        self.assertEquals(index.indices[0][55], [22])
+        self.assertEquals(index.indices[1][33], [1, 22])
+        self.assertEquals(index.indices[2][2], [0, 1, 22, 12])
+
+        # test update index
+        record = Record(0, [0, 1, 2], 12)
+        record2 = Record(0, [0, 1, 2], 12)
+        record2.update_value(0, 55)
+        record2.update_value(1, 33)
+        record2.update_value(2, 2)
+        index.update_index(record, record2)
+        self.assertEquals(index.indices[0][0], [0, 1])
+        self.assertEquals(index.indices[0][55], [22, 12])
+        self.assertEquals(index.indices[1][33], [1, 22, 12])
+        self.assertEquals(index.indices[2][2], [0, 1, 22, 12])
         
         
         

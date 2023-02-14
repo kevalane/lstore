@@ -1,6 +1,7 @@
 """
 A data strucutre holding indices for various columns of a table. Key column should be indexd by default, other columns can be indexed through this object. Indices are usually B-Trees, but other data structures can be used as well.
 """
+from table import Record
 
 INCLUSIVE = 1 # 0/1 for exclusive/inclusive range
 
@@ -83,6 +84,24 @@ class Index:
                 if value in working_index and RID in working_index[value]:
                     working_index[value].remove(RID)
             
+    def update_record_in_index(self, base_page: Record, tail_page: Record):
+        self.remove_record_from_index(base_page)
+        
+        # create the combined record
+        new_rid = base_page.rid
+        new_key = base_page.key
+        new_columns = []
+
+        # if the tail page has a value for a column, use it, 
+        # otherwise use the base page's value
+        for i in enumerate(base_page.columns):
+            if tail_page.columns[i] != None:
+                new_columns.append(tail_page.columns[i])
+            else:
+                new_columns.append(base_page.columns[i])
+
+        new_record = Record(new_rid, new_key, new_columns)
+        self.push_record_to_index(new_record)
 
     """
     # optional: Drop index of specific column
