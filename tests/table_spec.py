@@ -81,3 +81,15 @@ class TableTestCase(unittest.TestCase):
         self.assertEqual(table.base_pages[1].columns[RID_COLUMN].get(575 % 513), 575)
         self.assertEqual(table.base_pages[1].columns[TIMESTAMP_COLUMN].get(575 % 513), 0)
         self.assertEqual(table.base_pages[1].columns[SCHEMA_ENCODING_COLUMN].get(575 % 513), 0)
+
+
+    def test_simple_get(self):
+        key = 0
+        table = Table("test", 3, key)
+        columns = [1, 2, 3]
+        columns2 = [4, 5, 6]
+        table.add_record(columns)
+        table.add_record(columns2)
+        self.assertEqual(table.get_record(1), columns)
+        self.assertEqual(table.get_record(2), columns2)
+

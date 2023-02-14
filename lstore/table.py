@@ -7,6 +7,7 @@ INDIRECTION_COLUMN = 0
 RID_COLUMN = 1
 TIMESTAMP_COLUMN = 2
 SCHEMA_ENCODING_COLUMN = 3
+META_COLUMNS = 4
 
 class Base_Page:
     """
@@ -61,15 +62,20 @@ class Table:
             page = self.base_pages
         else:
             page = self.tail_pages
+        
+        # get relevant info from page_dir
         page_num = self.page_directory[rid][1]
         offset = self.page_directory[rid][2]
-        update = self.base_pages[page][3].get(offset) #search schema encoding column to retrieve the most recent record
-        if update == 1:
-            self.get_record(page[page_num][0].get(offset))
+        print(offset)
+        # check if updated
+        update = page[page_num].columns[SCHEMA_ENCODING_COLUMN].get(offset) #search schema encoding column to retrieve the most recent record
+        update_str = str(update)
+        # if update == 1:
+        #     self.get_record(page[page_num][0].get(offset))
         vals = []
         for column in range(len(page[page_num].columns)):
             vals.append(page[page_num].columns[column].get(offset))
-        return vals[:4] #return values except the first 4 metadata columns
+        return vals[META_COLUMNS:] #return values except the first 4 metadata columns
 
     def delete_record(self, rid):
         pass
