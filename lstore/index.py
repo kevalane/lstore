@@ -95,15 +95,26 @@ class Index:
                 # add the RID to the list if it's not already there
                 working_index[value].append(RID)
 
-
-    def remove_record_from_index(self,record):
+    """
+    # Remove a record from all relevant indices
+    :param  record: Record       The record to remove from the indices
+    """
+    def remove_record_from_index(self,record) -> None:
         RID = record.rid
         for i, value in enumerate(record.columns):
             if self.indices.get(i):
+                # get the index {} associated with the column number
                 working_index = self.indices.get(i)
+
                 if value in working_index and RID in working_index[value]:
+                    # remove the RID from the list if found
                     working_index[value].remove(RID)
-            
+    
+    """
+    # Update index after a record is updated
+    :param  base_page: Page      The page containing the old base record
+    :param  tail_page: Page      The page containing the new tail record
+    """
     def update_index(self, base_page, tail_page) -> None:
         self.remove_record_from_index(base_page)
         
@@ -124,9 +135,12 @@ class Index:
         # self.push_record_to_index(new_record)
 
     """
-    # optional: Drop index of specific column
+    # Drop index of specific column
+    :param  column_number: int   The column number to drop index
+
+    @returns boolean             True if index dropped, False if not
     """
-    def drop_index(self, column_number):
+    def drop_index(self, column_number: int) -> bool:
         if column_number in self.indices:
             del self.indices[column_number]
             return True
