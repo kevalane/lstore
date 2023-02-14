@@ -1,9 +1,18 @@
 from lstore.table import Table
 
+"""
+Database class that stores all tables and provides methods to
+create and delete tables. The database is stored in a dictionary
+where the key is the table name and the value is the table object.
+"""
 class Database():
 
+    """
+    # Creates a new database
+    Initializes the database with an empty dictionary
+    """
     def __init__(self):
-        self.tables = {} # hashtable for O(1) delete / get
+        self.tables = {}
         pass
 
     # Not required for milestone1
