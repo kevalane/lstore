@@ -3,11 +3,17 @@ from lstore.page import Page
 from lstore.record import Record
 from time import time
 
+# page access indexes
 INDIRECTION_COLUMN = 0
 RID_COLUMN = 1
 TIMESTAMP_COLUMN = 2
 SCHEMA_ENCODING_COLUMN = 3
 META_COLUMNS = 4
+
+# page directory indexes
+PAGE_TYPE = 0
+PAGE_NUM = 1
+OFFSET = 2
 
 class Base_Page:
     """
@@ -54,19 +60,20 @@ class Table:
         self.tail_pages = []
         self.rid_generator = 0 #Keeps track of the RID to be generated each time a record is added
 
-    def get_record(self, rid):
+    def get_record(self, rid, with_meta=False):
         """
         :param rid: int:        # RID of record to be retrieved
         """
-        if self.page_directory[rid][0] == 'base':
+        # get relevant page depending on tuple value
+        if self.page_directory[rid][PAGE_TYPE] == 'base':
             page = self.base_pages
         else:
             page = self.tail_pages
         
         # get relevant info from page_dir
-        page_num = self.page_directory[rid][1]
-        offset = self.page_directory[rid][2]
-        print(offset)
+        page_num = self.page_directory[rid][PAGE_NUM]
+        offset = self.page_directory[rid][OFFSET]
+        
         # check if updated
         update = page[page_num].columns[SCHEMA_ENCODING_COLUMN].get(offset) #search schema encoding column to retrieve the most recent record
         update_str = str(update)
@@ -75,7 +82,11 @@ class Table:
         vals = []
         for column in range(len(page[page_num].columns)):
             vals.append(page[page_num].columns[column].get(offset))
-        return vals[META_COLUMNS:] #return values except the first 4 metadata columns
+
+        if with_meta:
+            return vals
+        else:
+            return vals[META_COLUMNS:] #return values except the first 4 metadata columns
 
     def delete_record(self, rid):
         pass
@@ -91,26 +102,45 @@ class Table:
         :param new_cols: list   # List of new column values
         :param rid: int         # RID of the previous record being updates
         """
-        if not self.tail_pages.columns[0].has_capacity():
+        # create tail page if none exist
+        if self.tail_pages == []:
             self.tail_pages.append(Tail_Page(len(new_cols), self.key))
-            self.update_record(rid, new_cols)
+
+        # check if there's capacity in last tail_page, recursive if not 
+        if not self.tail_pages[-1].columns[INDIRECTION_COLUMN].has_capacity():
+            self.tail_pages.append(Tail_Page(len(new_cols), self.key))
+            return self.update_record(rid, new_cols)
+
         # create a record object
-        rid = self.assign_rid()
-        record = Record(self.key, new_cols, rid)
-        # add metadata to columns
-        self.tail_pages[-1].columns[INDIRECTION_COLUMN].write(0) # INDIRECTION COLUMN
-        self.tail_pages[-1].columns[RID_COLUMN].write(rid) # RID COLUMN
-        self.tail_pages[-1].columns[TIMESTAMP_COLUMN].write(0) # TIMESTAMP COLUMN
-        self.tail_pages[-1].columns[SCHEMA_ENCODING_COLUMN].write(0) # SCHEMA ENCODING COLUMN
+        tail_rid = self.assign_rid()
+        record = Record(self.key, new_cols, tail_rid)
+
+        # insert the specified values in the tail page columns
         for index, item in enumerate(new_cols):
-            self.tail_pages[-1][index+4].write(item)
+            self.tail_pages[-1].columns[index+4].write(item)
+        
         # add this rid to the page directory
         # directory contains dictionary mapping rid to a tuple telling table where to find it
         # tuple contains:
         # ('base' or 'tail', which base/tail page it is found on, the index within that page)
-        location = ('tail', len(self.tail_pages)-1, self.tail_pages[-1].num_records-1)
-        self.page_directory[rid] = location
+        location = ('tail', len(self.tail_pages)-1, 
+                    self.tail_pages[-1].num_records-1)
+        
+        self.page_directory[tail_rid] = location
         #update indirection columns and schema encoding columns from previous record
+
+        # tail_rid must be written to indir column of base page,
+        base_record = self.page_directory[rid]
+        base_page = self.base_pages[base_record[PAGE_NUM]]
+        old_tail_rid = base_page.columns[INDIRECTION_COLUMN].get(base_record[OFFSET])
+        base_page.columns[INDIRECTION_COLUMN].write(base_record[OFFSET], tail_rid)
+
+        # add metadata to columns
+        self.tail_pages[-1].columns[INDIRECTION_COLUMN].write(old_tail_rid)
+        self.tail_pages[-1].columns[RID_COLUMN].write(tail_rid)
+        self.tail_pages[-1].columns[TIMESTAMP_COLUMN].write(0)
+        self.tail_pages[-1].columns[SCHEMA_ENCODING_COLUMN].write(0)
+
 
     def add_record(self, columns):
         """
