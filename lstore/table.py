@@ -149,6 +149,7 @@ class Table:
                     encoding *= 10
 
         self.tail_pages[-1].columns[SCHEMA_ENCODING_COLUMN].write(encoding)
+        base_page.columns[SCHEMA_ENCODING_COLUMN].put(base_record[OFFSET], encoding)
 
 
     def add_record(self, columns):
@@ -164,7 +165,7 @@ class Table:
         record = Record(self.key, columns, rid)
         self.index.push_record_to_index(record)
         # next, add the metadata to columns
-        self.base_pages[-1].columns[INDIRECTION_COLUMN].write(0) # INDIRECTION COLUMN
+        self.base_pages[-1].columns[INDIRECTION_COLUMN].write(rid) # INDIRECTION COLUMN
         self.base_pages[-1].columns[RID_COLUMN].write(rid) # RID COLUMN
         self.base_pages[-1].columns[TIMESTAMP_COLUMN].write(0) # TIMESTAMP COLUMN
         self.base_pages[-1].columns[SCHEMA_ENCODING_COLUMN].write(0) # SCHEMA ENCODING COLUMN
