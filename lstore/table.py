@@ -98,10 +98,10 @@ class Table:
         rid = self.assign_rid()
         record = Record(self.key, new_cols, rid)
         # add metadata to columns
-        self.tail_pages[-1].columns[0].write(0) # INDIRECTION COLUMN
-        self.tail_pages[-1].columns[1].write(rid) # RID COLUMN
-        self.tail_pages[-1].columns[2].write(0) # TIMESTAMP COLUMN
-        self.tail_pages[-1].columns[3].write(0) # SCHEMA ENCODING COLUMN
+        self.tail_pages[-1].columns[INDIRECTION_COLUMN].write(0) # INDIRECTION COLUMN
+        self.tail_pages[-1].columns[RID_COLUMN].write(rid) # RID COLUMN
+        self.tail_pages[-1].columns[TIMESTAMP_COLUMN].write(0) # TIMESTAMP COLUMN
+        self.tail_pages[-1].columns[SCHEMA_ENCODING_COLUMN].write(0) # SCHEMA ENCODING COLUMN
         for index, item in enumerate(new_cols):
             self.tail_pages[-1][index+4].write(item)
         # add this rid to the page directory
@@ -125,10 +125,10 @@ class Table:
         record = Record(self.key, columns, rid)
         self.index.push_record_to_index(record)
         # next, add the metadata to columns
-        self.base_pages[-1].columns[0].write(0) # INDIRECTION COLUMN
-        self.base_pages[-1].columns[1].write(rid) # RID COLUMN
-        self.base_pages[-1].columns[2].write(0) # TIMESTAMP COLUMN
-        self.base_pages[-1].columns[3].write(0) # SCHEMA ENCODING COLUMN
+        self.base_pages[-1].columns[INDIRECTION_COLUMN].write(0) # INDIRECTION COLUMN
+        self.base_pages[-1].columns[RID_COLUMN].write(rid) # RID COLUMN
+        self.base_pages[-1].columns[TIMESTAMP_COLUMN].write(0) # TIMESTAMP COLUMN
+        self.base_pages[-1].columns[SCHEMA_ENCODING_COLUMN].write(0) # SCHEMA ENCODING COLUMN
         for index, item in enumerate(columns):
             self.base_pages[-1].columns[index+4].write(item)
         # finally add this rid to the page directory
