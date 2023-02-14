@@ -75,22 +75,25 @@ class Table:
             self.base_pages.append(Base_Page(len(columns), self.key))
             self.add_record(columns)
         # first, create a record object from the columns
-        rid = self.assign_rid
+        rid = self.assign_rid()
         record = Record(self.key, columns, rid)
         # next, add the metadata to columns
-        self.columns[0].write(None) # UPDATE # INDIRECTION COLUMN
+        self.columns[0].write(0) # UPDATE # INDIRECTION COLUMN
         self.columns[1].write(rid) # RID COLUMN
         self.columns[2].write(0) # TIMESTAMP COLUMN
         self.columns[3].write(0) # SCHEMA ENCODING COLUMN
         for index, item in enumerate(columns):
             self.base_pages[-1][index+4].write(item)
+        # finally add this rid to the page directory with a tuple containing the page it's found and the index within that page
+        location = (len(self.base_pages)-1, self.base_pages[-1].num_records-1)
+        self.page_directory[rid] = location
 
     def assign_rid(self):
         """
         Keeps track of creating new RIDs for new records
         """
-        rid = self.rid_generator
         self.rid_generator += 1
+        rid = self.rid_generator
         return rid
 
     '''
