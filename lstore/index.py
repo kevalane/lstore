@@ -21,7 +21,7 @@ class Index:
     
     @returns RID_list: int[]     Returns an array of RIDs that match the search
     """
-    def locate(self, column, value):
+    def locate(self, column: int, value: int) -> list[int]:
         # indicates whether index already made for given column
         if column in self.indices: 
             # gets the index {} associated with the column number
@@ -43,20 +43,20 @@ class Index:
 
     """
     # Returns the RIDs of all records with values in column "column" between "begin" and "end"
-    """
+    :param  begin:  int          The beginning of the range
+    :param  end:    int          The end of the range
+    :param  column: int          The column number to search
 
-    def locate_range(self, begin, end, column):
+    @returns RID_list: int[]     Returns an array of RIDs that match the search
+    """
+    def locate_range(self, begin: int, end: int, column: int) -> list[int]:
         range_RID_list = []
+
         for i in range(begin,end+INCLUSIVE):
+            # append the RID list for each value in the range
             range_RID_list.extend(self.locate(column,i))
 
         return range_RID_list
-        #given a range of values and a column number, go through the corresponding column index
-        #dict and serach for the range of values
-        #initiate an empyty list in the beginning to store all the key lists per value, append
-        #after each value is searched for 
-        
-        pass
 
     """
     # optional: Create index on specific column
