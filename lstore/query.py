@@ -21,7 +21,11 @@ class Query:
     # Return False if record doesn't exist or is locked due to 2PL
     """
     def delete(self, primary_key):
-        pass
+        if self.table.get_record(self.table, primary_key):
+            self.table.delete_record(self.table, primary_key)
+            return True
+        
+        return False
     
     
     """
@@ -44,7 +48,20 @@ class Query:
     # Assume that select will never be called on a key that doesn't exist
     """
     def select(self, search_key, search_key_index, projected_columns_index):
-        pass
+        res = list()
+        
+        selected = self.table.get_multiple_records(self.table, search_key, search_key_index)
+        
+        for rec in selected:
+            cols = list()
+            
+            for i in range(projected_columns_index):
+                if projected_columns_index[i] == 1:
+                    cols.append(rec.columns[i])
+                
+            res.append(Record(rec, rec.key, cols, rec.rid))
+        
+        return res
 
     
     """
