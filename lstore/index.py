@@ -1,29 +1,42 @@
 INCLUSIVE = 1 # 0/1 for exclusive/inclusive range
 
 """
-A data strucutre holding indices for various columns of a table. Key column should be indexd by default, other columns can be indexed through this object. Indices are usually B-Trees, but other data structures can be used as well.
+A data strucutre holding indices for various columns of a table. 
+Key column should be indexed by default, other columns can be indexed 
+through this object.
 """
 class Index:
 
+    """
+    # Initializes an empty indices dictionary for a table
+    :param  table: Table         The table to index
+    """
     def __init__(self, table):
-        # One index for each table. All our empty initially.
         self.indices = {}
-        pass
-
     
+    """
+    # Returns the RIDs of all records with values in "column" equal to "value"
+    :param  column: int          The column number to search
+    :param  value:  int          The value to search for
+    
+    @returns RID_list: int[]     Returns an array of RIDs that match the search
+    """
     def locate(self, column, value):
-        #given a value and column number, go through the corresponding index dictionary and 
-        #find the value 
-        #if you find the value, return the corresponding key list
-        #else, return an empty list
-        if column in self.indices: #indicates whether index already made for given column
-            working_index = self.indices.get(column) #gets the index associated with the column number
-            RID_list = working_index.get(value,[]) #gets the keys associated with the value
+        # indicates whether index already made for given column
+        if column in self.indices: 
+            # gets the index {} associated with the column number
+            working_index = self.indices.get(column) 
+
+            # gets the keys associated with the value
+            RID_list = working_index.get(value,[])
 
         else:
+            # if index not made, make one
             self.create_index(column)
-            working_index = self.indices.get(column) #gets the index associated with the column number
-            RID_list = working_index.get(value,[]) #gets the keys associated with the value
+
+            # sets the newly created empty index to RID_list
+            working_index = self.indices.get(column)
+            RID_list = working_index.get(value,[])
 
         return RID_list 
 
