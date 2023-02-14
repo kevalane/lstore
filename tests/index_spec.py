@@ -90,7 +90,14 @@ class IndexTestCase(unittest.TestCase):
         # setup
         index, table = self.setup()
         index, table = self.insert_records(index, table)
-        index.drop_index(0)
+        self.assertTrue(index.drop_index(0))
+        self.assertTrue(index.drop_index(1))
+        self.assertTrue(index.drop_index(2))
+        self.assertFalse(index.drop_index(0))
+        self.assertFalse(index.drop_index(1))
+        self.assertFalse(index.drop_index(2))
+        self.assertEquals(index.indices, {})
+
 
     def test_remove_no_index(self):
         table = Table("test", 4, 0)
