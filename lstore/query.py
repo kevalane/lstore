@@ -23,11 +23,11 @@ class Query:
     """
     def delete(self, primary_key):
         try: 
-            exists = self.table.get_record(self.table, primary_key)
+            exists = self.table.get_record(primary_key)
             
             if exists is not None:
                 try:
-                    self.table.delete_record(self.table, primary_key)
+                    self.table.delete_record(primary_key)
                     return True
                 
                 except: 
@@ -49,7 +49,7 @@ class Query:
             return False
         
         try:
-            self.table.add_record(self.table, columns)
+            self.table.add_record(columns)
             return True
             
         except:
@@ -68,7 +68,7 @@ class Query:
         res = list()
         
         try:
-            selected = self.table.get_multiple_records(self.table, search_key, search_key_index)
+            selected = self.table.get_multiple_records(search_key, search_key_index)
             
             if len(selected) == 0 or (len(projected_columns_index) > self.table.num_columns):
                 return False
@@ -111,7 +111,7 @@ class Query:
             return False
         
         try:
-            self.table.update_record(self.table, primary_key, columns)
+            self.table.update_record(primary_key, columns)
             return True
             
         except:
@@ -133,7 +133,7 @@ class Query:
             return False
         
         for i in range(start_range, end_range):
-            recs.append(self.table.get_record(self.table, i))
+            recs.append(self.table.get_record(i))
             
         if len(recs) == 0:
             return False
