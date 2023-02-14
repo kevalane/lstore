@@ -1,10 +1,8 @@
+INCLUSIVE = 1 # 0/1 for exclusive/inclusive range
+
 """
 A data strucutre holding indices for various columns of a table. Key column should be indexd by default, other columns can be indexed through this object. Indices are usually B-Trees, but other data structures can be used as well.
 """
-from table import Record
-
-INCLUSIVE = 1 # 0/1 for exclusive/inclusive range
-
 class Index:
 
     def __init__(self, table):
@@ -84,7 +82,7 @@ class Index:
                 if value in working_index and RID in working_index[value]:
                     working_index[value].remove(RID)
             
-    def update_record_in_index(self, base_page: Record, tail_page: Record):
+    def update_index(self, base_page, tail_page) -> None:
         self.remove_record_from_index(base_page)
         
         # create the combined record
@@ -100,8 +98,8 @@ class Index:
             else:
                 new_columns.append(base_page.columns[i])
 
-        new_record = Record(new_rid, new_key, new_columns)
-        self.push_record_to_index(new_record)
+        # new_record = Record(new_rid, new_key, new_columns)
+        # self.push_record_to_index(new_record)
 
     """
     # optional: Drop index of specific column
