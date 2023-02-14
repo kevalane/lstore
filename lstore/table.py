@@ -113,7 +113,7 @@ class Table:
         # check if there is capacity in the last base page
         if not self.base_pages[-1].columns[0].has_capacity():
             self.base_pages.append(Base_Page(len(columns), self.key))
-            self.add_record(columns)
+            return self.add_record(columns)
         # first, create a record object from the columns
         rid = self.assign_rid()
         record = Record(self.key, columns, rid)

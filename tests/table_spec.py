@@ -1,6 +1,7 @@
 import unittest
 from lstore.table import Table, Record, Base_Page, Tail_Page
 from lstore.page import Page
+from random import randint, seed
 
 INDIRECTION_COLUMN = 0
 RID_COLUMN = 1
@@ -36,25 +37,36 @@ class TableTestCase(unittest.TestCase):
         for col in base.columns:
             self.assertEqual(type(col), Page)
 
-    def test_add_record(self):
+    # def test_add_record(self):
+    #     key = 0
+    #     table = Table("test", 3, key)
+    #     columns = [1, 2, 3]
+    #     table.add_record(columns)
+
+    #     self.assertEqual(table.rid_generator, 1) # increment rid_generator
+    #     self.assertEqual(table.page_directory, {1: ('base', 0, 0)})
+    #     self.assertEqual(table.index.indices[0], {1: [1]})
+
+    #     for col in range(table.num_columns):
+    #         self.assertEqual(table.base_pages[0]
+    #                          .columns[META_COLUMNS + col]
+    #                          .get(0), 
+    #                          columns[col])
+
+    #     self.assertEqual(table.base_pages[0].columns[INDIRECTION_COLUMN].get(0), 0)
+    #     self.assertEqual(table.base_pages[0].columns[RID_COLUMN].get(0), 1)
+    #     self.assertEqual(table.base_pages[0].columns[TIMESTAMP_COLUMN].get(0), 0)
+    #     self.assertEqual(table.base_pages[0].columns[SCHEMA_ENCODING_COLUMN].get(0), 0)
+
+    def test_add_2000_records(self):
         key = 0
         table = Table("test", 3, key)
-        columns = [1, 2, 3]
-        table.add_record(columns)
-
-        self.assertEqual(table.rid_generator, 1) # increment rid_generator
-        self.assertEqual(table.page_directory, {1: ('base', 0, 0)})
-        self.assertEqual(table.index.indices[0], {1: [1]})
-
-        for col in range(table.num_columns):
-            self.assertEqual(table.base_pages[0]
-                             .columns[META_COLUMNS + col]
-                             .get(0), 
-                             columns[col])
-
-        self.assertEqual(table.base_pages[0].columns[INDIRECTION_COLUMN].get(0), 0)
-        self.assertEqual(table.base_pages[0].columns[RID_COLUMN].get(0), 1)
-        self.assertEqual(table.base_pages[0].columns[TIMESTAMP_COLUMN].get(0), 0)
-        self.assertEqual(table.base_pages[0].columns[SCHEMA_ENCODING_COLUMN].get(0), 0)
-
-    
+        seed(134134134)
+        for i in range(2000):
+            column = [randint(0, 1000), randint(0, 1000), randint(0, 1000)]
+            table.add_record(column)
+            RID = table.rid_generator
+            self.assertEqual(table.page_directory[RID], ('base', i // 512, i % 512), 
+                "Where RID=" + str(RID) + " and i mod" + str(i % 512) + " and i" + str(i))
+            if (i % 512 == 0):
+                self.assertEqual(len(table.base_pages), i // 512 + 1)
