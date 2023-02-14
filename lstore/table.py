@@ -124,7 +124,7 @@ class Table:
         # tuple contains:
         # ('base' or 'tail', which base/tail page it is found on, the index within that page)
         location = ('tail', len(self.tail_pages)-1, 
-                    self.tail_pages[-1].num_records-1)
+                    self.tail_pages[-1].columns[INDIRECTION_COLUMN].num_records-1)
         
         self.page_directory[tail_rid] = location
         #update indirection columns and schema encoding columns from previous record
@@ -133,13 +133,22 @@ class Table:
         base_record = self.page_directory[rid]
         base_page = self.base_pages[base_record[PAGE_NUM]]
         old_tail_rid = base_page.columns[INDIRECTION_COLUMN].get(base_record[OFFSET])
-        base_page.columns[INDIRECTION_COLUMN].write(base_record[OFFSET], tail_rid)
+        base_page.columns[INDIRECTION_COLUMN].put(base_record[OFFSET], tail_rid)
 
         # add metadata to columns
         self.tail_pages[-1].columns[INDIRECTION_COLUMN].write(old_tail_rid)
         self.tail_pages[-1].columns[RID_COLUMN].write(tail_rid)
         self.tail_pages[-1].columns[TIMESTAMP_COLUMN].write(0)
-        self.tail_pages[-1].columns[SCHEMA_ENCODING_COLUMN].write(0)
+
+        # create update schema column (1 if updated, 0 if not)
+        encoding = 0
+        for i in range(len(new_cols)):
+            if (new_cols[i] != None):
+                encoding += 1
+                if (i != len(new_cols)-1):
+                    encoding *= 10
+
+        self.tail_pages[-1].columns[SCHEMA_ENCODING_COLUMN].write(encoding)
 
 
     def add_record(self, columns):
