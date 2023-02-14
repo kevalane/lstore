@@ -75,14 +75,25 @@ class Table:
         offset = self.page_directory[rid][OFFSET]
         
         # check if updated
-        update = page[page_num].columns[SCHEMA_ENCODING_COLUMN].get(offset) #search schema encoding column to retrieve the most recent record
+        update = page[page_num].columns[SCHEMA_ENCODING_COLUMN].get(offset) 
         update_str = str(update)
-        # if update == 1:
-        #     self.get_record(page[page_num][0].get(offset))
         vals = []
-        for column in range(len(page[page_num].columns)):
-            vals.append(page[page_num].columns[column].get(offset))
 
+        if update == 0 or type(page) == Tail_Page:
+            # just get base page values
+            for column in range(len(page[page_num].columns)):
+                vals.append(page[page_num].columns[column].get(offset))
+        else:
+            # we're only here if base page that's updated
+            latest_tail_rid = page[page_num].columns[INDIRECTION_COLUMN].get(offset)
+            vals = self.get_record(latest_tail_rid, with_meta=True)
+            for(column, val) in enumerate(vals):
+                if (update_str[column] == '0'):
+                    vals[column] = page[page_num].columns[column].get(offset)
+                else:
+                    vals[column] = val
+
+        # return the wanted values
         if with_meta:
             return vals
         else:

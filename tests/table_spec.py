@@ -53,7 +53,7 @@ class TableTestCase(unittest.TestCase):
                              .get(0), 
                              columns[col])
 
-        self.assertEqual(table.base_pages[0].columns[INDIRECTION_COLUMN].get(0), 0)
+        self.assertEqual(table.base_pages[0].columns[INDIRECTION_COLUMN].get(0), 1)
         self.assertEqual(table.base_pages[0].columns[RID_COLUMN].get(0), 1)
         self.assertEqual(table.base_pages[0].columns[TIMESTAMP_COLUMN].get(0), 0)
         self.assertEqual(table.base_pages[0].columns[SCHEMA_ENCODING_COLUMN].get(0), 0)
@@ -77,7 +77,7 @@ class TableTestCase(unittest.TestCase):
                              .get(table.page_directory[575][2]), 
                              [72, 252, 911][col])
         self.assertEqual(table.base_pages[1].columns[RID_COLUMN].get(0), 513)
-        self.assertEqual(table.base_pages[1].columns[INDIRECTION_COLUMN].get(575 % 513), 0)
+        self.assertEqual(table.base_pages[1].columns[INDIRECTION_COLUMN].get(575 % 513), 575)
         self.assertEqual(table.base_pages[1].columns[RID_COLUMN].get(575 % 513), 575)
         self.assertEqual(table.base_pages[1].columns[TIMESTAMP_COLUMN].get(575 % 513), 0)
         self.assertEqual(table.base_pages[1].columns[SCHEMA_ENCODING_COLUMN].get(575 % 513), 0)
@@ -101,6 +101,7 @@ class TableTestCase(unittest.TestCase):
         table.add_record(columns)
         table.add_record(columns2)
         table.update_record(1, [7, 8, 9])
+        print(table.get_record(1, True))
         self.assertEqual(table.get_record(1), [7, 8, 9])
         self.assertEqual(table.get_record(2), columns2)
 
