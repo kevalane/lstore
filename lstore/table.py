@@ -48,10 +48,10 @@ class Table:
         self.num_columns = num_columns
         self.page_directory = {}
         self.index = Index(self)
+        self.index.create_index(key_index)
         self.base_pages = [Base_Page(num_columns, key_index)]
         self.tail_pages = []
         self.rid_generator = 0 #Keeps track of the RID to be generated each time a record is added
-        pass
 
     def get_record(self, rid):
         """

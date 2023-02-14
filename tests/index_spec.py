@@ -6,16 +6,14 @@ class IndexTestCase(unittest.TestCase):
     def test_init(self):
         table = Table("test", 3, 0)
         index = table.index
-        self.assertEquals(index.indices, {})
+        self.assertEquals(index.indices, {0: {}})
 
     def setup(self):
-        primary_key_column = 0
-        table = Table("test", 4, primary_key_column)
-        index = table.index
-        self.assertTrue(index.create_index(primary_key_column))
-        self.assertFalse(index.create_index(primary_key_column))
-        self.assertEquals(index.indices[primary_key_column], {})
-        return index, table
+        key = 0
+        table = Table("test", 4, key)
+        self.assertFalse(table.index.create_index(key))
+        self.assertEquals(table.index.indices, {key: {}})
+        return table.index, table
 
     def insert_records(self, index, table):
         record = Record(0, [0, 1, 2], 0)
@@ -101,11 +99,10 @@ class IndexTestCase(unittest.TestCase):
 
     def test_remove_no_index(self):
         table = Table("test", 4, 0)
-        index = Index(table)
         record = Record(0, [0, 1, 2], 0)
-        self.assertEqual(index.indices, {})
-        index.remove_record_from_index(record)
-        self.assertEqual(index.indices, {})
+        self.assertEqual(table.index.indices, {0: {}})
+        table.index.remove_record_from_index(record)
+        self.assertEqual(table.index.indices, {0: {}})
 
     def test_push_duplicate(self):
         # setup

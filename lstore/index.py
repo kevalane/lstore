@@ -136,7 +136,6 @@ class Index:
                 new_columns[i] = base_record.columns[i]
 
         new_record = Record(new_key, new_columns, new_rid)
-        print(new_record.columns)
         self.push_record_to_index(new_record)
 
     """
