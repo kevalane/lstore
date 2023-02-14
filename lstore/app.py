@@ -33,18 +33,18 @@ def main():
     operation = st.selectbox("Select Operation", ["Select", "Insert", "Update", "Delete", "Sum"])
     
     if operation == "Insert" or operation == "Update":
-        key = st.number_input("Enter key:")
-        val1 = st.number_input("Enter value 1:")
-        val2 = st.number_input("Enter value 2:")
-        val3 = st.number_input("Enter value 3:")
-        val4 = st.number_input("Enter value 4:")
+        key = st.text_input("Enter key:")
+        val1 = st.text_input("Enter value 1:")
+        val2 = st.text_input("Enter value 2:")
+        val3 = st.text_input("Enter value 3:")
+        val4 = st.text_input("Enter value 4:")
 
     elif operation == "Delete":
-       key = st.number_input("Enter key:") 
-       
+       key = st.text_input("Enter key:") 
+
     elif operation == "Sum":
-        start_range = st.number_input("Enter Start Key")
-        end_range = st.number_input("Enter End Key")
+        start_range = st.text_input("Enter Start Key")
+        end_range = st.text_input("Enter End Key")
              
     if st.button("Execute"):
         if operation == "Insert":
