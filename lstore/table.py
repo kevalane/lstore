@@ -72,13 +72,15 @@ class Table:
         
         # get relevant info from page_dir
         page_num = self.page_directory[rid][PAGE_NUM]
+        print(rid)
         offset = self.page_directory[rid][OFFSET]
+        if offset == -1:
+            return None
         
         # check if updated
-        update = page[page_num].columns[SCHEMA_ENCODING_COLUMN].get(offset) 
+        update = page[page_num].columns[SCHEMA_ENCODING_COLUMN].get(offset)
         update_str = str(update)
         vals = []
-
         if update == 0 or type(page) == Tail_Page:
             # just get base page values
             for column in range(len(page[page_num].columns)):
@@ -86,18 +88,29 @@ class Table:
         else:
             # we're only here if base page that's updated
             latest_tail_rid = page[page_num].columns[INDIRECTION_COLUMN].get(offset)
-            vals = self.get_record(latest_tail_rid, with_meta=True)
-            for(column, val) in enumerate(vals):
-                if (update_str[column] == '0'):
-                    vals[column] = page[page_num].columns[column].get(offset)
-                else:
-                    vals[column] = val
+            vals = self.get_tail_page(latest_tail_rid)
+
+            for i in range(len(vals[META_COLUMNS:])):
+                if (update_str[i] == '0'):
+                    vals[i] = page[page_num].columns[column].get(offset)
 
         # return the wanted values
         if with_meta:
             return vals
         else:
             return vals[META_COLUMNS:] #return values except the first 4 metadata columns
+
+    def get_tail_page(self, tail_rid):
+        """
+        :param tail_rid: int     # RID of the tail page to be retrieved
+        """
+        page_num = self.page_directory[tail_rid][PAGE_NUM]
+        page_offset = self.page_directory[tail_rid][OFFSET]
+        retvals = []
+        for column in range(len(self.tail_pages[page_num].columns)):
+            retvals.append(self.tail_pages[page_num].columns[column].get(page_offset))
+        
+        return retvals
 
     def delete_record(self, rid):
         pass
@@ -125,17 +138,18 @@ class Table:
         # create a record object
         tail_rid = self.assign_rid()
         record = Record(self.key, new_cols, tail_rid)
+        # NOTE: update index
 
         # insert the specified values in the tail page columns
         for index, item in enumerate(new_cols):
-            self.tail_pages[-1].columns[index+4].write(item)
+            self.tail_pages[-1].columns[index+META_COLUMNS].write(item)
         
         # add this rid to the page directory
         # directory contains dictionary mapping rid to a tuple telling table where to find it
         # tuple contains:
         # ('base' or 'tail', which base/tail page it is found on, the index within that page)
         location = ('tail', len(self.tail_pages)-1, 
-                    self.tail_pages[-1].columns[INDIRECTION_COLUMN].num_records-1)
+                    self.tail_pages[-1].columns[INDIRECTION_COLUMN].num_records)
         
         self.page_directory[tail_rid] = location
         #update indirection columns and schema encoding columns from previous record
@@ -144,7 +158,7 @@ class Table:
         base_record = self.page_directory[rid]
         base_page = self.base_pages[base_record[PAGE_NUM]]
         old_tail_rid = base_page.columns[INDIRECTION_COLUMN].get(base_record[OFFSET])
-        base_page.columns[INDIRECTION_COLUMN].put(base_record[OFFSET], tail_rid)
+        base_page.columns[INDIRECTION_COLUMN].put(tail_rid, base_record[OFFSET])
 
         # add metadata to columns
         self.tail_pages[-1].columns[INDIRECTION_COLUMN].write(old_tail_rid)
@@ -158,9 +172,8 @@ class Table:
                 encoding += 1
                 if (i != len(new_cols)-1):
                     encoding *= 10
-
         self.tail_pages[-1].columns[SCHEMA_ENCODING_COLUMN].write(encoding)
-        base_page.columns[SCHEMA_ENCODING_COLUMN].put(base_record[OFFSET], encoding)
+        base_page.columns[SCHEMA_ENCODING_COLUMN].put(encoding, base_record[OFFSET])
 
 
     def add_record(self, columns):

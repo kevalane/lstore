@@ -102,6 +102,7 @@ class TableTestCase(unittest.TestCase):
         table.add_record(columns2)
         table.update_record(1, [7, 8, 9])
         print(table.get_record(1, True))
+        print(table.get_record(3, True))
         self.assertEqual(table.get_record(1), [7, 8, 9])
         self.assertEqual(table.get_record(2), columns2)
 
