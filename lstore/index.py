@@ -1,3 +1,5 @@
+from lstore.record import Record
+
 INCLUSIVE = 1 # 0/1 for exclusive/inclusive range
 
 """
@@ -114,25 +116,27 @@ class Index:
     # Update index after a record is updated
     :param  base_page: Page      The page containing the old base record
     :param  tail_page: Page      The page containing the new tail record
+    :param  schema_encoding: str The schema encoding of updated fields, e.g. 1011
     """
-    def update_index(self, base_page, tail_page) -> None:
-        self.remove_record_from_index(base_page)
+    def update_index(self, base_record: Record, tail_record: Record, 
+                     schema_encoding: int) -> None:
+        self.remove_record_from_index(base_record)
         
         # create the combined record
-        new_rid = base_page.rid
-        new_key = base_page.key
-        new_columns = []
+        new_rid = base_record.rid
+        new_key = base_record.key
+        new_columns = [0]*len(base_record.columns)
 
         # if the tail page has a value for a column, use it, 
         # otherwise use the base page's value
-        for i in enumerate(base_page.columns):
-            if tail_page.columns[i] != None:
-                new_columns.append(tail_page.columns[i])
+        for i in range(len(base_record.columns)):
+            if schema_encoding[i] == '1':
+                new_columns[i] = tail_record.columns[i]
             else:
-                new_columns.append(base_page.columns[i])
+                new_columns[i] = base_record.columns[i]
 
-        # new_record = Record(new_rid, new_key, new_columns)
-        # self.push_record_to_index(new_record)
+        new_record = Record(new_key, new_columns, new_rid)
+        self.push_record_to_index(new_record)
 
     """
     # Drop index of specific column

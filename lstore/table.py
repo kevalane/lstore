@@ -48,10 +48,10 @@ class Table:
         self.num_columns = num_columns
         self.page_directory = {}
         self.index = Index(self)
+        self.index.create_index(key_index)
         self.base_pages = [Base_Page(num_columns, key_index)]
         self.tail_pages = []
         self.rid_generator = 0 #Keeps track of the RID to be generated each time a record is added
-        pass
 
     def get_record(self, rid):
         """
@@ -110,24 +110,28 @@ class Table:
         """
         :param columns: list    # List of column values
         """
-        if not self.base_pages.columns[0].has_capacity():
+        # check if there is capacity in the last base page
+        if not self.base_pages[-1].columns[0].has_capacity():
             self.base_pages.append(Base_Page(len(columns), self.key))
-            self.add_record(columns)
+            return self.add_record(columns)
         # first, create a record object from the columns
         rid = self.assign_rid()
         record = Record(self.key, columns, rid)
+        self.index.push_record_to_index(record)
         # next, add the metadata to columns
         self.base_pages[-1].columns[0].write(0) # INDIRECTION COLUMN
         self.base_pages[-1].columns[1].write(rid) # RID COLUMN
         self.base_pages[-1].columns[2].write(0) # TIMESTAMP COLUMN
         self.base_pages[-1].columns[3].write(0) # SCHEMA ENCODING COLUMN
         for index, item in enumerate(columns):
-            self.base_pages[-1][index+4].write(item)
+            self.base_pages[-1].columns[index+4].write(item)
         # finally add this rid to the page directory
         # directory contains dictionary mapping rid to a tuple telling table where to find it
         # tuple contains:
         # ('base' or 'tail', which base/tail page it is found on, the index within that page)
-        location = ('base', len(self.base_pages)-1, self.base_pages[-1].num_records-1)
+        location = ('base', 
+                    len(self.base_pages)-1, 
+                    self.base_pages[-1].columns[0].num_records-1)
         self.page_directory[rid] = location
 
     def assign_rid(self):

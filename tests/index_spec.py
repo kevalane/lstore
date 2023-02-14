@@ -5,17 +5,15 @@ from lstore.table import Table, Record
 class IndexTestCase(unittest.TestCase):
     def test_init(self):
         table = Table("test", 3, 0)
-        index = Index(table)
-        self.assertEquals(index.indices, {})
+        index = table.index
+        self.assertEquals(index.indices, {0: {}})
 
     def setup(self):
-        table = Table("test", 4, 0)
-        index = Index(table)
-        col = 0
-        self.assertTrue(index.create_index(col))
-        self.assertFalse(index.create_index(col))
-        self.assertEquals(index.indices[col], {})
-        return index, table
+        key = 0
+        table = Table("test", 4, key)
+        self.assertFalse(table.index.create_index(key))
+        self.assertEquals(table.index.indices, {key: {}})
+        return table.index, table
 
     def insert_records(self, index, table):
         record = Record(0, [0, 1, 2], 0)
@@ -101,11 +99,10 @@ class IndexTestCase(unittest.TestCase):
 
     def test_remove_no_index(self):
         table = Table("test", 4, 0)
-        index = Index(table)
         record = Record(0, [0, 1, 2], 0)
-        self.assertEqual(index.indices, {})
-        index.remove_record_from_index(record)
-        self.assertEqual(index.indices, {})
+        self.assertEqual(table.index.indices, {0: {}})
+        table.index.remove_record_from_index(record)
+        self.assertEqual(table.index.indices, {0: {}})
 
     def test_push_duplicate(self):
         # setup
@@ -151,12 +148,25 @@ class IndexTestCase(unittest.TestCase):
     def test_update_index(self):
         index, table = self.setup()
 
-        record = Record(0, [1, 2, 3], 0)
-        record2 = Record(0, [3, None, 5], 0)
+        record = Record(0, [1, 2, 3], 11)
+        record2 = Record(0, [3, 0, 5], 22)
+        record3 = Record(0, [1, 2, 5], 33)
 
-        self.assertTrue(index.push_record_to_index(record))
-        print(index.indices)
-        index.update_index(record, record2)
-        print(index.indices)
+        index.push_record_to_index(record)
+        index.push_record_to_index(record2)
+        index.push_record_to_index(record3)
+        # what it should look like before
+        self.assertEquals(index.indices[0][1], [11, 33])
+        self.assertEquals(index.indices[1][2], [11, 33])
+        self.assertEquals(index.indices[2][3], [11])
+
+        index.update_index(record, record2, '101')
+
+        # Post update
+        self.assertEquals(index.indices[0][1], [33])
+        self.assertEquals(index.indices[1][2], [33, 11])
+        self.assertEquals(index.indices[2][3], [])
+
+        
 
         
