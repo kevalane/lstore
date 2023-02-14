@@ -31,7 +31,7 @@ class Database():
     @returns Table | None       Returns the created table 
                                 or None if table already exists
     """
-    def create_table(self, name, num_columns, key_index):
+    def create_table(self, name: str, num_columns: int, key_index: int) -> Table:
         if (self.get_table(name) == None):
             # Table does not exist, create it
             table = Table(name, num_columns, key_index)
@@ -49,7 +49,7 @@ class Database():
     @returns boolean            Returns True if table was deleted,
                                 False if table does not exist
     """
-    def drop_table(self, name):
+    def drop_table(self, name: str) -> bool:
         if (self.get_table(name) != None):
             # Table exists, delete it
             del self.tables[str(name)]
@@ -66,7 +66,7 @@ class Database():
     @returns Table | None       Returns the table with given name 
                                 or None if table does not exist
     """
-    def get_table(self, name):
+    def get_table(self, name: str) -> Table:
         if name in self.tables:
             return self.tables[str(name)]
         else:
