@@ -36,4 +36,25 @@ class TableTestCase(unittest.TestCase):
         for col in base.columns:
             self.assertEqual(type(col), Page)
 
+    def test_add_record(self):
+        key = 0
+        table = Table("test", 3, key)
+        columns = [1, 2, 3]
+        table.add_record(columns)
+
+        self.assertEqual(table.rid_generator, 1) # increment rid_generator
+        self.assertEqual(table.page_directory, {1: ('base', 0, 0)})
+        self.assertEqual(table.index.indices[0], {1: [1]})
+
+        for col in range(table.num_columns):
+            self.assertEqual(table.base_pages[0]
+                             .columns[META_COLUMNS + col]
+                             .get(0), 
+                             columns[col])
+
+        self.assertEqual(table.base_pages[0].columns[INDIRECTION_COLUMN].get(0), 0)
+        self.assertEqual(table.base_pages[0].columns[RID_COLUMN].get(0), 1)
+        self.assertEqual(table.base_pages[0].columns[TIMESTAMP_COLUMN].get(0), 0)
+        self.assertEqual(table.base_pages[0].columns[SCHEMA_ENCODING_COLUMN].get(0), 0)
+
     
