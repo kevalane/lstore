@@ -72,7 +72,6 @@ class Table:
         
         # get relevant info from page_dir
         page_num = self.page_directory[rid][PAGE_NUM]
-        print(rid)
         offset = self.page_directory[rid][OFFSET]
         if offset == -1:
             return None
@@ -80,19 +79,21 @@ class Table:
         # check if updated
         update = page[page_num].columns[SCHEMA_ENCODING_COLUMN].get(offset)
         update_str = str(update)
+        # append 0 to start if shorter than num_columns
+        update_str = '0'*(self.num_columns-len(update_str)) + update_str
         vals = []
-        if update == 0 or type(page) == Tail_Page:
-            # just get base page values
-            for column in range(len(page[page_num].columns)):
-                vals.append(page[page_num].columns[column].get(offset))
-        else:
+
+        for column in range(len(page[page_num].columns)):
+            vals.append(page[page_num].columns[column].get(offset))
+
+        if not (update == 0 or type(page) == Tail_Page):
             # we're only here if base page that's updated
             latest_tail_rid = page[page_num].columns[INDIRECTION_COLUMN].get(offset)
             vals = self.get_tail_page(latest_tail_rid)
 
             for i in range(len(vals[META_COLUMNS:])):
                 if (update_str[i] == '0'):
-                    vals[i] = page[page_num].columns[column].get(offset)
+                    vals[i+META_COLUMNS] = page[page_num].columns[META_COLUMNS+i].get(offset)
 
         # return the wanted values
         if with_meta:
@@ -142,6 +143,8 @@ class Table:
 
         # insert the specified values in the tail page columns
         for index, item in enumerate(new_cols):
+            if (item == None):
+                item = 0
             self.tail_pages[-1].columns[index+META_COLUMNS].write(item)
         
         # add this rid to the page directory
