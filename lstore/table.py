@@ -54,14 +54,30 @@ class Table:
         pass
 
     def get_record(self, rid):
-        pass
-        # Returns a record object
+        """
+        :param rid: int:        # RID of record to be retrieved
+        """
+        if self.page_directory[rid][0] == 'base':
+            page = self.base_pages
+        else:
+            page = self.tail_pages
+        page_num = self.page_directory[rid][1]
+        offset = self.page_directory[rid][2]
+        update = self.base_pages[page][3].get(offset) #search schema encoding column to retrieve the most recent record
+        if update == 1:
+            self.get_record(page[page_num][0].get(offset))
+        vals = []
+        for column in range(len(page[page_num].columns)):
+            vals.append(page[page_num].columns[column].get(offset))
+        return vals[:4] #return values except the first 4 metadata columns
 
     def delete_record(self, rid):
         pass
 
     def get_column(self, column):
-        # The column parameter will be an index for which column is to be retrieved
+        """
+        :param column: int      # Index of column to be retrieved
+        """
         pass
 
     def update_record(self, rid, new_cols):
@@ -85,7 +101,7 @@ class Table:
         for index, item in enumerate(columns):
             self.base_pages[-1][index+4].write(item)
         # finally add this rid to the page directory with a tuple containing the page it's found and the index within that page
-        location = (len(self.base_pages)-1, self.base_pages[-1].num_records-1)
+        location = ('base', len(self.base_pages)-1, self.base_pages[-1].num_records-1)
         self.page_directory[rid] = location
 
     def assign_rid(self):
