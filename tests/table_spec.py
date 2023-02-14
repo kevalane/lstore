@@ -37,26 +37,26 @@ class TableTestCase(unittest.TestCase):
         for col in base.columns:
             self.assertEqual(type(col), Page)
 
-    # def test_add_record(self):
-    #     key = 0
-    #     table = Table("test", 3, key)
-    #     columns = [1, 2, 3]
-    #     table.add_record(columns)
+    def test_add_record(self):
+        key = 0
+        table = Table("test", 3, key)
+        columns = [1, 2, 3]
+        table.add_record(columns)
 
-    #     self.assertEqual(table.rid_generator, 1) # increment rid_generator
-    #     self.assertEqual(table.page_directory, {1: ('base', 0, 0)})
-    #     self.assertEqual(table.index.indices[0], {1: [1]})
+        self.assertEqual(table.rid_generator, 1) # increment rid_generator
+        self.assertEqual(table.page_directory, {1: ('base', 0, 0)})
+        self.assertEqual(table.index.indices[0], {1: [1]})
 
-    #     for col in range(table.num_columns):
-    #         self.assertEqual(table.base_pages[0]
-    #                          .columns[META_COLUMNS + col]
-    #                          .get(0), 
-    #                          columns[col])
+        for col in range(table.num_columns):
+            self.assertEqual(table.base_pages[0]
+                             .columns[META_COLUMNS + col]
+                             .get(0), 
+                             columns[col])
 
-    #     self.assertEqual(table.base_pages[0].columns[INDIRECTION_COLUMN].get(0), 0)
-    #     self.assertEqual(table.base_pages[0].columns[RID_COLUMN].get(0), 1)
-    #     self.assertEqual(table.base_pages[0].columns[TIMESTAMP_COLUMN].get(0), 0)
-    #     self.assertEqual(table.base_pages[0].columns[SCHEMA_ENCODING_COLUMN].get(0), 0)
+        self.assertEqual(table.base_pages[0].columns[INDIRECTION_COLUMN].get(0), 0)
+        self.assertEqual(table.base_pages[0].columns[RID_COLUMN].get(0), 1)
+        self.assertEqual(table.base_pages[0].columns[TIMESTAMP_COLUMN].get(0), 0)
+        self.assertEqual(table.base_pages[0].columns[SCHEMA_ENCODING_COLUMN].get(0), 0)
 
     def test_add_2000_records(self):
         key = 0
@@ -70,3 +70,14 @@ class TableTestCase(unittest.TestCase):
                 "Where RID=" + str(RID) + " and i mod" + str(i % 512) + " and i" + str(i))
             if (i % 512 == 0):
                 self.assertEqual(len(table.base_pages), i // 512 + 1)
+
+        for col in range(table.num_columns):
+            self.assertEqual(table.base_pages[1]
+                             .columns[META_COLUMNS + col]
+                             .get(table.page_directory[575][2]), 
+                             [72, 252, 911][col])
+        self.assertEqual(table.base_pages[1].columns[RID_COLUMN].get(0), 513)
+        self.assertEqual(table.base_pages[1].columns[INDIRECTION_COLUMN].get(575 % 513), 0)
+        self.assertEqual(table.base_pages[1].columns[RID_COLUMN].get(575 % 513), 575)
+        self.assertEqual(table.base_pages[1].columns[TIMESTAMP_COLUMN].get(575 % 513), 0)
+        self.assertEqual(table.base_pages[1].columns[SCHEMA_ENCODING_COLUMN].get(575 % 513), 0)
