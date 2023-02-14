@@ -53,7 +53,7 @@ class TableTestCase(unittest.TestCase):
                              .get(0), 
                              columns[col])
 
-        self.assertEqual(table.base_pages[0].columns[INDIRECTION_COLUMN].get(0), 0)
+        self.assertEqual(table.base_pages[0].columns[INDIRECTION_COLUMN].get(0), 1)
         self.assertEqual(table.base_pages[0].columns[RID_COLUMN].get(0), 1)
         self.assertEqual(table.base_pages[0].columns[TIMESTAMP_COLUMN].get(0), 0)
         self.assertEqual(table.base_pages[0].columns[SCHEMA_ENCODING_COLUMN].get(0), 0)
@@ -77,7 +77,42 @@ class TableTestCase(unittest.TestCase):
                              .get(table.page_directory[575][2]), 
                              [72, 252, 911][col])
         self.assertEqual(table.base_pages[1].columns[RID_COLUMN].get(0), 513)
-        self.assertEqual(table.base_pages[1].columns[INDIRECTION_COLUMN].get(575 % 513), 0)
+        self.assertEqual(table.base_pages[1].columns[INDIRECTION_COLUMN].get(575 % 513), 575)
         self.assertEqual(table.base_pages[1].columns[RID_COLUMN].get(575 % 513), 575)
         self.assertEqual(table.base_pages[1].columns[TIMESTAMP_COLUMN].get(575 % 513), 0)
         self.assertEqual(table.base_pages[1].columns[SCHEMA_ENCODING_COLUMN].get(575 % 513), 0)
+
+
+    def test_simple_get(self):
+        key = 0
+        table = Table("test", 3, key)
+        columns = [1, 2, 3]
+        columns2 = [4, 5, 6]
+        table.add_record(columns)
+        table.add_record(columns2)
+        self.assertEqual(table.get_record(1), columns)
+        self.assertEqual(table.get_record(2), columns2)
+
+    def test_simple_update(self):
+        key = 0
+        table = Table("test", 3, key)
+        columns = [1, 2, 3]
+        columns2 = [4, 5, 6]
+        table.add_record(columns)
+        table.add_record(columns2)
+        table.update_record(1, [7, 8, 9])
+        self.assertEqual(table.get_record(1), [7, 8, 9])
+        self.assertEqual(table.get_record(2), columns2)
+
+    def test_update_with_none(self):
+        key = 0
+        table = Table("test", 3, key)
+        columns = [1, 2, 3]
+        columns2 = [4, 5, 6]
+        table.add_record(columns)
+        table.add_record(columns2)
+        table.update_record(1, [None, 8, None])
+        self.assertEqual(table.get_record(1), [1, 8, 3])
+        self.assertEqual(table.get_record(2), columns2)
+
+
