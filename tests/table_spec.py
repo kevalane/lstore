@@ -150,3 +150,41 @@ class TableTestCase(unittest.TestCase):
         table.add_record(columns)
         table.add_record(columns2)
         self.assertFalse(table.delete_record(3))
+    
+    def test_delete_record_success(self):
+        key = 0
+        table = Table("test", 4, key)
+        columns = [1, 1, 2, 3]
+        columns2 = [2, 4, 5, 6]
+        table.add_record(columns)
+        table.add_record(columns2)
+        rid = 1
+        self.assertTrue(table.delete_record(rid))
+        with self.assertRaises(KeyError):
+            table.get_record(rid)
+        self.assertEqual(table.get_record(2), columns2)
+
+    def test_delete_record_with_tail_page(self):
+        key = 0
+        table = Table("test", 4, key)
+        columns = [11, 1, 2, 3]
+        columns2 = [22, 4, 5, 6]
+        table.add_record(columns)
+        table.add_record(columns2)
+        table.update_record(11, [None, None, None, 9])
+        table.update_record(11, [None, 10, None, None])
+        table.update_record(11, [None, None, None, 15])
+        rid = 11
+        self.assertEqual(table.get_record(11, True), [11, 10, 2, 15])
+        self.assertTrue(table.delete_record(rid))
+        
+        with self.assertRaises(KeyError):
+                table.get_record(rid)
+
+        # self.assertEqual(table.get_record(-11), [11, 10, 2, 15])
+
+        # self.assertEqual(table.get_record(11), columns)
+        # self.assertEqual(table.get_record(22), columns2)
+        # self.assertEqual(table.get_record(33), [3, 7, 8, 9])
+        # self.assertEqual(table.get_record(55), [5, 13, 14, 15])
+
