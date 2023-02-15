@@ -31,7 +31,7 @@ class Page:
                 False otherwise
     """
     def write(self, value: int) -> bool:
-        if (self.has_capacity() == False):
+        if not self.has_capacity():
             return False
         
         self._insert(value, self.num_records)
@@ -50,7 +50,7 @@ class Page:
                 False otherwise
     """
     def put(self, value: int, offset: int) -> bool:
-        if (self._valid_offset(offset) == False):
+        if not self._valid_offset(offset):
             return False
 
         self._insert(value, offset)
@@ -75,7 +75,7 @@ class Page:
                 -1 if the offset is invalid
     """
     def get(self, offset: int) -> int:
-        if (self._valid_offset(offset) == False):
+        if not self._valid_offset(offset):
             return -1
 
         # calc offset
@@ -113,7 +113,7 @@ class Page:
     @returns   True if the offset is valid, False otherwise
     """
     def _valid_offset(self, offset: int) -> bool:
-        if (offset < 0 or offset >= PAGE_SIZE/DATA_SIZE):
+        if offset < 0 or offset >= PAGE_SIZE/DATA_SIZE:
             return False # out of bounds offset
 
         if (offset >= self.num_records):
