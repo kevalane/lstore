@@ -18,11 +18,12 @@ class Index:
     
     def locate(self, column: int, value: int) -> list[int]:
         """
-        # Returns the RIDs of all records with values in "column" equal to "value"
+        Returns the RIDs of all records with values in "column" equal to "value"
+
         :param  column: int          The column number to search
         :param  value:  int          The value to search for
         
-        @returns RID_list: int[]     Returns an array of RIDs that match the search
+        :returns: List[int]          Returns an array of RIDs that match the search
         """
         # indicates whether index already made for given column
         if column in self.indices: 
@@ -45,12 +46,12 @@ class Index:
 
     def locate_range(self, begin: int, end: int, column: int) -> list[int]:
         """
-        # Returns the RIDs of all records with values in column "column" between "begin" and "end"
-        :param  begin:  int          The beginning of the range
-        :param  end:    int          The end of the range
-        :param  column: int          The column number to search
+        Returns the RIDs of all records with values in "column" equal to "value"
 
-        @returns RID_list: int[]     Returns an array of RIDs that match the search
+        :param column: int - The column number to search
+        :param value: int - The value to search for
+
+        :returns: List[int] - An array of RIDs that match the search
         """
         range_RID_list = []
 
@@ -63,10 +64,10 @@ class Index:
     def create_index(self, column_number: int) -> bool:
         """
         # Create index on specific column
-        :param  column_number: int   The column number to index
+        :param  column_number: int      The column number to index
 
-        @returns boolean             True if index created,
-                                    False if index already exists
+        :returns boolean:               True if index created,
+                                        False if index already exists
         """
         if column_number not in self.indices:
             # create index {} for column
@@ -143,13 +144,10 @@ class Index:
         # Drop index of specific column
         :param  column_number: int   The column number to drop index
 
-        @returns boolean             True if index dropped, False if not
+        :returns: boolean            True if index dropped, False if not
         """
         if column_number in self.indices:
             del self.indices[column_number]
             return True
         else:
             return False
-
-
-    
