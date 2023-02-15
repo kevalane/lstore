@@ -115,7 +115,7 @@ class Table:
         """
         :param rid: int         # rid to be deleted
         """
-        if rid not in self.page_directory.keys():
+        if rid not in self.page_directory:
             return False
 
         # Loop through deleting each tail page until we get to the last one
@@ -130,6 +130,8 @@ class Table:
                 del self.page_directory[rid]
                 self.page_directory[rid * -1] = new_rid
                 rid = self.get_record(rid, with_meta=True)[RID_COLUMN] # set the rid to the new rid in the indirection column and then loop over again
+
+        return True
         
         
 

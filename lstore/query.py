@@ -23,9 +23,9 @@ class Query:
     """
     def delete(self, primary_key):
         try:
-            self.table.delete_record(primary_key)
-            return True
-                
+            retval = self.table.delete_record(primary_key)
+            return retval
+
         except: 
             return False
     
