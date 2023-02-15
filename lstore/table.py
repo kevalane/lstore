@@ -111,25 +111,39 @@ class Table:
         
         return retvals
 
+    def get_base_record(self, base_rid):
+        """
+        :param base_rid: int     # RID of the base page to be retrieved
+        """
+        page_num = self.page_directory[base_rid][PAGE_NUM]
+        page_offset = self.page_directory[base_rid][OFFSET]
+        retvals = []
+        for column in range(len(self.base_pages[page_num].columns)):
+            retvals.append(self.base_pages[page_num].columns[column].get(page_offset))
+        
+        return retvals
+
     def delete_record(self, rid):
         """
         :param rid: int         # rid to be deleted
         """
-        if rid not in self.page_directory.keys():
+        if rid not in self.page_directory:
             return False
 
-        # Loop through deleting each tail page until we get to the last one
-        while True:
-            if self.page_directory[rid][PAGE_TYPE] == 'base':
-                new_rid = self.page_directory[rid]
-                del self.page_directory[rid]
-                self.page_directory[rid * -1] = new_rid
-                break
-            else: 
-                new_rid = self.page_directory[rid]
-                del self.page_directory[rid]
-                self.page_directory[rid * -1] = new_rid
-                rid = self.get_record(rid, with_meta=True)[RID_COLUMN] # set the rid to the new rid in the indirection column and then loop over again
+        indir_rid = self.get_base_record(rid)[INDIRECTION_COLUMN]
+
+        if indir_rid != 0:
+            checking = indir_rid
+            while checking != rid:
+                self.page_directory[checking*-1] = self.page_directory[checking]
+                new_checking = self.get_tail_page(checking)[INDIRECTION_COLUMN]
+                del self.page_directory[checking]
+                checking = new_checking
+
+        self.page_directory[rid*-1] = self.page_directory[rid]
+        del self.page_directory[rid]
+                
+        return True
         
         
 
@@ -188,7 +202,8 @@ class Table:
 
         # add metadata to columns
         self.tail_pages[-1].columns[INDIRECTION_COLUMN].write(old_tail_rid)
-        self.tail_pages[-1].columns[RID_COLUMN].write(tail_rid)
+        if (tail_rid != rid):
+            self.tail_pages[-1].columns[RID_COLUMN].write(tail_rid)
         self.tail_pages[-1].columns[TIMESTAMP_COLUMN].write(0)
 
         # HANDLE CUMULATIVE SCHEMA UPDATES
@@ -201,18 +216,17 @@ class Table:
 
             # write all old info to new tail page
             for i in range(len(old_tail_info[META_COLUMNS:])):
-                if (old_tail_info[i+META_COLUMNS] != 0):
+                if (old_tail_info[i+META_COLUMNS] != 0 and self.tail_pages[-1].columns[i+META_COLUMNS].get(location[OFFSET]) == 0):
                     self.tail_pages[-1].columns[i+META_COLUMNS].put(old_tail_info[i+META_COLUMNS], location[OFFSET])
+        
+        previous_encoding = '0'*(self.num_columns - len(str(previous_encoding))) + str(previous_encoding)
 
         # create update schema column (1 if updated, 0 if not)
         encoding = '0'*self.num_columns
         for i in range(len(new_cols)):
-            if (new_cols[i] != None):
+            if (new_cols[i] != None or previous_encoding[i] == '1'):
                 encoding = encoding[:i] + '1' + encoding[i + 1:]
-        
-        # concatenate previous encoding with new encoding
-        encoding = int(encoding) + previous_encoding
-        
+
         self.tail_pages[-1].columns[SCHEMA_ENCODING_COLUMN].write(int(encoding))
         base_page.columns[SCHEMA_ENCODING_COLUMN].put(int(encoding), base_record[OFFSET])
 
