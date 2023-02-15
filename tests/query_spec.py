@@ -37,4 +37,7 @@ class QuerySpec(unittest.TestCase):
     def test_select_success(self):
         self.query.insert(1, 123, 456, 18, 1)
         self.query.insert(2, 456, 789, 20, 0)
+        self.assertEqual(self.query.select(1, 0, [1,1,1,1,1]), [[1, 123, 456, 18, 1]])
         self.assertEqual(len(self.query.select(1, 0, [1,1,1,1])), 1)
+        self.assertEqual(self.query.select(1, 0, [1,0,1,0,1]), [[1, 456, 1]])
+        self.assertEqual(self.query.select(1, 0, [1,0,1,0]), [[1, 456]])

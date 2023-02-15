@@ -68,19 +68,21 @@ class Query:
         res = list()
         
         try:
-            selected = self.table.get_multiple_records(search_key, search_key_index)
+            selected = self.table.index.indices[search_key_index].get(search_key)
+            # selected = self.table.get_multiple_records(search_key, search_key_index)
             
             if len(selected) == 0 or (len(projected_columns_index) > self.table.num_columns):
                 return False
         
-            for rec in selected:
-                cols = list()
+            for rid in selected:
+                record = self.table.get_record(rid)
                 
-                for i in range(projected_columns_index):
+                cols = list()
+                for i in range(len(projected_columns_index)):
                     if projected_columns_index[i] == 1:
-                        cols.append(rec.columns[i])
-                    
-                res.append(Record(rec, rec.key, cols, rec.rid))
+                        cols.append(record[i])
+                
+                res.append(cols)
             
             return res
         
