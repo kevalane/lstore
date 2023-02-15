@@ -128,6 +128,7 @@ class Table:
         :param rid: int         # rid to be deleted
         """
         if rid not in self.page_directory:
+        # if not self.page_directory[rid]:
             return False
 
         indir_rid = self.get_base_record(rid)[INDIRECTION_COLUMN]

@@ -35,9 +35,10 @@ class QuerySpec(unittest.TestCase):
         self.assertFalse(self.query.delete(2))
 
     def test_delete_invalid_primary_key(self):
-        # Assuming `table` is an instance of the class and `invalid_primary_key` does not exist in the table
-        invalid_primary_key = 314131341314
-        self.assertFalse(self.table.delete_record(invalid_primary_key))
+        self.query.insert(134134134, 123, 456, 18, 1)
+        # mess up memory, corrupting indirection column
+        self.table.base_pages[0].columns[0].put(31431741374613, 0)
+        self.assertFalse(self.query.delete(134134134))
 
 
     def test_select_success(self):
