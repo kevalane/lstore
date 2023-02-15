@@ -61,12 +61,11 @@ class Query:
         res = list()
         
         try:
+            if (len(projected_columns_index) > self.table.num_columns):
+                return False
+
             selected = self.table.index.indices[search_key_index].get(search_key)
             # selected = self.table.get_multiple_records(search_key, search_key_index)
-            
-            if len(selected) == 0 or (len(projected_columns_index) > self.table.num_columns):
-                # maybe have a loop over all records (i.e., superslow) here
-                return False
         
             for rid in selected:
                 record = self.table.get_record(rid)

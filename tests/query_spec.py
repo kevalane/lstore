@@ -40,7 +40,6 @@ class QuerySpec(unittest.TestCase):
         self.table.base_pages[0].columns[0].put(31431741374613, 0)
         self.assertFalse(self.query.delete(134134134))
 
-
     def test_select_success(self):
         self.query.insert(1, 123, 456, 18, 1)
         self.query.insert(2, 456, 789, 20, 0)
@@ -56,13 +55,11 @@ class QuerySpec(unittest.TestCase):
         self.assertFalse(self.query.select(1, 0, [1,1,1,1,1,1]))
 
     def test_update_success(self):
-        return
-        self.query.insert(1, 123, 456, 18, 1)
-        self.assertTrue(self.query.update(1, 1, 2, 3, 4, None))
-        self.assertEqual(self.query.select(1, 0, [1,1,1,1,1])[0].columns, [1, 2, 3, 4, 1])
+        self.query.insert(4444, 123, 456, 18, 1)
+        self.assertTrue(self.query.update(4444, 1, 2, 3, 4, None))
+        self.assertEqual(self.query.select(4444, 0, [1,1,1,1,1])[0].columns, [1, 2, 3, 4, 1])
 
     def test_update_failure(self):
-        return
         # record doesn't exist
         self.assertFalse(self.query.update(1, 1, 2, 19, 0, 1))
         # too many columns
