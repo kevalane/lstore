@@ -117,9 +117,20 @@ class Table:
         """
         if rid not in self.page_directory.keys():
             return False
-        new_rid = self.page_directory[rid]
-        del self.page_directory[rid]
-        self.page_directory[rid * -1] = new_rid
+
+        # Loop through deleting each tail page until we get to the last one
+        while True:
+            if self.page_directory[rid][PAGE_TYPE] == 'base':
+                new_rid = self.page_directory[rid]
+                del self.page_directory[rid]
+                self.page_directory[rid * -1] = new_rid
+                break
+            else: 
+                new_rid = self.page_directory[rid]
+                del self.page_directory[rid]
+                self.page_directory[rid * -1] = new_rid
+                rid = self.get_record(rid, with_meta=True)[RID_COLUMN] # set the rid to the new rid in the indirection column and then loop over again
+        
         
 
     def get_column(self, column):
