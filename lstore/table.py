@@ -114,18 +114,32 @@ class Table:
         return retvals
 
     def delete_record(self, rid):
-        pass
+        """
+        :param rid: int         # rid to be deleted
+        """
+        if rid not in self.page_directory.keys():
+            return False
+        new_rid = self.page_directory[rid * -1]
+        del self.page_directory[rid]
+        self.page_directory[rid * -1] = new_rid
+        
 
     def get_column(self, column):
+        col_list = []
+        for rid in self.page_directory.keys():
+            if self.page_directory[rid][0] == 'base' and rid >= 0:
+                val = (rid, self.get_record(rid)[column])
+                col_list.append(val)
+        return col_list
         """
         :param column: int      # Index of column to be retrieved
         """
-        pass
+        
 
     def update_record(self, rid, new_cols):
         """
         :param new_cols: list   # List of new column values
-        :param rid: int         # RID of the previous record being updates
+        :param rid: int         # RID of the previous record being updated
         """
         # create tail page if none exist
         if self.tail_pages == []:
