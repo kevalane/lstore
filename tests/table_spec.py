@@ -83,9 +83,9 @@ class TableTestCase(unittest.TestCase):
 
     def test_simple_get(self):
         key = 0
-        table = Table("test", 3, key)
-        columns = [1, 2, 3]
-        columns2 = [4, 5, 6]
+        table = Table("test", 4, key)
+        columns = [1, 1, 2, 3]
+        columns2 = [2, 4, 5, 6]
         table.add_record(columns)
         table.add_record(columns2)
         self.assertEqual(table.get_record(1), columns)
@@ -93,22 +93,22 @@ class TableTestCase(unittest.TestCase):
 
     def test_simple_update(self):
         key = 0
-        table = Table("test", 3, key)
-        columns = [1, 2, 3]
-        columns2 = [4, 5, 6]
+        table = Table("test", 4, key)
+        columns = [33333331, 1, 2, 3]
+        columns2 = [33333332, 4, 5, 6]
         table.add_record(columns)
         table.add_record(columns2)
-        table.update_record(1, [7, 8, 9])
-        self.assertEqual(table.get_record(1), [7, 8, 9])
-        self.assertEqual(table.get_record(2), columns2)
+        table.update_record(33333331, [None, 7, 8, 9])
+        self.assertEqual(table.get_record(33333331), [33333331, 7, 8, 9])
+        self.assertEqual(table.get_record(33333332), columns2)
 
     def test_update_with_none(self):
         key = 0
         table = Table("test", 4, key)
-        columns = [1, 1, 2, 3]
-        columns2 = [2, 4, 5, 6]
+        columns = [111111, 1, 2, 3]
+        columns2 = [222222, 4, 5, 6]
         table.add_record(columns)
         table.add_record(columns2)
-        table.update_record(0, [None, None, 8, None])
-        self.assertEqual(table.get_record(1), [1, 8, 3])
-        self.assertEqual(table.get_record(2), columns2)
+        table.update_record(111111, [None, None, 8, None])
+        self.assertEqual(table.get_record(111111), [111111, 1, 8, 3])
+        self.assertEqual(table.get_record(222222), columns2)

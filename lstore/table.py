@@ -94,7 +94,7 @@ class Table:
             for i in range(len(vals[META_COLUMNS:])):
                 if (update_str[i] == '0'):
                     vals[i+META_COLUMNS] = page[page_num].columns[META_COLUMNS+i].get(offset)
-
+        
         # return the wanted values
         if with_meta:
             return vals
@@ -236,8 +236,8 @@ class Table:
         # rid = self.assign_rid()
         rid = columns[0] # rid is given by the user
         record = Record(self.key, columns, rid)
+        
         self.index.push_record_to_index(record)
-
 
         # next, add the metadata to columns
         self.base_pages[-1].columns[INDIRECTION_COLUMN].write(rid) # INDIRECTION COLUMN
