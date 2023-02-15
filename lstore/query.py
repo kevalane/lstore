@@ -133,15 +133,21 @@ class Query:
         sum = 0
         
         if aggregate_column_index >= self.table.num_columns:
+            print("Invalid column index")
             return False
         
-        for i in range(start_range, end_range):
+        for i in range(start_range, end_range+1):
             try:
                 recs.append(self.table.get_record(i))
-            except:
-                return False
+            except Exception as e:
+                continue
+                
+                # print(e.stacktrace)
+                # print("Exception caught")
+                # return False
             
         if len(recs) == 0:
+            print("No records exist in the given range")
             return False
         
         for j in recs:
