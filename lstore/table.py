@@ -190,7 +190,8 @@ class Table:
 
         # add metadata to columns
         self.tail_pages[-1].columns[INDIRECTION_COLUMN].write(old_tail_rid)
-        self.tail_pages[-1].columns[RID_COLUMN].write(tail_rid)
+        if (tail_rid != rid):
+            self.tail_pages[-1].columns[RID_COLUMN].write(tail_rid)
         self.tail_pages[-1].columns[TIMESTAMP_COLUMN].write(0)
 
         # HANDLE CUMULATIVE SCHEMA UPDATES
@@ -203,7 +204,7 @@ class Table:
 
             # write all old info to new tail page
             for i in range(len(old_tail_info[META_COLUMNS:])):
-                if (old_tail_info[i+META_COLUMNS] != 0):
+                if (old_tail_info[i+META_COLUMNS] != 0 and self.tail_pages[-1].columns[i+META_COLUMNS].get(location[OFFSET]) == 0):
                     self.tail_pages[-1].columns[i+META_COLUMNS].put(old_tail_info[i+META_COLUMNS], location[OFFSET])
         
         previous_encoding = '0'*(self.num_columns - len(str(previous_encoding))) + str(previous_encoding)
