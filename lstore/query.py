@@ -22,18 +22,11 @@ class Query:
     # Return False if record doesn't exist or is locked due to 2PL
     """
     def delete(self, primary_key):
-        try: 
-            exists = self.table.get_record(primary_key)
-            
-            if exists is not None:
-                try:
-                    self.table.delete_record(primary_key)
-                    return True
+        try:
+            self.table.delete_record(primary_key)
+            return True
                 
-                except: 
-                    return False
-        
-        except:
+        except: 
             return False
     
     
