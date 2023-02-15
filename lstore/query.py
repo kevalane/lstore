@@ -45,7 +45,7 @@ class Query:
     def insert(self, *columns):
         schema_encoding = '0' * self.table.num_columns
         
-        if len(columns) > self.table.num_columns:
+        if len(columns) != self.table.num_columns:
             return False
         
         try:
@@ -68,19 +68,22 @@ class Query:
         res = list()
         
         try:
-            selected = self.table.get_multiple_records(search_key, search_key_index)
+            selected = self.table.index.indices[search_key_index].get(search_key)
+            # selected = self.table.get_multiple_records(search_key, search_key_index)
             
             if len(selected) == 0 or (len(projected_columns_index) > self.table.num_columns):
+                # maybe have a loop over all records (i.e., superslow) here
                 return False
         
-            for rec in selected:
-                cols = list()
+            for rid in selected:
+                record = self.table.get_record(rid)
                 
-                for i in range(projected_columns_index):
+                cols = list()
+                for i in range(len(projected_columns_index)):
                     if projected_columns_index[i] == 1:
-                        cols.append(rec.columns[i])
-                    
-                res.append(Record(rec, rec.key, cols, rec.rid))
+                        cols.append(record[i])
+                
+                res.append(Record(self.table.key, cols, rid))
             
             return res
         
@@ -107,7 +110,7 @@ class Query:
     # Returns False if no records exist with given key or if the target record cannot be accessed due to 2PL locking
     """
     def update(self, primary_key, *columns):
-        if len(columns) > self.table.num_columns:
+        if len(columns) != self.table.num_columns:
             return False
         
         try:
@@ -129,17 +132,20 @@ class Query:
         recs = list()
         sum = 0
         
-        if aggregate_column_index > self.table.num_columns:
+        if aggregate_column_index >= self.table.num_columns:
             return False
         
         for i in range(start_range, end_range):
-            recs.append(self.table.get_record(i))
+            try:
+                recs.append(self.table.get_record(i))
+            except:
+                return False
             
         if len(recs) == 0:
             return False
         
         for j in recs:
-            sum += j.columns[aggregate_column_index]
+            sum += j[aggregate_column_index]
             
         return sum
 
