@@ -241,6 +241,7 @@ class Table:
         self.base_pages[-1].columns[RID_COLUMN].write(rid) # RID COLUMN
         self.base_pages[-1].columns[TIMESTAMP_COLUMN].write(0) # TIMESTAMP COLUMN
         self.base_pages[-1].columns[SCHEMA_ENCODING_COLUMN].write(0) # SCHEMA ENCODING COLUMN
+
         for index, item in enumerate(columns):
             self.base_pages[-1].columns[index+4].write(item)
         # finally add this rid to the page directory
