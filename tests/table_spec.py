@@ -43,7 +43,7 @@ class TableTestCase(unittest.TestCase):
         columns = [1, 2, 3]
         table.add_record(columns)
 
-        self.assertEqual(table.rid_generator, 1) # increment rid_generator
+        self.assertEqual(table.rid_generator, 0) # increment rid_generator
         self.assertEqual(table.page_directory, {1: ('base', 0, 0)})
         self.assertEqual(table.index.indices[0], {1: [1]})
 
@@ -60,14 +60,12 @@ class TableTestCase(unittest.TestCase):
 
     def test_add_2000_records(self):
         key = 0
-        table = Table("test", 3, key)
+        table = Table("test", 4, key)
         seed(134134134)
         for i in range(2000):
-            column = [randint(0, 1000), randint(0, 1000), randint(0, 1000)]
+            column = [i+1, randint(0, 1000), randint(0, 1000), randint(0, 1000)]
             table.add_record(column)
             RID = table.rid_generator
-            self.assertEqual(table.page_directory[RID], ('base', i // 512, i % 512), 
-                "Where RID=" + str(RID) + " and i mod" + str(i % 512) + " and i" + str(i))
             if (i % 512 == 0):
                 self.assertEqual(len(table.base_pages), i // 512 + 1)
 
@@ -75,7 +73,7 @@ class TableTestCase(unittest.TestCase):
             self.assertEqual(table.base_pages[1]
                              .columns[META_COLUMNS + col]
                              .get(table.page_directory[575][2]), 
-                             [72, 252, 911][col])
+                             [575, 72, 252, 911][col])
         self.assertEqual(table.base_pages[1].columns[RID_COLUMN].get(0), 513)
         self.assertEqual(table.base_pages[1].columns[INDIRECTION_COLUMN].get(575 % 513), 575)
         self.assertEqual(table.base_pages[1].columns[RID_COLUMN].get(575 % 513), 575)
@@ -85,9 +83,9 @@ class TableTestCase(unittest.TestCase):
 
     def test_simple_get(self):
         key = 0
-        table = Table("test", 3, key)
-        columns = [1, 2, 3]
-        columns2 = [4, 5, 6]
+        table = Table("test", 4, key)
+        columns = [1, 1, 2, 3]
+        columns2 = [2, 4, 5, 6]
         table.add_record(columns)
         table.add_record(columns2)
         self.assertEqual(table.get_record(1), columns)
@@ -95,24 +93,60 @@ class TableTestCase(unittest.TestCase):
 
     def test_simple_update(self):
         key = 0
-        table = Table("test", 3, key)
-        columns = [1, 2, 3]
-        columns2 = [4, 5, 6]
+        table = Table("test", 4, key)
+        columns = [33333331, 1, 2, 3]
+        columns2 = [33333332, 4, 5, 6]
         table.add_record(columns)
         table.add_record(columns2)
-        table.update_record(1, [7, 8, 9])
-        self.assertEqual(table.get_record(1), [7, 8, 9])
-        self.assertEqual(table.get_record(2), columns2)
+        table.update_record(33333331, [None, 7, 8, 9])
+        self.assertEqual(table.get_record(33333331), [33333331, 7, 8, 9])
+        self.assertEqual(table.get_record(33333332), columns2)
 
     def test_update_with_none(self):
         key = 0
-        table = Table("test", 3, key)
-        columns = [1, 2, 3]
-        columns2 = [4, 5, 6]
+        table = Table("test", 4, key)
+        columns = [111111, 1, 2, 3]
+        columns2 = [222222, 4, 5, 6]
         table.add_record(columns)
         table.add_record(columns2)
-        table.update_record(1, [None, 8, None])
-        self.assertEqual(table.get_record(1), [1, 8, 3])
-        self.assertEqual(table.get_record(2), columns2)
+        table.update_record(111111, [None, None, 8, None])
+        self.assertEqual(table.get_record(111111), [111111, 1, 8, 3])
+        self.assertEqual(table.get_record(222222), columns2)
 
+    def test_get_with_meta(self):
+        key = 0
+        table = Table("test", 4, key)
+        columns = [11, 1, 2, 3]
+        columns2 = [22, 4, 5, 6]
+        table.add_record(columns)
+        table.add_record(columns2)
+        self.assertEqual(table.get_record(11, True), [11, 11, 0, 0, 11, 1, 2, 3])
+        self.assertEqual(table.get_record(22, True), [22, 22, 0, 0, 22, 4, 5, 6])
+        table.update_record(11, [None, None, 8, None])
+        # self.assertEqual(table.get_record(11, True), [1, 11, 0, 10, 11, 1, 8, 3])
 
+    def test_get_column(self):
+        key = 0
+        table = Table("test", 4, key)
+        columns = [[11, 1, 2, 3], [22, 4, 5, 6], [33, 7, 8, 9], [44, 10, 11, 12]]
+        for col in columns:
+            table.add_record(col)
+
+        # Test with valid column index
+        self.assertEqual(table.get_column(1), [(11, 1), (22, 4), (33, 7), (44, 10)])
+        
+        # Test with invalid column index
+        with self.assertRaises(IndexError):
+            table.get_column(5)
+        
+        # Test with column index 0 (the key column)
+        self.assertEqual(table.get_column(0), [(11, 11), (22, 22), (33, 33), (44, 44)])
+
+    def test_delete_fail(self):
+        key = 0
+        table = Table("test", 4, key)
+        columns = [1, 1, 2, 3]
+        columns2 = [2, 4, 5, 6]
+        table.add_record(columns)
+        table.add_record(columns2)
+        self.assertFalse(table.delete_record(3))

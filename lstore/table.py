@@ -73,8 +73,6 @@ class Table:
         # get relevant info from page_dir
         page_num = self.page_directory[rid][PAGE_NUM]
         offset = self.page_directory[rid][OFFSET]
-        if offset == -1:
-            return None
         
         # check if updated
         update = page[page_num].columns[SCHEMA_ENCODING_COLUMN].get(offset)
@@ -94,7 +92,7 @@ class Table:
             for i in range(len(vals[META_COLUMNS:])):
                 if (update_str[i] == '0'):
                     vals[i+META_COLUMNS] = page[page_num].columns[META_COLUMNS+i].get(offset)
-
+        
         # return the wanted values
         if with_meta:
             return vals
@@ -194,8 +192,6 @@ class Table:
             for i in range(len(old_tail_info[META_COLUMNS:])):
                 if (old_tail_info[i+META_COLUMNS] != 0):
                     self.tail_pages[-1].columns[i+META_COLUMNS].put(old_tail_info[i+META_COLUMNS], location[OFFSET])
-                    
-        
 
         # create update schema column (1 if updated, 0 if not)
         encoding = '0'*self.num_columns
@@ -208,7 +204,6 @@ class Table:
         
         self.tail_pages[-1].columns[SCHEMA_ENCODING_COLUMN].write(int(encoding))
         base_page.columns[SCHEMA_ENCODING_COLUMN].put(int(encoding), base_record[OFFSET])
-        base_page.columns[INDIRECTION_COLUMN].put(tail_rid, base_record[OFFSET])
 
         # create base record
         base_record_cols = []
@@ -216,8 +211,11 @@ class Table:
             base_record_cols.append(base_page.columns[i].get(base_record[OFFSET]))
         base_rec = Record(self.key, base_record_cols, rid)
 
+        # pad with leading 0s
+        encoding = '0'*(self.num_columns - len(str(encoding))) + str(encoding)
+
         # update indexing
-        self.index.update_index(base_rec, tail_record, encoding)
+        self.index.update_index(base_rec, tail_record, str(encoding))
 
 
     def add_record(self, columns):
@@ -233,14 +231,15 @@ class Table:
         # rid = self.assign_rid()
         rid = columns[0] # rid is given by the user
         record = Record(self.key, columns, rid)
+        
         self.index.push_record_to_index(record)
-
 
         # next, add the metadata to columns
         self.base_pages[-1].columns[INDIRECTION_COLUMN].write(rid) # INDIRECTION COLUMN
         self.base_pages[-1].columns[RID_COLUMN].write(rid) # RID COLUMN
         self.base_pages[-1].columns[TIMESTAMP_COLUMN].write(0) # TIMESTAMP COLUMN
         self.base_pages[-1].columns[SCHEMA_ENCODING_COLUMN].write(0) # SCHEMA ENCODING COLUMN
+
         for index, item in enumerate(columns):
             self.base_pages[-1].columns[index+4].write(item)
         # finally add this rid to the page directory
