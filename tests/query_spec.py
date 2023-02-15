@@ -56,3 +56,13 @@ class QuerySpec(unittest.TestCase):
         self.query.insert(1, 123, 456, 18, 1)
         self.assertTrue(self.query.update(1, 1, 2, 3, 4, None))
         self.assertEqual(self.query.select(1, 0, [1,1,1,1,1]), [[1, 2, 3, 4, 1]])
+
+    def test_update_failure(self):
+        # record doesn't exist
+        self.assertFalse(self.query.update(1, 1, 2, 19, 0, 1))
+        # too many columns
+        self.assertFalse(self.query.update(1, 1, 2, 19, 0, 1, 51, 15))
+        # too few columns
+        self.assertFalse(self.query.update(1, 1, 2, 19))        
+        # non-integer column
+        self.assertFalse(self.query.update(1, 1, 'Doe', 19, 0))

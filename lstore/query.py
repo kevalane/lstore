@@ -83,7 +83,7 @@ class Query:
                     if projected_columns_index[i] == 1:
                         cols.append(record[i])
                 
-                res.append(cols)
+                res.append(Record(self.table.key, cols, rid))
             
             return res
         
