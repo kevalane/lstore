@@ -12,7 +12,7 @@ class Page:
     to a bytearray of size PAGE_SIZE, where PAGE_SIZE is
     a constant number of bytes.
     """
-    def __init__(self):
+    def __init__(self) -> None:
         self.num_records = 0
         self.data = bytearray(PAGE_SIZE)
 
@@ -20,7 +20,7 @@ class Page:
     @returns    True if there is space to insert a record, 
                 False otherwise
     """
-    def has_capacity(self):
+    def has_capacity(self) -> bool:
         return self.num_records*DATA_SIZE < PAGE_SIZE
 
     """
@@ -30,7 +30,7 @@ class Page:
     @returns    True if the value was written to the page,
                 False otherwise
     """
-    def write(self, value):
+    def write(self, value: int) -> bool:
         if (self.has_capacity() == False):
             return False
         
@@ -49,7 +49,7 @@ class Page:
     @returns    True if the value was written to the page,
                 False otherwise
     """
-    def put(self, value, offset):
+    def put(self, value: int, offset: int) -> bool:
         if (self._valid_offset(offset) == False):
             return False
 
@@ -64,7 +64,7 @@ class Page:
     @returns    True if the value 0 was written to the given field,
                 False otherwise
     """
-    def delete(self, offset):
+    def delete(self, offset: int) -> bool:
         return self.put(0, offset)
 
     """
@@ -74,7 +74,7 @@ class Page:
     @returns    The value stored in the page at the given offset,
                 -1 if the offset is invalid
     """
-    def get(self, offset):
+    def get(self, offset: int) -> int:
         if (self._valid_offset(offset) == False):
             return -1
 
@@ -94,7 +94,7 @@ class Page:
     :param  value: int64        The value to write to the page
     :param  offset: int         The offset to write the value to
     """
-    def _insert(self, value, offset):
+    def _insert(self, value: int, offset: int) -> None:
         # convert value to bytes
         value_to_bytes = value.to_bytes(DATA_SIZE, 
                                         byteorder=STORAGE_OPTION, 
@@ -112,7 +112,7 @@ class Page:
 
     @returns   True if the offset is valid, False otherwise
     """
-    def _valid_offset(self, offset):
+    def _valid_offset(self, offset: int) -> bool:
         if (offset < 0 or offset >= PAGE_SIZE/DATA_SIZE):
             return False # out of bounds offset
 
