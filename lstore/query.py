@@ -72,6 +72,7 @@ class Query:
             # selected = self.table.get_multiple_records(search_key, search_key_index)
             
             if len(selected) == 0 or (len(projected_columns_index) > self.table.num_columns):
+                # maybe have a loop over all records (i.e., superslow) here
                 return False
         
             for rid in selected:
@@ -109,7 +110,7 @@ class Query:
     # Returns False if no records exist with given key or if the target record cannot be accessed due to 2PL locking
     """
     def update(self, primary_key, *columns):
-        if len(columns) > self.table.num_columns:
+        if len(columns) != self.table.num_columns:
             return False
         
         try:

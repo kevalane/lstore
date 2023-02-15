@@ -41,3 +41,18 @@ class QuerySpec(unittest.TestCase):
         self.assertEqual(len(self.query.select(1, 0, [1,1,1,1])), 1)
         self.assertEqual(self.query.select(1, 0, [1,0,1,0,1]), [[1, 456, 1]])
         self.assertEqual(self.query.select(1, 0, [1,0,1,0]), [[1, 456]])
+
+    def test_select_fail(self):
+        # no matching record
+        self.assertFalse(self.query.select(3, 0, [1,1,1,1]))
+        # too many projected columns
+        self.assertFalse(self.query.select(1, 0, [1,1,1,1,1,1]))
+
+    def test_select_version(self):
+        # for milestone 2
+        self.query.select_version(1, 0, [1, 1], -1)
+
+    def test_update_success(self):
+        self.query.insert(1, 123, 456, 18, 1)
+        self.assertTrue(self.query.update(1, 1, 2, 3, 4, None))
+        self.assertEqual(self.query.select(1, 0, [1,1,1,1,1]), [[1, 2, 3, 4, 1]])
