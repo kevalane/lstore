@@ -119,7 +119,7 @@ class Table:
         """
         if rid not in self.page_directory.keys():
             return False
-        new_rid = self.page_directory[rid * -1]
+        new_rid = self.page_directory[rid]
         del self.page_directory[rid]
         self.page_directory[rid * -1] = new_rid
         
