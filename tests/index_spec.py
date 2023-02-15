@@ -123,7 +123,6 @@ class IndexTestCase(unittest.TestCase):
         self.assertEquals(index.indices[2][2], [0, 1, 22, 12])
 
     def test_update_index(self):
-        return
         # setup
         index, table = self.setup()
         index, table = self.insert_records(index, table)
@@ -147,7 +146,6 @@ class IndexTestCase(unittest.TestCase):
         self.assertEquals(index.indices[2][2], [0, 1, 22, 12])
 
     def test_update_index(self):
-        return
         index, table = self.setup()
 
         record = Record(0, [1, 2, 3], 11)
