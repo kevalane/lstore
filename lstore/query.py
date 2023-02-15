@@ -132,7 +132,7 @@ class Query:
         recs = list()
         sum = 0
         
-        if aggregate_column_index > self.table.num_columns:
+        if aggregate_column_index >= self.table.num_columns:
             return False
         
         for i in range(start_range, end_range):
@@ -142,7 +142,7 @@ class Query:
             return False
         
         for j in recs:
-            sum += j.columns[aggregate_column_index]
+            sum += j[aggregate_column_index]
             
         return sum
 

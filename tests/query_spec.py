@@ -37,10 +37,10 @@ class QuerySpec(unittest.TestCase):
     def test_select_success(self):
         self.query.insert(1, 123, 456, 18, 1)
         self.query.insert(2, 456, 789, 20, 0)
-        self.assertEqual(self.query.select(1, 0, [1,1,1,1,1]), [[1, 123, 456, 18, 1]])
+        self.assertEqual(self.query.select(1, 0, [1,1,1,1,1])[0].columns, [1, 123, 456, 18, 1])
         self.assertEqual(len(self.query.select(1, 0, [1,1,1,1])), 1)
-        self.assertEqual(self.query.select(1, 0, [1,0,1,0,1]), [[1, 456, 1]])
-        self.assertEqual(self.query.select(1, 0, [1,0,1,0]), [[1, 456]])
+        self.assertEqual(self.query.select(1, 0, [1,0,1,0,1])[0].columns, [1, 456, 1])
+        self.assertEqual(self.query.select(1, 0, [1,0,1,0])[0].columns, [1, 456])
 
     def test_select_fail(self):
         # no matching record
@@ -55,7 +55,7 @@ class QuerySpec(unittest.TestCase):
     def test_update_success(self):
         self.query.insert(1, 123, 456, 18, 1)
         self.assertTrue(self.query.update(1, 1, 2, 3, 4, None))
-        self.assertEqual(self.query.select(1, 0, [1,1,1,1,1]), [[1, 2, 3, 4, 1]])
+        self.assertEqual(self.query.select(1, 0, [1,1,1,1,1])[0].columns, [1, 2, 3, 4, 1])
 
     def test_update_failure(self):
         # record doesn't exist
@@ -66,3 +66,8 @@ class QuerySpec(unittest.TestCase):
         self.assertFalse(self.query.update(1, 1, 2, 19))        
         # non-integer column
         self.assertFalse(self.query.update(1, 1, 'Doe', 19, 0))
+
+    def test_sum_success(self):
+        self.query.insert(1, 123, 456, 18, 1)
+        self.query.insert(2, 456, 789, 20, 0)
+        self.assertEqual(self.query.sum(1, 3, 3), 38)
