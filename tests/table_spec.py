@@ -124,4 +124,29 @@ class TableTestCase(unittest.TestCase):
         self.assertEqual(table.get_record(22, True), [22, 22, 0, 0, 22, 4, 5, 6])
         table.update_record(11, [None, None, 8, None])
         # self.assertEqual(table.get_record(11, True), [1, 11, 0, 10, 11, 1, 8, 3])
+
+    def test_get_column(self):
+        key = 0
+        table = Table("test", 4, key)
+        columns = [[11, 1, 2, 3], [22, 4, 5, 6], [33, 7, 8, 9], [44, 10, 11, 12]]
+        for col in columns:
+            table.add_record(col)
+
+        # Test with valid column index
+        self.assertEqual(table.get_column(1), [(11, 1), (22, 4), (33, 7), (44, 10)])
         
+        # Test with invalid column index
+        with self.assertRaises(IndexError):
+            table.get_column(5)
+        
+        # Test with column index 0 (the key column)
+        self.assertEqual(table.get_column(0), [(11, 11), (22, 22), (33, 33), (44, 44)])
+
+    def test_delete_fail(self):
+        key = 0
+        table = Table("test", 4, key)
+        columns = [1, 1, 2, 3]
+        columns2 = [2, 4, 5, 6]
+        table.add_record(columns)
+        table.add_record(columns2)
+        self.assertFalse(table.delete_record(3))
