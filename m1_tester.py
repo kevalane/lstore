@@ -59,7 +59,7 @@ for key in records:
         original = records[key].copy()
         # update our test directory
         records[key][i] = value
-        print(query.update(key, *updated_columns))
+        query.update(key, *updated_columns)
         record = query.select(key, 0, [1, 1, 1, 1, 1])[0]
         error = False
         for j, column in enumerate(record.columns):
@@ -67,12 +67,11 @@ for key in records:
                 error = True
         if error:
             print('update error on', original, 'and', updated_columns, ':', record, ', correct:', records[key])
-            exit()
         else:
             pass
             # print('update on', original, 'and', updated_columns, ':', record)
         updated_columns[i] = None
-exit(0)
+
 keys = sorted(list(records.keys()))
 # aggregate on every column 
 for c in range(0, grades_table.num_columns):

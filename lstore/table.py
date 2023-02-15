@@ -192,8 +192,8 @@ class Table:
             # write all old info to new tail page
             for i in range(len(old_tail_info[META_COLUMNS:])):
                 if (old_tail_info[i+META_COLUMNS] != 0):
-                    print(old_tail_offset)
-                    self.tail_pages[-1].colums[i+META_COLUMNS-1].put(old_tail_info[i+META_COLUMNS], old_tail_offset)
+                    self.tail_pages[-1].columns[i+META_COLUMNS].put(old_tail_info[i+META_COLUMNS], location[OFFSET])
+                    
         
 
         # create update schema column (1 if updated, 0 if not)
