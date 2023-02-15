@@ -129,7 +129,6 @@ class Index:
 
         # if the tail page has a value for a column, use it, 
         # otherwise use the base page's value
-        print("UPDATING")
         for i in range(len(base_record.columns)):
             if schema_encoding[i] == '1':
                 new_columns[i] = tail_record.columns[i]

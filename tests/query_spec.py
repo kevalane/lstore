@@ -80,10 +80,9 @@ class QuerySpec(unittest.TestCase):
         self.query.insert(1, 2, 3, 4, 5)
         self.assertTrue(self.query.select(1, 0, [1, 1, 1, 1, 1]))
         r_before = self.query.select(1, 0, [1, 1, 1, 1, 1])[0]
-        print(r_before.columns)
         self.query.increment(1, 2)
         r = self.query.select(1, 0, [1, 1, 1, 1, 1])[0]
-        print (r.columns)
+        self.assertEqual(r.columns[2], r_before.columns[2] + 1)
 
     ## MILESTONE 2
     def test_select_version(self):

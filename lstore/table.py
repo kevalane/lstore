@@ -168,18 +168,13 @@ class Table:
         self.tail_pages[-1].columns[TIMESTAMP_COLUMN].write(0)
 
         # create update schema column (1 if updated, 0 if not)
-        encoding = 0
+        encoding = '0'*self.num_columns
         for i in range(len(new_cols)):
             if (new_cols[i] != None):
-                encoding += 1
-                if (i != len(new_cols)-1):
-                    encoding *= 10
-        self.tail_pages[-1].columns[SCHEMA_ENCODING_COLUMN].write(encoding)
-        base_page.columns[SCHEMA_ENCODING_COLUMN].put(encoding, base_record[OFFSET])
-
-        # add leading 0 to encoding if necessary
-        encoding_str = str(encoding)
-        encoding_str = '0'*(self.num_columns-len(encoding_str)) + encoding_str
+                encoding = encoding[:i] + '1' + encoding[i + 1:]
+    
+        self.tail_pages[-1].columns[SCHEMA_ENCODING_COLUMN].write(int(encoding))
+        base_page.columns[SCHEMA_ENCODING_COLUMN].put(int(encoding), base_record[OFFSET])
 
         # create base record
         base_record_cols = []
@@ -188,7 +183,7 @@ class Table:
         base_rec = Record(self.key, base_record_cols, rid)
 
         # update indexing
-        self.index.update_index(base_rec, tail_record, str(encoding))
+        self.index.update_index(base_rec, tail_record, encoding)
 
 
     def add_record(self, columns):

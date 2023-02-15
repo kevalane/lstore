@@ -176,7 +176,6 @@ class Query:
         if r is not False:
             updated_columns = [None] * self.table.num_columns
             updated_columns[column] = r[column] + 1
-            print("GHERE")
             u = self.update(key, *updated_columns)
             return u
         return False
