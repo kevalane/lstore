@@ -63,7 +63,7 @@ class Query:
         try:
             if (len(projected_columns_index) > self.table.num_columns):
                 return False
-
+            
             selected = self.table.index.indices[search_key_index].get(search_key)
             # selected = self.table.get_multiple_records(search_key, search_key_index)
         
@@ -76,7 +76,6 @@ class Query:
                         cols.append(record[i])
                 
                 res.append(Record(self.table.key, cols, rid))
-            
             return res
         
         except: 
@@ -164,8 +163,9 @@ class Query:
     # Returns False if no record matches key or if target record is locked by 2PL.
     """
     def increment(self, key, column):
-        r = self.select(key, self.table.key, [1] * self.table.num_columns)[0]
+        r = self.select(key, self.table.key, [1] * self.table.num_columns)
         if r is not False:
+            r = r[0]
             updated_columns = [None] * self.table.num_columns
             updated_columns[column] = r[column] + 1
             u = self.update(key, *updated_columns)

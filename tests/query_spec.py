@@ -88,6 +88,9 @@ class QuerySpec(unittest.TestCase):
         r = self.query.select(1, 0, [1, 1, 1, 1, 1])[0]
         self.assertEqual(r.columns[2], r_before.columns[2] + 1)
 
+    def test_increment_no_record(self):
+        self.assertFalse(self.query.increment(1134134, 0))
+
     ## MILESTONE 2
     def test_select_version(self):
         self.query.select_version(1, 0, [1, 1], -1)
