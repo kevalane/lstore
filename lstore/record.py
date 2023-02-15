@@ -10,3 +10,6 @@ class Record:
 
     def __get__(self):
         return self.columns
+
+    def __str__(self):
+        return str(self.columns)

@@ -139,6 +139,8 @@ class Table:
         # create a record object
         tail_rid = self.assign_rid()
         tail_record = Record(self.key, new_cols, tail_rid)
+        print(tail_record)
+        print(tail_rid)
 
         # insert the specified values in the tail page columns
         for index, item in enumerate(new_cols):
@@ -194,10 +196,14 @@ class Table:
         if not self.base_pages[-1].columns[0].has_capacity():
             self.base_pages.append(Base_Page(len(columns), self.key))
             return self.add_record(columns)
+
         # first, create a record object from the columns
-        rid = self.assign_rid()
+        # rid = self.assign_rid()
+        rid = columns[0] # rid is given by the user
         record = Record(self.key, columns, rid)
         self.index.push_record_to_index(record)
+
+
         # next, add the metadata to columns
         self.base_pages[-1].columns[INDIRECTION_COLUMN].write(rid) # INDIRECTION COLUMN
         self.base_pages[-1].columns[RID_COLUMN].write(rid) # RID COLUMN
