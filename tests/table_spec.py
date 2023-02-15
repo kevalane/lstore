@@ -189,5 +189,28 @@ class TableTestCase(unittest.TestCase):
         self.assertEqual(table.get_tail_page(-2), [1, 2, 0, 101, 0, 10, 0, 9])
         self.assertEqual(table.get_tail_page(-3), [2, 3, 0, 101, 0, 10, 0, 15])
         self.assertEqual(table.get_record(22), columns2)
+
+    def test_update_all_records(self):
+        key = 0
+        table = Table("test", 4, key)
+        seed(134134)
+        updated_cols = []
+        # Insert 1000 records
+        for i in range(1000):
+            columns = [34432332+i+1, randint(0, 1000), randint(0, 1000), randint(0, 1000)]
+            table.add_record(columns)
+
+        # Update all 1000 records
+        for i in range(1000):
+            new_columns = [None, randint(1001, 2000), randint(1001, 2000), randint(1001, 2000)]
+            table.update_record(i+1, new_columns)
+            updated_cols.append([34432332+i+1, new_columns[1], new_columns[2], new_columns[3]])
+
+        # Check if all records have the new column values
+        for i in range(1000):
+            record = table.get_record(34432332+i+1)
+            expected_columns = updated_cols[i]
+            self.assertEqual(record, expected_columns)
+
         
 
