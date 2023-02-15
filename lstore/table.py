@@ -111,6 +111,18 @@ class Table:
         
         return retvals
 
+    def get_base_record(self, base_rid):
+        """
+        :param base_rid: int     # RID of the base page to be retrieved
+        """
+        page_num = self.page_directory[base_rid][PAGE_NUM]
+        page_offset = self.page_directory[base_rid][OFFSET]
+        retvals = []
+        for column in range(len(self.base_pages[page_num].columns)):
+            retvals.append(self.base_pages[page_num].columns[column].get(page_offset))
+        
+        return retvals
+
     def delete_record(self, rid):
         """
         :param rid: int         # rid to be deleted
@@ -119,18 +131,32 @@ class Table:
             return False
 
         # Loop through deleting each tail page until we get to the last one
-        while True:
-            if self.page_directory[rid][PAGE_TYPE] == 'base':
-                new_rid = self.page_directory[rid]
-                del self.page_directory[rid]
-                self.page_directory[rid * -1] = new_rid
-                break
-            else: 
-                new_rid = self.page_directory[rid]
-                del self.page_directory[rid]
-                self.page_directory[rid * -1] = new_rid
-                rid = self.get_record(rid, with_meta=True)[RID_COLUMN] # set the rid to the new rid in the indirection column and then loop over again
+        # while True:
+        #     if self.page_directory[rid][PAGE_TYPE] == 'base':
+        #         new_rid = self.page_directory[rid]
+        #         del self.page_directory[rid]
+        #         self.page_directory[rid * -1] = new_rid
+        #         break
+        #     else: 
+        #         print("deleting tail page with rid: " + str(rid))
+        #         new_rid = self.page_directory[rid]
+        #         del self.page_directory[rid]
+        #         self.page_directory[rid * -1] = new_rid
+        #         rid = self.get_record(rid, with_meta=True)[RID_COLUMN] # set the rid to the new rid in the indirection column and then loop over again
 
+        indir_rid = self.get_base_record(rid)[INDIRECTION_COLUMN]
+
+        if indir_rid != 0:
+            checking = indir_rid
+            while checking != rid:
+                self.page_directory[checking*-1] = self.page_directory[checking]
+                new_checking = self.get_tail_page(checking)[INDIRECTION_COLUMN]
+                del self.page_directory[checking]
+                checking = new_checking
+
+        self.page_directory[rid*-1] = self.page_directory[rid]
+        del self.page_directory[rid]
+                
         return True
         
         

@@ -183,11 +183,11 @@ class TableTestCase(unittest.TestCase):
         
         with self.assertRaises(KeyError):
                 table.get_record(rid)
-
-        # self.assertEqual(table.get_record(-11), [11, 10, 2, 15])
-
-        # self.assertEqual(table.get_record(11), columns)
-        # self.assertEqual(table.get_record(22), columns2)
-        # self.assertEqual(table.get_record(33), [3, 7, 8, 9])
-        # self.assertEqual(table.get_record(55), [5, 13, 14, 15])
+        
+        self.assertEqual(table.get_base_record(-11), [3, 11, 0, 101, 11, 1, 2, 3])
+        self.assertEqual(table.get_tail_page(-1), [11, 1, 0, 1, 0, 0, 0, 9])
+        self.assertEqual(table.get_tail_page(-2), [1, 2, 0, 101, 0, 10, 0, 9])
+        self.assertEqual(table.get_tail_page(-3), [2, 3, 0, 101, 0, 10, 0, 15])
+        self.assertEqual(table.get_record(22), columns2)
+        
 
