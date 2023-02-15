@@ -45,7 +45,7 @@ class Query:
     def insert(self, *columns):
         schema_encoding = '0' * self.table.num_columns
         
-        if len(columns) > self.table.num_columns:
+        if len(columns) != self.table.num_columns:
             return False
         
         try:
