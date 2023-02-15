@@ -119,21 +119,22 @@ class Table:
         """
         if rid not in self.page_directory.keys():
             return False
-        new_rid = self.page_directory[rid * -1]
+        new_rid = self.page_directory[rid]
         del self.page_directory[rid]
         self.page_directory[rid * -1] = new_rid
         
 
     def get_column(self, column):
-        col_list = []
-        for rid in self.page_directory.keys():
-            if self.page_directory[rid][0] == 'base' and rid >= 0:
-                val = (rid, self.get_record(rid)[column])
-                col_list.append(val)
-        return col_list
         """
         :param column: int      # Index of column to be retrieved
         """
+        col_list = []
+        for rid in self.page_directory.keys():
+            if self.page_directory[rid][0] == 'base' and rid >= 0:
+                val = (self.get_record(rid)[self.key], self.get_record(rid)[column])
+                col_list.append(val)
+        return col_list
+
         
 
     def update_record(self, rid, new_cols):
