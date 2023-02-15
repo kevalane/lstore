@@ -131,7 +131,7 @@ class Table:
         col_list = []
         for rid in self.page_directory.keys():
             if self.page_directory[rid][0] == 'base' and rid >= 0:
-                val = (rid, self.get_record(rid)[column])
+                val = (self.get_record(rid)[self.key], self.get_record(rid)[column])
                 col_list.append(val)
         return col_list
 
