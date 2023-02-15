@@ -139,8 +139,6 @@ class Table:
         # create a record object
         tail_rid = self.assign_rid()
         tail_record = Record(self.key, new_cols, tail_rid)
-        print(tail_record)
-        print(tail_rid)
 
         # insert the specified values in the tail page columns
         for index, item in enumerate(new_cols):
@@ -169,14 +167,33 @@ class Table:
         self.tail_pages[-1].columns[RID_COLUMN].write(tail_rid)
         self.tail_pages[-1].columns[TIMESTAMP_COLUMN].write(0)
 
+        # HANDLE CUMULATIVE SCHEMA UPDATES
+        previous_encoding = 0
+        if (old_tail_rid != rid):
+            old_tail_offset = self.page_directory[old_tail_rid][OFFSET]
+            old_tail_info = self.get_tail_page(old_tail_rid)
+            old_tail_encoding = old_tail_info[SCHEMA_ENCODING_COLUMN]
+            previous_encoding = old_tail_encoding
+
+            # write all old info to new tail page
+            for i in range(len(old_tail_info[META_COLUMNS:])):
+                if (old_tail_info[i+META_COLUMNS] != 0):
+                    print(old_tail_offset)
+                    self.tail_pages[-1].colums[i+META_COLUMNS-1].put(old_tail_info[i+META_COLUMNS], old_tail_offset)
+        
+
         # create update schema column (1 if updated, 0 if not)
         encoding = '0'*self.num_columns
         for i in range(len(new_cols)):
             if (new_cols[i] != None):
                 encoding = encoding[:i] + '1' + encoding[i + 1:]
-    
+        
+        # concatenate previous encoding with new encoding
+        encoding = int(encoding) + previous_encoding
+        
         self.tail_pages[-1].columns[SCHEMA_ENCODING_COLUMN].write(int(encoding))
         base_page.columns[SCHEMA_ENCODING_COLUMN].put(int(encoding), base_record[OFFSET])
+        base_page.columns[INDIRECTION_COLUMN].put(tail_rid, base_record[OFFSET])
 
         # create base record
         base_record_cols = []

@@ -63,8 +63,6 @@ for key in records:
         record = query.select(key, 0, [1, 1, 1, 1, 1])[0]
         error = False
         for j, column in enumerate(record.columns):
-            print(column)
-            print(records[key][j])
             if column != records[key][j]:
                 error = True
         if error:
