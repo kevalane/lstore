@@ -216,8 +216,11 @@ class Table:
             base_record_cols.append(base_page.columns[i].get(base_record[OFFSET]))
         base_rec = Record(self.key, base_record_cols, rid)
 
+        # pad with leading 0s
+        encoding = '0'*(self.num_columns - len(str(encoding))) + str(encoding)
+
         # update indexing
-        self.index.update_index(base_rec, tail_record, encoding)
+        self.index.update_index(base_rec, tail_record, str(encoding))
 
 
     def add_record(self, columns):
