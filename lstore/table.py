@@ -130,20 +130,6 @@ class Table:
         if rid not in self.page_directory:
             return False
 
-        # Loop through deleting each tail page until we get to the last one
-        # while True:
-        #     if self.page_directory[rid][PAGE_TYPE] == 'base':
-        #         new_rid = self.page_directory[rid]
-        #         del self.page_directory[rid]
-        #         self.page_directory[rid * -1] = new_rid
-        #         break
-        #     else: 
-        #         print("deleting tail page with rid: " + str(rid))
-        #         new_rid = self.page_directory[rid]
-        #         del self.page_directory[rid]
-        #         self.page_directory[rid * -1] = new_rid
-        #         rid = self.get_record(rid, with_meta=True)[RID_COLUMN] # set the rid to the new rid in the indirection column and then loop over again
-
         indir_rid = self.get_base_record(rid)[INDIRECTION_COLUMN]
 
         if indir_rid != 0:
