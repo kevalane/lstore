@@ -119,7 +119,7 @@ class Index:
     :param  schema_encoding: str The schema encoding of updated fields, e.g. 1011
     """
     def update_index(self, base_record: Record, tail_record: Record, 
-                     schema_encoding: int) -> None:
+                     schema_encoding: str) -> None:
         self.remove_record_from_index(base_record)
         
         # create the combined record
@@ -129,6 +129,7 @@ class Index:
 
         # if the tail page has a value for a column, use it, 
         # otherwise use the base page's value
+        print("UPDATING")
         for i in range(len(base_record.columns)):
             if schema_encoding[i] == '1':
                 new_columns[i] = tail_record.columns[i]

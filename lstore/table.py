@@ -138,8 +138,7 @@ class Table:
 
         # create a record object
         tail_rid = self.assign_rid()
-        record = Record(self.key, new_cols, tail_rid)
-        # NOTE: update index
+        tail_record = Record(self.key, new_cols, tail_rid)
 
         # insert the specified values in the tail page columns
         for index, item in enumerate(new_cols):
@@ -177,6 +176,19 @@ class Table:
                     encoding *= 10
         self.tail_pages[-1].columns[SCHEMA_ENCODING_COLUMN].write(encoding)
         base_page.columns[SCHEMA_ENCODING_COLUMN].put(encoding, base_record[OFFSET])
+
+        # add leading 0 to encoding if necessary
+        encoding_str = str(encoding)
+        encoding_str = '0'*(self.num_columns-len(encoding_str)) + encoding_str
+
+        # create base record
+        base_record_cols = []
+        for i in range(len(base_page.columns[META_COLUMNS:])):
+            base_record_cols.append(base_page.columns[i].get(base_record[OFFSET]))
+        base_rec = Record(self.key, base_record_cols, rid)
+
+        # update indexing
+        self.index.update_index(base_rec, tail_record, str(encoding))
 
 
     def add_record(self, columns):
