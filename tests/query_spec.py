@@ -48,10 +48,6 @@ class QuerySpec(unittest.TestCase):
         # too many projected columns
         self.assertFalse(self.query.select(1, 0, [1,1,1,1,1,1]))
 
-    def test_select_version(self):
-        # for milestone 2
-        self.query.select_version(1, 0, [1, 1], -1)
-
     def test_update_success(self):
         self.query.insert(1, 123, 456, 18, 1)
         self.assertTrue(self.query.update(1, 1, 2, 3, 4, None))
@@ -71,3 +67,22 @@ class QuerySpec(unittest.TestCase):
         self.query.insert(1, 123, 456, 18, 1)
         self.query.insert(2, 456, 789, 20, 0)
         self.assertEqual(self.query.sum(1, 3, 3), 38)
+
+    def test_sum_failure(self):
+        # no record in range
+        self.assertFalse(self.query.sum(4, 6, 2))
+        # invalid column index
+        self.assertFalse(self.query.sum(1, 3, 5))
+
+    def test_increment_success(self):
+        self.query.insert(1, 1, 1, 1, 1)
+        self.query.increment(1, 2)
+        r = self.query.select(1, 0, [1, 1, 1, 1])[0]
+        self.assertEqual(r.columns[2], 2)
+
+    ## MILESTONE 2
+    def test_select_version(self):
+        self.query.select_version(1, 0, [1, 1], -1)
+
+    def test_sum_version(self):
+        self.query.sum_version(1, 1, 1, -1)

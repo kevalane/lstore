@@ -136,7 +136,10 @@ class Query:
             return False
         
         for i in range(start_range, end_range):
-            recs.append(self.table.get_record(i))
+            try:
+                recs.append(self.table.get_record(i))
+            except:
+                return False
             
         if len(recs) == 0:
             return False
