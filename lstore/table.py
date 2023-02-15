@@ -73,8 +73,6 @@ class Table:
         # get relevant info from page_dir
         page_num = self.page_directory[rid][PAGE_NUM]
         offset = self.page_directory[rid][OFFSET]
-        if offset == -1:
-            return None
         
         # check if updated
         update = page[page_num].columns[SCHEMA_ENCODING_COLUMN].get(offset)
