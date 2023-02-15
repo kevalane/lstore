@@ -192,8 +192,6 @@ class Table:
             for i in range(len(old_tail_info[META_COLUMNS:])):
                 if (old_tail_info[i+META_COLUMNS] != 0):
                     self.tail_pages[-1].columns[i+META_COLUMNS].put(old_tail_info[i+META_COLUMNS], location[OFFSET])
-                    
-        
 
         # create update schema column (1 if updated, 0 if not)
         encoding = '0'*self.num_columns
@@ -206,7 +204,6 @@ class Table:
         
         self.tail_pages[-1].columns[SCHEMA_ENCODING_COLUMN].write(int(encoding))
         base_page.columns[SCHEMA_ENCODING_COLUMN].put(int(encoding), base_record[OFFSET])
-        base_page.columns[INDIRECTION_COLUMN].put(tail_rid, base_record[OFFSET])
 
         # create base record
         base_record_cols = []

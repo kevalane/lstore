@@ -112,3 +112,16 @@ class TableTestCase(unittest.TestCase):
         table.update_record(111111, [None, None, 8, None])
         self.assertEqual(table.get_record(111111), [111111, 1, 8, 3])
         self.assertEqual(table.get_record(222222), columns2)
+
+    def test_get_with_meta(self):
+        key = 0
+        table = Table("test", 4, key)
+        columns = [11, 1, 2, 3]
+        columns2 = [22, 4, 5, 6]
+        table.add_record(columns)
+        table.add_record(columns2)
+        self.assertEqual(table.get_record(11, True), [11, 11, 0, 0, 11, 1, 2, 3])
+        self.assertEqual(table.get_record(22, True), [22, 22, 0, 0, 22, 4, 5, 6])
+        table.update_record(11, [None, None, 8, None])
+        # self.assertEqual(table.get_record(11, True), [1, 11, 0, 10, 11, 1, 8, 3])
+        
