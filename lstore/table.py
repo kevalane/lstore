@@ -125,15 +125,16 @@ class Table:
         
 
     def get_column(self, column):
+        """
+        :param column: int      # Index of column to be retrieved
+        """
         col_list = []
         for rid in self.page_directory.keys():
             if self.page_directory[rid][0] == 'base' and rid >= 0:
                 val = (rid, self.get_record(rid)[column])
                 col_list.append(val)
         return col_list
-        """
-        :param column: int      # Index of column to be retrieved
-        """
+
         
 
     def update_record(self, rid, new_cols):
