@@ -211,6 +211,3 @@ class TableTestCase(unittest.TestCase):
             record = table.get_record(34432332+i+1)
             expected_columns = updated_cols[i]
             self.assertEqual(record, expected_columns)
-
-        
-
