@@ -68,28 +68,25 @@ class Table:
         
         # check if updated
         update = page[page_num].columns[SCHEMA_ENCODING_COLUMN].get(offset)
-        update_str = str(update)
-        # append 0 to start if shorter than num_columns
-        update_str = '0'*(self.num_columns-len(update_str)) + update_str
-        vals = []
+        update_str = self._pad_with_leading_zeros(update)
 
+        # adds all base page values to vals
+        vals = []
         for column in range(len(page[page_num].columns)):
             vals.append(page[page_num].columns[column].get(offset))
 
         if not (update == 0 or type(page) == Tail_Page):
             # we're only here if base page that's updated
             latest_tail_rid = page[page_num].columns[INDIRECTION_COLUMN].get(offset)
-            vals = self.get_tail_page(latest_tail_rid)
+            tail_vals = self.get_tail_page(latest_tail_rid)
 
             for i in range(len(vals[META_COLUMNS:])):
-                if (update_str[i] == '0'):
-                    vals[i+META_COLUMNS] = page[page_num].columns[META_COLUMNS+i].get(offset)
+                if (update_str[i] == '1'):
+                    # if the column is updated, replace the value with the tail value
+                    vals[i+META_COLUMNS] = tail_vals[i+META_COLUMNS]
         
-        # return the wanted values
-        if with_meta:
-            return vals
-        else:
-            return vals[META_COLUMNS:] #return values except the first 4 metadata columns
+        # Return the wanted values
+        return vals if with_meta else vals[META_COLUMNS:]
 
     def get_tail_page(self, tail_rid):
         """
@@ -281,7 +278,7 @@ class Table:
         Pads the encoding with leading zeros to make it the 
         same length as the number of columns
         :param encoding: int    # The encoding to pad
-        
+
         :return: str            # The padded encoding
         """
         return '0'*(self.num_columns - len(str(encoding))) + str(encoding)
