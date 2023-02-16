@@ -147,9 +147,11 @@ class Table:
                 
         return True
 
-    def get_column(self, column):
+    def get_column(self, column: int) -> list[tuple[int, int]]:
         """
+        Get a column from the table with the given column index
         :param column: int      # Index of column to be retrieved
+        :return: list[tuple]    # List of tuples of (key, value) for each record
         """
         col_list = []
         for rid in self.page_directory.keys():
