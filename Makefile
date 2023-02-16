@@ -1,5 +1,8 @@
-PYTHON=python3
+PYTHON=python
 
+run:
+	streamlit run app.py
+	
 test:
 	echo "\n*** Running unit tests... ***\n" && \
 	$(PYTHON) run_unit_tests.py && \
