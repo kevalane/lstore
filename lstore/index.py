@@ -82,10 +82,12 @@ class Index:
         :param  record: Record       The record to add to the indices
         """
         RID = record.rid
+        # print(self.indices)
         # iterate through each column in the record
         for i, value in enumerate(record.columns):
-            # if index not made, make one
-            self.create_index(i)
+            if i not in self.indices:
+                # skip index not made
+                continue
 
             # get the index {} associated with the column number
             working_index = self.indices.get(i)
@@ -97,7 +99,7 @@ class Index:
             if RID not in working_index[value]:
                 # add the RID to the list if it's not already there
                 working_index[value].append(RID)
-
+        # print(self.indices)
     def remove_record_from_index(self,record) -> None:
         """
         # Remove a record from all relevant indices

@@ -12,7 +12,9 @@ class IndexTestCase(unittest.TestCase):
         key = 0
         table = Table("test", 4, key)
         self.assertFalse(table.index.create_index(key))
-        self.assertEquals(table.index.indices, {key: {}})
+        self.assertEqual(table.index.indices, {key: {}})
+        self.assertTrue(table.index.create_index(1))
+        self.assertTrue(table.index.create_index(2))
         return table.index, table
 
     def insert_records(self, index, table):
