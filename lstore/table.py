@@ -167,7 +167,7 @@ class Table:
         :param rid: int         # RID of the previous record being updated
         """
         # create tail page if none exist
-        if self.tail_pages == []:
+        if not self.tail_pages:
             self.tail_pages.append(Tail_Page(len(new_cols), self.key))
 
         # check if there's capacity in last tail_page, recursive if not 
@@ -181,24 +181,21 @@ class Table:
 
         # insert the specified values in the tail page columns
         for index, item in enumerate(new_cols):
-            if (item == None):
+            if item is None:
                 item = 0
             self.tail_pages[-1].columns[index+META_COLUMNS].write(item)
         
-        # add this rid to the page directory
-        # directory contains dictionary mapping rid to a tuple telling table where to find it
-        # tuple contains:
-        # ('base' or 'tail', which base/tail page it is found on, the index within that page)
+        # add rid to page directory
         location = ('tail', len(self.tail_pages)-1, 
                     self.tail_pages[-1].columns[INDIRECTION_COLUMN].num_records)
-        
         self.page_directory[tail_rid] = location
-        #update indirection columns and schema encoding columns from previous record
 
         # tail_rid must be written to indir column of base page,
         base_record = self.page_directory[rid]
         base_page = self.base_pages[base_record[PAGE_NUM]]
         old_tail_rid = base_page.columns[INDIRECTION_COLUMN].get(base_record[OFFSET])
+        
+        # write new tail_rid to base page
         base_page.columns[INDIRECTION_COLUMN].put(tail_rid, base_record[OFFSET])
 
         # add metadata to columns
@@ -210,7 +207,6 @@ class Table:
         # HANDLE CUMULATIVE SCHEMA UPDATES
         previous_encoding = 0
         if (old_tail_rid != rid):
-            old_tail_offset = self.page_directory[old_tail_rid][OFFSET]
             old_tail_info = self.get_tail_page(old_tail_rid)
             old_tail_encoding = old_tail_info[SCHEMA_ENCODING_COLUMN]
             previous_encoding = old_tail_encoding
@@ -220,7 +216,7 @@ class Table:
                 if (old_tail_info[i+META_COLUMNS] != 0 and self.tail_pages[-1].columns[i+META_COLUMNS].get(location[OFFSET]) == 0):
                     self.tail_pages[-1].columns[i+META_COLUMNS].put(old_tail_info[i+META_COLUMNS], location[OFFSET])
         
-        previous_encoding = '0'*(self.num_columns - len(str(previous_encoding))) + str(previous_encoding)
+        previous_encoding = self._pad_with_leading_zeros(previous_encoding)
 
         # create update schema column (1 if updated, 0 if not)
         encoding = '0'*self.num_columns
@@ -276,7 +272,7 @@ class Table:
         location = ('base', 
                     len(self.base_pages)-1, 
                     base_page.columns[0].num_records-1)
-                    
+
         self.page_directory[rid] = location
 
     def assign_rid(self):
