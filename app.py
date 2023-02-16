@@ -1,7 +1,7 @@
 from random import randint
 import streamlit as st
-
-# from query import Query
+from lstore.db import Database
+# from lstore.query import Query
 
 def insert_record(key, val1, val2, val3, val4):
     # Query.insert(key, val1, val2, val3, val4)
@@ -31,8 +31,9 @@ def select_data(search_key, search_key_index, projected_columns_index):
 #         st.write("| {} | {} | {} | {} | {} |".format(key, data[key]['val1'], data[key]['val2'], data[key]['val3'], data[key]['val4']))
 
 def main():
-    st.title("DBMS Demo")
-    
+    st.title("DBMS Demo - Team sorry.py")
+    st.subheader("Roshni Prasad, Rishabh Jain, Ashton Coates, Kevin Rasmusson, Catherine Yaroslavtseva")
+
     operation = st.selectbox("Select Operation", ["Select", "Insert", "Update", "Delete", "Sum"])
     
     if operation == "Insert" or operation == "Update":
@@ -90,5 +91,28 @@ def main():
         elif operation == "Select":
             select_data(search_key, search_key_index, projected_columns_index)
 
-if __name__ == "__main__":
-    main()
+def intro_page(): 
+    st.title("DBMS Demo - Team sorry.py")
+    st.subheader("Roshni Prasad, Rishabh Jain, Ashton Coates, Kevin Rasmusson, Catherine Yaroslavtseva")
+    op = st.selectbox("Select Operation",["Create a new table","Get an already exisitng table"]) 
+    if op == "Create a new table":
+        new_table()
+    elif op == "Get an already exisitng table":
+        get_table()
+
+def new_table(): 
+    name = st.text_input("Name for the Table")
+    no_of_columns = st.number_input("Number of Columns",step = 1, min_value = 1)
+    key_index  = st.number_input("Key Index",step = 1, min_value = 0)
+    if st.button("Enter"):
+        Database.create_table(name,no_of_columns,key_index)
+        main()
+def get_table():
+    name = st.text_input("Name for the Table")
+    if st.button("Enter"):
+        Database.get_table(name)
+        main()
+
+while True:
+    intro_page()
+    break
