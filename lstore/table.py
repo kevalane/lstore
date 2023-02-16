@@ -128,7 +128,7 @@ class Table:
         # get the indirection rid of base record
         indir_rid = self.get_base_record(rid)[INDIRECTION_COLUMN]
 
-        if indir_rid != 0:
+        if indir_rid != rid or indir_rid != 0:
             # means its been updated, so we need to invalidate all tail pages
             checking = indir_rid
             while checking != rid:
@@ -160,8 +160,7 @@ class Table:
                 col_list.append(val)
         return col_list
 
-        
-
+    
     def update_record(self, rid, new_cols):
         """
         :param new_cols: list   # List of new column values
@@ -245,37 +244,39 @@ class Table:
         self.index.update_index(base_rec, tail_record, str(encoding))
 
 
-    def add_record(self, columns):
+    def add_record(self, columns: list[int]) -> None:
         """
         :param columns: list    # List of column values
         """
         # check if there is capacity in the last base page
         if not self.base_pages[-1].columns[0].has_capacity():
             self.base_pages.append(Base_Page(len(columns), self.key))
+            # recursive call tries to add record again, now that there is capacity
             return self.add_record(columns)
 
-        # first, create a record object from the columns
-        # rid = self.assign_rid()
-        rid = columns[0] # rid is given by the user
+        # create record object from columns
+        rid = columns[0] 
         record = Record(self.key, columns, rid)
         
+        # add record to index
         self.index.push_record_to_index(record)
 
         # next, add the metadata to columns
-        self.base_pages[-1].columns[INDIRECTION_COLUMN].write(rid) # INDIRECTION COLUMN
-        self.base_pages[-1].columns[RID_COLUMN].write(rid) # RID COLUMN
-        self.base_pages[-1].columns[TIMESTAMP_COLUMN].write(0) # TIMESTAMP COLUMN
-        self.base_pages[-1].columns[SCHEMA_ENCODING_COLUMN].write(0) # SCHEMA ENCODING COLUMN
+        base_page = self.base_pages[-1]
+        base_page.columns[INDIRECTION_COLUMN].write(rid)
+        base_page.columns[RID_COLUMN].write(rid)
+        base_page.columns[TIMESTAMP_COLUMN].write(0)
+        base_page.columns[SCHEMA_ENCODING_COLUMN].write(0)
 
+        # write to columns
         for index, item in enumerate(columns):
-            self.base_pages[-1].columns[index+4].write(item)
-        # finally add this rid to the page directory
-        # directory contains dictionary mapping rid to a tuple telling table where to find it
-        # tuple contains:
-        # ('base' or 'tail', which base/tail page it is found on, the index within that page)
+            base_page.columns[index+4].write(item)
+        
+        # add this rid to the page directory
         location = ('base', 
                     len(self.base_pages)-1, 
-                    self.base_pages[-1].columns[0].num_records-1)
+                    base_page.columns[0].num_records-1)
+                    
         self.page_directory[rid] = location
 
     def assign_rid(self):
