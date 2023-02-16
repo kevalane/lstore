@@ -92,7 +92,7 @@ class Table:
         # Return the wanted values
         return vals if with_meta else vals[META_COLUMNS:]
 
-    def get_tail_page(self, tail_rid):
+    def get_tail_page(self, tail_rid: int) -> list[int]:
         """
         :param tail_rid: int     # RID of the tail page to be retrieved
         """
@@ -104,7 +104,7 @@ class Table:
         
         return retvals
 
-    def get_base_record(self, base_rid):
+    def get_base_record(self, base_rid: int) -> list[int]:
         """
         :param base_rid: int     # RID of the base page to be retrieved
         """
@@ -116,20 +116,29 @@ class Table:
         
         return retvals
 
-    def delete_record(self, rid):
+    def delete_record(self, rid: int) -> bool:
         """
+        Delete a record from the table with the given rid
         :param rid: int         # rid to be deleted
+        :return: bool           # True if record was deleted, False if not
         """
         if rid not in self.page_directory:
             return False
 
+        # get the indirection rid of base record
         indir_rid = self.get_base_record(rid)[INDIRECTION_COLUMN]
 
         if indir_rid != 0:
+            # means its been updated, so we need to invalidate all tail pages
             checking = indir_rid
             while checking != rid:
+                # invalidate tail page
                 self.page_directory[checking*-1] = self.page_directory[checking]
+
+                # get next tail page
                 new_checking = self.get_tail_page(checking)[INDIRECTION_COLUMN]
+
+                # delete old tail page from page directory
                 del self.page_directory[checking]
                 checking = new_checking
 
@@ -137,8 +146,6 @@ class Table:
         del self.page_directory[rid]
                 
         return True
-        
-        
 
     def get_column(self, column):
         """
