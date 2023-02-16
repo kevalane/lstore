@@ -60,7 +60,11 @@ class Table:
 
     def get_record(self, rid: int, with_meta=False) -> list[int]:
         """
+        Get a record from the table with the given rid
         :param rid: int:        # RID of record to be retrieved
+        :param with_meta: bool  # Whether or not to include the metadata columns
+
+        :return: list[int]      # List of values in the record
         """
         # Get the relevant page and information from the page directory.
         page_type, page_num, offset = self.page_directory[rid]
