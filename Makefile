@@ -1,7 +1,7 @@
-PYTHON=python3
+PYTHON=python
 
 run:
-	streamlit run lstore/app.py
+	streamlit run app.py
 	
 test:
 	echo "\n*** Running unit tests... ***\n" && \
