@@ -20,7 +20,7 @@ class Base_Page:
     :param num_columns: string  # Number of columns in the table
     :param key_index: int       # Index of the key column
      """
-    def __init__(self, num_columns, key_index):
+    def __init__(self, num_columns: int, key_index: int) -> None:
         self.key_index = key_index
         self.columns = []
         for _ in range(num_columns+4):
@@ -30,7 +30,7 @@ class Base_Page:
 
 class Tail_Page:
 
-    def __init__(self, num_columns, key_index):
+    def __init__(self, num_columns: int, key_index: int) -> None:
         key_index = key_index
         self.columns = []
         for _ in range(num_columns+4):
@@ -46,7 +46,7 @@ class Table:
     :param page_directory: dict # Directory of all base and tail pages
     :param index: object        # Index object
     """
-    def __init__(self, name, num_columns, key_index):
+    def __init__(self, name: str, num_columns: int, key_index: int) -> None:
         self.name = name
         self.key = key_index
         self.num_columns = num_columns
@@ -55,21 +55,16 @@ class Table:
         self.index.create_index(key_index)
         self.base_pages = [Base_Page(num_columns, key_index)]
         self.tail_pages = []
-        self.rid_generator = 0 #Keeps track of the RID to be generated each time a record is added
+        # Keeps track of the RID to be generated each time a tail record is added
+        self.rid_generator = 0 
 
-    def get_record(self, rid, with_meta=False):
+    def get_record(self, rid: int, with_meta=False) -> list[int]:
         """
         :param rid: int:        # RID of record to be retrieved
         """
-        # get relevant page depending on tuple value
-        if self.page_directory[rid][PAGE_TYPE] == 'base':
-            page = self.base_pages
-        else:
-            page = self.tail_pages
-        
-        # get relevant info from page_dir
-        page_num = self.page_directory[rid][PAGE_NUM]
-        offset = self.page_directory[rid][OFFSET]
+        # Get the relevant page and information from the page directory.
+        page_type, page_num, offset = self.page_directory[rid]
+        page = self.base_pages if page_type == 'base' else self.tail_pages
         
         # check if updated
         update = page[page_num].columns[SCHEMA_ENCODING_COLUMN].get(offset)
@@ -280,6 +275,16 @@ class Table:
         self.rid_generator += 1
         rid = self.rid_generator
         return rid
+
+    def _pad_with_leading_zeros(self, encoding: int) -> str:
+        """
+        Pads the encoding with leading zeros to make it the 
+        same length as the number of columns
+        :param encoding: int    # The encoding to pad
+        
+        :return: str            # The padded encoding
+        """
+        return '0'*(self.num_columns - len(str(encoding))) + str(encoding)
 
     '''
     MERGE WILL BE IMPLEMENTED IN MILESTONE 2
