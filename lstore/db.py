@@ -1,73 +1,71 @@
 from lstore.table import Table
 
-"""
-Database class that stores all tables and provides methods to
-create and delete tables. The database is stored in a dictionary
-where the key is the table name and the value is the table object.
-"""
-class Database():
+class Database:
+    """
+    Class to represent a database that stores all tables and provides methods to
+    create and delete tables. The database is stored in a dictionary where the key
+    is the table name and the value is the table object.
+    """
 
-    """
-    # Creates a new database
-    Initializes the database with an empty dictionary
-    """
-    def __init__(self):
+    def __init__(self) -> None:
+        """
+        Constructor for the Database class. Initializes the database with an
+        empty dictionary.
+        """
         self.tables = {}
+
+    def open(self, path: str) -> None:
+        """
+        Not required for Milestone 1.
+        """
         pass
 
-    # Not required for milestone1
-    def open(self, path):
+    def close(self) -> None:
+        """
+        Not required for Milestone 1.
+        """
         pass
 
-    def close(self):
-        pass
-
-    """
-    # Creates a new table
-    :param name: string         #Table name
-    :param num_columns: int     #Number of Columns: all columns are integer
-    :param key: int             #Index of table key in columns
-    
-    @returns Table | None       Returns the created table 
-                                or None if table already exists
-    """
     def create_table(self, name: str, num_columns: int, key_index: int) -> Table:
-        if (self.get_table(name) == None):
+        """
+        Creates a new table in the database.
+
+        :param name: str            The name of the table to be created.
+        :param num_columns: int     The number of columns in the table.
+                                    All columns are of integer type.
+        :param key_index: int       The index of the table key in the columns.
+
+        :returns: Table | None      The created table or None if the table already exists.
+        """
+        if name not in self.tables:
             # Table does not exist, create it
             table = Table(name, num_columns, key_index)
-            self.tables[str(table.name)] = table
+            self.tables[name] = table
             return table
         else:
             return None
 
-    
-    """
-    # Deletes the specified table
-
-    :param name: string         #Table name
-
-    @returns boolean            Returns True if table was deleted,
-                                False if table does not exist
-    """
     def drop_table(self, name: str) -> bool:
-        if (self.get_table(name) != None):
+        """
+        Deletes the specified table from the database.
+
+        :param name: str            The name of the table to be deleted.
+
+        :returns: bool              True if the table was deleted, False if the table does not exist.
+        """
+        if name in self.tables:
             # Table exists, delete it
-            del self.tables[str(name)]
+            del self.tables[name]
             return True
         else:
             return False
 
-    
-    """
-    # Returns table with the passed name
-
-    :param name: string         #Table name
-
-    @returns Table | None       Returns the table with given name 
-                                or None if table does not exist
-    """
     def get_table(self, name: str) -> Table:
-        if name in self.tables:
-            return self.tables[str(name)]
-        else:
-            return None
+        """
+        Returns the table with the given name.
+
+        :param name: str            The name of the table to return.
+
+        :returns: Table | None      The table with the given name or None if the table does not exist.
+        """
+        return self.tables.get(name, None)

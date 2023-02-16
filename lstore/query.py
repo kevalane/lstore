@@ -22,18 +22,11 @@ class Query:
     # Return False if record doesn't exist or is locked due to 2PL
     """
     def delete(self, primary_key):
-        try: 
-            exists = self.table.get_record(primary_key)
-            
-            if exists is not None:
-                try:
-                    self.table.delete_record(primary_key)
-                    return True
-                
-                except: 
-                    return False
-        
-        except:
+        try:
+            retval = self.table.delete_record(primary_key)
+            return retval
+
+        except: 
             return False
     
     
@@ -45,7 +38,7 @@ class Query:
     def insert(self, *columns):
         schema_encoding = '0' * self.table.num_columns
         
-        if len(columns) > self.table.num_columns:
+        if len(columns) != self.table.num_columns:
             return False
         
         try:
@@ -68,20 +61,21 @@ class Query:
         res = list()
         
         try:
-            selected = self.table.get_multiple_records(search_key, search_key_index)
-            
-            if len(selected) == 0 or (len(projected_columns_index) > self.table.num_columns):
+            if (len(projected_columns_index) > self.table.num_columns):
                 return False
-        
-            for rec in selected:
-                cols = list()
-                
-                for i in range(projected_columns_index):
-                    if projected_columns_index[i] == 1:
-                        cols.append(rec.columns[i])
-                    
-                res.append(Record(rec, rec.key, cols, rec.rid))
             
+            selected = self.table.index.indices[search_key_index].get(search_key)
+            # selected = self.table.get_multiple_records(search_key, search_key_index)
+        
+            for rid in selected:
+                record = self.table.get_record(rid)
+                
+                cols = list()
+                for i in range(len(projected_columns_index)):
+                    if projected_columns_index[i] == 1:
+                        cols.append(record[i])
+                
+                res.append(Record(self.table.key, cols, rid))
             return res
         
         except: 
@@ -107,7 +101,7 @@ class Query:
     # Returns False if no records exist with given key or if the target record cannot be accessed due to 2PL locking
     """
     def update(self, primary_key, *columns):
-        if len(columns) > self.table.num_columns:
+        if len(columns) != self.table.num_columns:
             return False
         
         try:
@@ -129,17 +123,20 @@ class Query:
         recs = list()
         sum = 0
         
-        if aggregate_column_index > self.table.num_columns:
+        if aggregate_column_index >= self.table.num_columns:
             return False
         
-        for i in range(start_range, end_range):
-            recs.append(self.table.get_record(i))
+        for i in range(start_range, end_range+1):
+            try:
+                recs.append(self.table.get_record(i))
+            except Exception as e:
+                continue
             
         if len(recs) == 0:
             return False
         
         for j in recs:
-            sum += j.columns[aggregate_column_index]
+            sum += j[aggregate_column_index]
             
         return sum
 
@@ -166,8 +163,9 @@ class Query:
     # Returns False if no record matches key or if target record is locked by 2PL.
     """
     def increment(self, key, column):
-        r = self.select(key, self.table.key, [1] * self.table.num_columns)[0]
+        r = self.select(key, self.table.key, [1] * self.table.num_columns)
         if r is not False:
+            r = r[0]
             updated_columns = [None] * self.table.num_columns
             updated_columns[column] = r[column] + 1
             u = self.update(key, *updated_columns)
