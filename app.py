@@ -102,7 +102,7 @@ def intro_page():
     elif op == "Get an already exisitng table":
         get_table()
 
-def new_table(): 
+def new_table():  
     db = Database()
     name = st.text_input("Name for the Table")
     no_of_columns = st.number_input("Number of Columns",step = 1, min_value = 1)
