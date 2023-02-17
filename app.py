@@ -1,4 +1,5 @@
 from random import randint
+from turtle import onclick
 import streamlit as st
 from lstore.db import Database
 from lstore.query import Query
@@ -47,6 +48,7 @@ def main(db):
         val2 = st.text_input("Enter value 2:",val2)
         val3 = st.text_input("Enter value 3:",val3)
         val4 = st.text_input("Enter value 4:",val4)
+        
             
     elif operation == "Delete":
         key = 0
@@ -75,12 +77,12 @@ def main(db):
         search_key = st.text_input("Enter Search Key",search_key)
         search_key_index = st.text_input("Enter Search Key Index",search_key_index)
         projected_columns_index = st.text_input("Enter Projected Column Index",projected_columns_index)
-         
-
-    if st.button("Execute"):
+    temp = False
+    temp = st.button("Execute")
+    while temp:
         if operation == "Insert":
             insert_record(query,key, val1, val2, val3, val4)
-            
+
         elif operation == "Update":
             update_record(query,key, val1, val2, val3, val4)
             
@@ -92,6 +94,7 @@ def main(db):
         
         elif operation == "Select":
             select_data(query,search_key, search_key_index, projected_columns_index)
+        break 
 
 def intro_page(): 
     st.title("DBMS Demo - Team sorry.py")
@@ -110,7 +113,7 @@ def new_table():
     if st.button("Enter"):
         new = db.create_table(name,no_of_columns,key_index)
         if new:
-            st.write("Created new table with the name: {}".format(name))
+            st.write("Created new table with the name: {}".format(name)) 
             main(new)
 
 def get_table():
