@@ -67,16 +67,27 @@ class Bufferpool:
         """
         pass
         
-    def pin():
+    def pin(self, index: int, base_page: bool) -> bool:
         """
         this should increase semaphore count,
         meaning that the page cannot be evicted
         """
-        pass
+        try:
+            obj = self.base_pages if base_page else self.tail_pages
+            obj[index].semaphore_count += 1
+            return True
+        except:
+            return False
 
-    def unpin():
+    def unpin(self, index: int, base_page: bool) -> bool:
         """
         this should decrease semaphore count,
         meaning that the page can be evicted
         """
-        pass
+        try:
+            obj = self.base_pages if base_page else self.tail_pages
+            if obj[index].semaphore_count > 0:
+                obj[index].semaphore_count -= 1
+            return True
+        except:
+            return False
