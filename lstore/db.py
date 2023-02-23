@@ -1,4 +1,5 @@
 from lstore.table import Table
+from lstore.bufferpool import Bufferpool
 
 class Database:
     """
@@ -13,11 +14,13 @@ class Database:
         empty dictionary.
         """
         self.tables = {}
+        self.bufferpool = None
 
-    def open(self, path: str) -> None:
+    def open(self, path: str, max_pages_in_bufferpool) -> None:
         """
         Not required for Milestone 1.
         """
+        self.bufferpool = Bufferpool(max_pages_in_bufferpool)
         pass
 
     def close(self) -> None:

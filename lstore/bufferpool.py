@@ -1,10 +1,8 @@
 from lstore.wide_page import Wide_Page
 
-MAX_PAGES = 16 # experiment with this!
-
 class Bufferpool:
 
-    def __init__(self):
+    def __init__(self, max_pages: int):
         """
         self.base_pages = {
             'index': {
@@ -16,6 +14,7 @@ class Bufferpool:
         self.base_pages = {}
         self.tail_pages = {}
         self.num_pages = 0
+        self.max_pages = max_pages
 
     def write_page(self, index: int, base_page: bool) -> bool:
         """
