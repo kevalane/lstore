@@ -38,4 +38,7 @@ class Wide_Page:
         
         f.close()
 
+    def read_from_disk(self, index: int, base_page: bool) -> None:
+        pass
+
     

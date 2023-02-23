@@ -1,5 +1,7 @@
 from lstore.wide_page import Wide_Page
 
+MAX_PAGES = 16 # experiment with this!
+
 class Bufferpool:
 
     def __init__(self):
@@ -35,4 +37,29 @@ class Bufferpool:
 
         # maybe return true even though nothing written?
         return False
+
+    def retrieve_page(self, index: int, base_page: bool) -> Wide_Page:
+        """
+        :param index: index to retrieve
+        :param base_page: bool to determine if base page or tail page
+        :return: Wide_Page
+        """
+        obj = self.base_pages if base_page else self.tail_pages
+
+        if index in obj:
+            return obj[index]['wide_page']
+
+        if self.num_pages == MAX_PAGES:
+            self.evict()
+
+        wide_page = Wide_Page(1, 0)
+        wide_page.read_from_disk(index, base_page)
+
+    def evict():
+        """
+        let's just go with lru
+
+        if time, fifo, mru, etc. for graphs and stuff
+        """
+        pass
         
