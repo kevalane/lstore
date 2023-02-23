@@ -4,9 +4,11 @@ from lstore.wide_page import Wide_Page
 import shutil
 import os
 
+MAX_PAGES = 16
+
 class BufferPoolTest(unittest.TestCase):
     def setUp(self):
-        self.bufferpool = Bufferpool(16)
+        self.bufferpool = Bufferpool(MAX_PAGES)
         try:
             os.mkdir('./data')
             os.mkdir('./data/base')
@@ -15,7 +17,7 @@ class BufferPoolTest(unittest.TestCase):
             pass
 
     def test_init(self):
-        self.assertEqual(self.bufferpool.max_pages, 16)
+        self.assertEqual(self.bufferpool.max_pages, MAX_PAGES)
         self.assertEqual(self.bufferpool.num_pages, 0)
         self.assertEqual(self.bufferpool.base_pages, {})
         self.assertEqual(self.bufferpool.tail_pages, {})
@@ -110,6 +112,24 @@ class BufferPoolTest(unittest.TestCase):
             print()
         return_obj = self.bufferpool.retrieve_page(0, True, 4)
         self.assertEqual(return_obj, None)
+
+    def test_retrieve_max_pages(self):
+        for i in range(MAX_PAGES):
+            wide_page = Wide_Page(4, 0)
+            self.bufferpool.base_pages[i] = {
+                'semaphore_count': 0,
+                'dirty': False,
+                'wide_page': wide_page
+            }
+            self.bufferpool.num_pages += 1
+        
+        seventeenth = Wide_Page(4, 0)
+        seventeenth.columns[0].write(123)
+        seventeenth.write_to_disk(44, False)
+
+        self.assertEqual(self.bufferpool.retrieve_page(44, False, 4).columns[0].get(0), 
+                        seventeenth.columns[0].get(0))
+        self.assertEqual(self.bufferpool.retrieve_page(44, False, 4).columns[0].get(0), 123)
 
     def test_pin_base_page(self):
         # Add a page to the base pages
