@@ -6,6 +6,7 @@ class Bufferpool:
         """
         self.base_pages = {
             'index': {
+                semaphore_count: int,
                 dirty: bool,
                 wide_page: Wide_Page 
             }
@@ -49,7 +50,7 @@ class Bufferpool:
         if index in obj:
             return obj[index]['wide_page']
 
-        if self.num_pages == MAX_PAGES:
+        if self.num_pages == self.max_pages:
             self.evict()
 
         wide_page = Wide_Page(1, 0)
@@ -66,3 +67,16 @@ class Bufferpool:
         """
         pass
         
+    def pin():
+        """
+        this should increase semaphore count,
+        meaning that the page cannot be evicted
+        """
+        pass
+
+    def unpin():
+        """
+        this should decrease semaphore count,
+        meaning that the page can be evicted
+        """
+        pass
