@@ -15,7 +15,7 @@ class Wide_Page:
             # Add a column for every column being added, plus 4 for the metadata columns
             self.columns.append(Page())
 
-    def write_to_disk(self, index: int, base_page: bool) -> None:
+    def write_to_disk(self, index: int, base_page: bool) -> bool:
         """
         :param index: index to write
         :param base_page: bool to determine if base page or tail page
@@ -28,17 +28,22 @@ class Wide_Page:
         for column in self.columns:
             data['columns'].append({
                 'num_records': column.num_records,
-                'data': column.data.decode()
+                'data': column.data.decode('iso-8859-1')
             })
         
-        if base_page:
-            with open(f'./data/base/{index}.json', 'w') as f:
-                json.dump(data, f)
-        else:
-            with open(f'./data/tail/{index}.json', 'w') as f:
-                json.dump(data, f)
-        
-        f.close()
+        try:
+            if base_page:
+                with open(f'./data/base/{index}.json', 'w') as f:
+                    json.dump(data, f)
+            else:
+                with open(f'./data/tail/{index}.json', 'w') as f:
+                    json.dump(data, f)
+            
+            f.close()
+            return True
+        except:
+            print("Error writing to disk")
+            return False
 
     def read_from_disk(self, index: int, is_base_page: bool) -> bool:
 
@@ -55,7 +60,7 @@ class Wide_Page:
         self.key_index = data['key_index']
         for i, column in enumerate(data['columns']):
             self.columns[i].num_records = column['num_records']
-            self.columns[i].data = column['data'].encode()
+            self.columns[i].data = column['data'].encode('iso-8859-1')
         
         f.close()
         return True
