@@ -27,7 +27,6 @@ class Wide_Page_Test(unittest.TestCase):
         self.assertTrue(self.wide_page.write_to_disk(0, False))
 
     def test_write_to_disk_fail(self):
-        return
         # remove directories
         shutil.rmtree('./data/base')
         shutil.rmtree('./data/tail')
@@ -76,6 +75,15 @@ class Wide_Page_Test(unittest.TestCase):
         self.assertEquals(read_page.columns[6].get(222), 135)
         self.assertEquals(read_page.columns[7].get(333), 136)
         self.assertEquals(read_page.columns[8].get(444), 1354135135)
+
+    def test_read_from_disk_fail(self):
+        # remove directories
+        shutil.rmtree('./data/base')
+        shutil.rmtree('./data/tail')
+        self.assertFalse(self.wide_page.read_from_disk(0, True))
+        self.assertFalse(self.wide_page.read_from_disk(0, False))
+        os.mkdir('./data/base')
+        os.mkdir('./data/tail')
     
 
     

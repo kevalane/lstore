@@ -46,15 +46,15 @@ class Wide_Page:
             return False
 
     def read_from_disk(self, index: int, is_base_page: bool) -> bool:
-
-        if is_base_page:
-            with open(f'./data/base/{index}.json', 'r') as f:
-                data = json.load(f)
-        else:
-            with open(f'./data/tail/{index}.json', 'r') as f:
-                data = json.load(f)
-
-        if data is None:
+        try:
+            if is_base_page:
+                with open(f'./data/base/{index}.json', 'r') as f:
+                    data = json.load(f)
+            else:
+                with open(f'./data/tail/{index}.json', 'r') as f:
+                    data = json.load(f)
+        except:
+            print("Error reading from disk")
             return False
 
         self.key_index = data['key_index']
