@@ -55,7 +55,10 @@ class Bufferpool:
             self.evict()
 
         wide_page = Wide_Page(num_columns, 0)
-        wide_page.read_from_disk(index, is_base_page)
+
+        if not wide_page.read_from_disk(index, is_base_page):
+            return None
+            
         obj[index] = {
             'semaphore_count': 0,
             'dirty': False,

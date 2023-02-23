@@ -89,6 +89,28 @@ class BufferPoolTest(unittest.TestCase):
         self.assertEqual(ret_page.columns[1].get(0), 123)
         self.assertEqual(ret_page.columns[5].get(0), 1231211)
 
+    def test_retrieve_page_already_in_bufferpool(self):
+
+        # create wide_page object
+        wide_page = Wide_Page(4, 0)
+
+        inserted_obj = {
+            'semaphore_count': 0,
+            'dirty': False,
+            'wide_page': wide_page
+        }
+        self.bufferpool.base_pages[0] = inserted_obj
+        self.assertEqual(self.bufferpool.retrieve_page(0, True, 4), wide_page)
+
+    def test_retrieve_page_not_exist(self):
+        try:
+            os.remove('./data/base/0.json')
+            del self.bufferpool.base_pages[0]
+        except:
+            print()
+        return_obj = self.bufferpool.retrieve_page(0, True, 4)
+        self.assertEqual(return_obj, None)
+
     def test_pin_base_page(self):
         # Add a page to the base pages
         wide_page = Wide_Page(4, 0)
