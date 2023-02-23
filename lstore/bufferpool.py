@@ -32,7 +32,8 @@ class Bufferpool:
         wide_page = obj[index]['wide_page']
 
         if dirty:
-            wide_page.write_to_disk(index, base_page)
+            if not wide_page.write_to_disk(index, base_page):
+                return False
             obj[index]['dirty'] = False
             return True
 
@@ -55,6 +56,13 @@ class Bufferpool:
 
         wide_page = Wide_Page(num_columns, 0)
         wide_page.read_from_disk(index, is_base_page)
+        obj[index] = {
+            'semaphore_count': 0,
+            'dirty': False,
+            'wide_page': wide_page
+        }
+        self.num_pages += 1
+        return wide_page
 
     def evict():
         """
