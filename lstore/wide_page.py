@@ -38,7 +38,24 @@ class Wide_Page:
         
         f.close()
 
-    def read_from_disk(self, index: int, base_page: bool) -> None:
-        pass
+    def read_from_disk(self, index: int, is_base_page: bool) -> bool:
+
+        if is_base_page:
+            with open(f'./data/base/{index}.json', 'r') as f:
+                data = json.load(f)
+        else:
+            with open(f'./data/tail/{index}.json', 'r') as f:
+                data = json.load(f)
+
+        if data is None:
+            return False
+
+        self.key_index = data['key_index']
+        for i, column in enumerate(data['columns']):
+            self.columns[i].num_records = column['num_records']
+            self.columns[i].data = column['data'].encode()
+        
+        f.close()
+        return True
 
     
