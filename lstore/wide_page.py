@@ -1,4 +1,5 @@
 from lstore.page import Page
+import json
 
 class Wide_Page:
     """
@@ -18,4 +19,17 @@ class Wide_Page:
         :param base_page: bool to determine if base page or tail page
         :return: None
         """
+        data = {
+            'key_index': self.key_index,
+            'columns': self.columns
+        }
+        if base_page:
+            with open(f'./data/base/{index}.json', 'w') as f:
+                json.dump(data, f)
+        else:
+            with open(f'./data/tail/{index}.json', 'w') as f:
+                json.dump(data, f)
         
+        f.close()
+
+    
