@@ -59,7 +59,8 @@ class Bufferpool:
             return obj[index]['wide_page']
 
         if self.num_pages == self.max_pages:
-            self.evict()
+            if not self.evict():
+                return False
 
         wide_page = Wide_Page(num_columns, 0)
 
@@ -120,6 +121,34 @@ class Bufferpool:
                 self.num_pages -= 1
                 return True
         
+        return False
+
+    def touch_page(self, index: int, is_base_page: bool) -> bool:
+        """
+        :param index: index to touch
+        :param base_page: bool to determine if base page or tail page
+        :return: bool
+        """
+        obj = self.base_pages if is_base_page else self.tail_pages
+
+        if index not in obj:
+            return False
+
+        # loop through deque
+        for i in range(len(self.deque)):
+            # check if base page or tail page
+            if self.deque[i]['base_page'] == is_base_page:
+                # check if index is equal
+                if self.deque[i]['index'] == index:
+                    # remove from deque
+                    self.deque.remove(i)
+                    # add to end of deque
+                    self.deque.append({
+                        'index': index,
+                        'base_page': is_base_page
+                    })
+                    return True
+
         return False
         
     def pin(self, index: int, base_page: bool) -> bool:
