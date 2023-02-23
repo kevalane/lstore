@@ -146,4 +146,34 @@ class BufferPoolTest(unittest.TestCase):
         self.assertFalse(self.bufferpool.unpin(0, True))
         self.assertFalse(self.bufferpool.pin(0, True))
 
+    def test_mark_dirty_base_page(self):
+        # Add a page to the base pages
+        wide_page = Wide_Page(4, 0)
+        self.bufferpool.base_pages[0] = {
+            'semaphore_count': 0,
+            'dirty': False,
+            'wide_page': wide_page
+        }
+
+        # Mark the page as dirty and check that the 'dirty' flag is updated
+        self.assertTrue(self.bufferpool.mark_dirty(0, True))
+        self.assertEqual(self.bufferpool.base_pages[0]['dirty'], True)
+
+    def test_mark_dirty_tail_page(self):
+        # Add a page to the tail pages
+        wide_page = Wide_Page(4, 1)
+        self.bufferpool.tail_pages[0] = {
+            'semaphore_count': 0,
+            'dirty': False,
+            'wide_page': wide_page
+        }
+
+        # Mark the page as dirty and check that the 'dirty' flag is updated
+        self.assertTrue(self.bufferpool.mark_dirty(0, False))
+        self.assertEqual(self.bufferpool.tail_pages[0]['dirty'], True)
+
+    def test_mark_dirty_nonexistent_page(self):
+        # Mark a non-existent page as dirty and check that the method returns False
+        self.assertFalse(self.bufferpool.mark_dirty(0, True))
+        self.assertFalse(self.bufferpool.mark_dirty(0, False))
 
