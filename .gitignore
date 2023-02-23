@@ -1,5 +1,6 @@
 # py
 **/**/__pycache__/
+data/
 
 # Test
 .coverage
@@ -10,3 +11,4 @@ htmlcov/
 
 # MACOS
 *.DS_Store
+*.pptx
