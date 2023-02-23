@@ -1,6 +1,8 @@
 from lstore.page import Page
 import json
 
+META_COLUMNS = 4
+
 class Wide_Page:
     """
     :param num_columns: string  # Number of columns in the table
@@ -9,7 +11,7 @@ class Wide_Page:
     def __init__(self, num_columns: int, key_index: int) -> None:
         self.key_index = key_index
         self.columns = []
-        for _ in range(num_columns+4):
+        for _ in range(num_columns+META_COLUMNS):
             # Add a column for every column being added, plus 4 for the metadata columns
             self.columns.append(Page())
 

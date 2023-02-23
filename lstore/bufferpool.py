@@ -2,7 +2,7 @@ from lstore.wide_page import Wide_Page
 
 class Bufferpool:
 
-    def __init__(self, max_pages: int, num_columns: int):
+    def __init__(self, max_pages: int):
         """
         self.{base, tail}_pages = {
             'index': {
@@ -16,7 +16,6 @@ class Bufferpool:
         self.tail_pages = {}
         self.num_pages = 0
         self.max_pages = max_pages
-        self.num_columns = num_columns
 
     def write_page(self, index: int, base_page: bool) -> bool:
         """
@@ -40,7 +39,7 @@ class Bufferpool:
         # maybe return true even though nothing written?
         return False
 
-    def retrieve_page(self, index: int, is_base_page: bool) -> Wide_Page:
+    def retrieve_page(self, index: int, is_base_page: bool, num_columns: int) -> Wide_Page:
         """
         :param index: index to retrieve
         :param base_page: bool to determine if base page or tail page
@@ -54,7 +53,7 @@ class Bufferpool:
         if self.num_pages == self.max_pages:
             self.evict()
 
-        wide_page = Wide_Page(self.num_columns, 0)
+        wide_page = Wide_Page(num_columns, 0)
         wide_page.read_from_disk(index, is_base_page)
 
     def evict():
