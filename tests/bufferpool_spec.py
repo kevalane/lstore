@@ -1,10 +1,18 @@
 import unittest
 from lstore.bufferpool import Bufferpool
 from lstore.wide_page import Wide_Page
+import shutil
+import os
 
 class BufferPoolTest(unittest.TestCase):
     def setUp(self):
         self.bufferpool = Bufferpool(16)
+        try:
+            os.mkdir('./data')
+            os.mkdir('./data/base')
+            os.mkdir('./data/tail')
+        except:
+            pass
 
     def test_init(self):
         self.assertEqual(self.bufferpool.max_pages, 16)
@@ -19,6 +27,31 @@ class BufferPoolTest(unittest.TestCase):
             'wide_page': Wide_Page(4, 0)
         }
         self.assertTrue(self.bufferpool.write_page(0, True))
+        self.assertEqual(self.bufferpool.base_pages[0]['dirty'], False)
+
+    def test_write_page_not_exist(self):
+        self.assertFalse(self.bufferpool.write_page(0, True))
+
+    def test_write_no_files(self):
+        self.bufferpool.base_pages[0] = {
+            'semaphore_count': 0,
+            'dirty': True,
+            'wide_page': Wide_Page(4, 0)
+        }
+        shutil.rmtree('./data/base')
+        shutil.rmtree('./data/tail')
+        self.assertFalse(self.bufferpool.write_page(0, True))
+        self.assertEqual(self.bufferpool.base_pages[0]['dirty'], True)
+        os.mkdir('./data/base')
+        os.mkdir('./data/tail')
+    
+    def test_write_page_not_dirty(self):
+        self.bufferpool.base_pages[0] = {
+            'semaphore_count': 0,
+            'dirty': False,
+            'wide_page': Wide_Page(4, 0)
+        }
+        self.assertFalse(self.bufferpool.write_page(0, True))
         self.assertEqual(self.bufferpool.base_pages[0]['dirty'], False)
 
     def test_retrieve_page(self):
