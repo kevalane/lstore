@@ -21,8 +21,14 @@ class Wide_Page:
         """
         data = {
             'key_index': self.key_index,
-            'columns': self.columns
+            'columns': []
         }
+        for column in self.columns:
+            data['columns'].append({
+                'num_records': column.num_records,
+                'data': column.data.decode()
+            })
+        
         if base_page:
             with open(f'./data/base/{index}.json', 'w') as f:
                 json.dump(data, f)
