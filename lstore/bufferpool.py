@@ -96,9 +96,9 @@ class Bufferpool:
         """
         try:
             obj = self.base_pages if base_page else self.tail_pages
-            obj[index].semaphore_count += 1
+            obj[index]['semaphore_count'] += 1
             return True
-        except:
+        except Exception as e:
             return False
 
     def unpin(self, index: int, base_page: bool) -> bool:
@@ -108,8 +108,8 @@ class Bufferpool:
         """
         try:
             obj = self.base_pages if base_page else self.tail_pages
-            if obj[index].semaphore_count > 0:
-                obj[index].semaphore_count -= 1
+            if obj[index]['semaphore_count'] > 0:
+                obj[index]['semaphore_count'] -= 1
             return True
         except:
             return False
