@@ -64,6 +64,20 @@ class Bufferpool:
         self.num_pages += 1
         return wide_page
 
+    def mark_dirty(self, index: int, is_base_page: bool) -> bool:
+        """
+        :param index: index to mark dirty
+        :param base_page: bool to determine if base page or tail page
+        :return: bool
+        """
+        obj = self.base_pages if is_base_page else self.tail_pages
+
+        if index not in obj:
+            return False
+
+        obj[index]['dirty'] = True
+        return True
+
     def evict():
         """
         let's just go with lru
