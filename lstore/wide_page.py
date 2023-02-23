@@ -1,6 +1,8 @@
 from lstore.page import Page
 import json
 
+META_COLUMNS = 4
+
 class Wide_Page:
     """
     :param num_columns: string  # Number of columns in the table
@@ -9,11 +11,11 @@ class Wide_Page:
     def __init__(self, num_columns: int, key_index: int) -> None:
         self.key_index = key_index
         self.columns = []
-        for _ in range(num_columns+4):
+        for _ in range(num_columns+META_COLUMNS):
             # Add a column for every column being added, plus 4 for the metadata columns
             self.columns.append(Page())
 
-    def write_to_disk(self, index: int, base_page: bool) -> None:
+    def write_to_disk(self, index: int, base_page: bool) -> bool:
         """
         :param index: index to write
         :param base_page: bool to determine if base page or tail page
@@ -26,19 +28,41 @@ class Wide_Page:
         for column in self.columns:
             data['columns'].append({
                 'num_records': column.num_records,
-                'data': column.data.decode()
+                'data': column.data.decode('iso-8859-1')
             })
         
-        if base_page:
-            with open(f'./data/base/{index}.json', 'w') as f:
-                json.dump(data, f)
-        else:
-            with open(f'./data/tail/{index}.json', 'w') as f:
-                json.dump(data, f)
+        try:
+            if base_page:
+                with open(f'./data/base/{index}.json', 'w') as f:
+                    json.dump(data, f)
+            else:
+                with open(f'./data/tail/{index}.json', 'w') as f:
+                    json.dump(data, f)
+            
+            f.close()
+            return True
+        except:
+            print("Error writing to disk")
+            return False
+
+    def read_from_disk(self, index: int, is_base_page: bool) -> bool:
+        try:
+            if is_base_page:
+                with open(f'./data/base/{index}.json', 'r') as f:
+                    data = json.load(f)
+            else:
+                with open(f'./data/tail/{index}.json', 'r') as f:
+                    data = json.load(f)
+        except:
+            print("Error reading from disk")
+            return False
+
+        self.key_index = data['key_index']
+        for i, column in enumerate(data['columns']):
+            self.columns[i].num_records = column['num_records']
+            self.columns[i].data = column['data'].encode('iso-8859-1')
         
         f.close()
-
-    def read_from_disk(self, index: int, base_page: bool) -> None:
-        pass
+        return True
 
     

@@ -4,7 +4,7 @@ class Bufferpool:
 
     def __init__(self, max_pages: int):
         """
-        self.base_pages = {
+        self.{base, tail}_pages = {
             'index': {
                 semaphore_count: int,
                 dirty: bool,
@@ -32,20 +32,21 @@ class Bufferpool:
         wide_page = obj[index]['wide_page']
 
         if dirty:
-            wide_page.write_to_disk(index, base_page)
+            if not wide_page.write_to_disk(index, base_page):
+                return False
             obj[index]['dirty'] = False
             return True
 
         # maybe return true even though nothing written?
         return False
 
-    def retrieve_page(self, index: int, base_page: bool) -> Wide_Page:
+    def retrieve_page(self, index: int, is_base_page: bool, num_columns: int) -> Wide_Page:
         """
         :param index: index to retrieve
         :param base_page: bool to determine if base page or tail page
         :return: Wide_Page
         """
-        obj = self.base_pages if base_page else self.tail_pages
+        obj = self.base_pages if is_base_page else self.tail_pages
 
         if index in obj:
             return obj[index]['wide_page']
@@ -53,8 +54,32 @@ class Bufferpool:
         if self.num_pages == self.max_pages:
             self.evict()
 
-        wide_page = Wide_Page(1, 0)
-        wide_page.read_from_disk(index, base_page)
+        wide_page = Wide_Page(num_columns, 0)
+
+        if not wide_page.read_from_disk(index, is_base_page):
+            return None
+            
+        obj[index] = {
+            'semaphore_count': 0,
+            'dirty': False,
+            'wide_page': wide_page
+        }
+        self.num_pages += 1
+        return wide_page
+
+    def mark_dirty(self, index: int, is_base_page: bool) -> bool:
+        """
+        :param index: index to mark dirty
+        :param base_page: bool to determine if base page or tail page
+        :return: bool
+        """
+        obj = self.base_pages if is_base_page else self.tail_pages
+
+        if index not in obj:
+            return False
+
+        obj[index]['dirty'] = True
+        return True
 
     def evict():
         """
@@ -67,16 +92,27 @@ class Bufferpool:
         """
         pass
         
-    def pin():
+    def pin(self, index: int, base_page: bool) -> bool:
         """
         this should increase semaphore count,
         meaning that the page cannot be evicted
         """
-        pass
+        try:
+            obj = self.base_pages if base_page else self.tail_pages
+            obj[index]['semaphore_count'] += 1
+            return True
+        except Exception as e:
+            return False
 
-    def unpin():
+    def unpin(self, index: int, base_page: bool) -> bool:
         """
         this should decrease semaphore count,
         meaning that the page can be evicted
         """
-        pass
+        try:
+            obj = self.base_pages if base_page else self.tail_pages
+            if obj[index]['semaphore_count'] > 0:
+                obj[index]['semaphore_count'] -= 1
+            return True
+        except:
+            return False

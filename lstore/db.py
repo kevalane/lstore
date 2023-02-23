@@ -16,10 +16,11 @@ class Database:
         self.tables = {}
         self.bufferpool = None
 
-    def open(self, path: str, max_pages_in_bufferpool) -> None:
+    def open(self, path: str, max_pages_in_bufferpool=16) -> None:
         """
         Not required for Milestone 1.
         """
+        # we need to add path here so disk is stored to specidied folder
         self.bufferpool = Bufferpool(max_pages_in_bufferpool)
         pass
 
