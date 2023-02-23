@@ -32,6 +32,7 @@ class Bufferpool:
 
         if dirty:
             wide_page.write_to_disk(index, base_page)
+            obj[index]['dirty'] = False
             return True
 
         # maybe return true even though nothing written?
@@ -57,6 +58,9 @@ class Bufferpool:
     def evict():
         """
         let's just go with lru
+        If the page being evicted is dirty, then it must be written back to disk before
+        discarding it. You may use any replacement policies of your choice, for example,
+        Least-recently-used (LRU) or most-recently-used (MRU).
 
         if time, fifo, mru, etc. for graphs and stuff
         """
