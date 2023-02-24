@@ -319,3 +319,20 @@ class BufferPoolTest(unittest.TestCase):
         # let's not append it to deque
         self.assertFalse(self.bufferpool.touch_page(0, True))
 
+    def test_retrieve_page_all_pinned(self):
+        # fill up the buffer pool with pinned pages
+        for i in range(MAX_PAGES):
+            wide_page = Wide_Page(4, i)
+            self.bufferpool.base_pages[i] = {
+                'semaphore_count': 1,
+                'dirty': False,
+                'wide_page': wide_page
+            }
+            self.bufferpool.num_pages += 1
+            self.bufferpool.deque.append({
+                'index': i,
+                'base_page': True
+            })
+        
+        # try to retrieve a page
+        self.assertFalse(self.bufferpool.retrieve_page(17, True, 5))
