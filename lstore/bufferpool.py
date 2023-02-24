@@ -113,10 +113,10 @@ class Bufferpool:
             if obj[self.deque[i]['index']]['semaphore_count'] == 0:
                 # write page to disk
                 self.write_page(self.deque[i]['index'], self.deque[i]['base_page'])
-                # remove from deque
-                self.deque.pop(i)
                 # remove from base_pages or tail_pages
                 del obj[self.deque[i]['index']]
+                # remove from deque
+                self.deque.pop(i)
                 # decrease num_pages
                 self.num_pages -= 1
                 return True

@@ -131,7 +131,6 @@ class BufferPoolTest(unittest.TestCase):
         seventeenth.columns[0].write(123)
         seventeenth.write_to_disk(44, False)
         self.assertIsNotNone(self.bufferpool.retrieve_page(44, False, 4))
-        print(self.bufferpool.retrieve_page(44, False, 4))
         self.assertEqual(self.bufferpool.retrieve_page(44, False, 4).columns[0].get(0), 
                         seventeenth.columns[0].get(0))
         self.assertEqual(self.bufferpool.retrieve_page(44, False, 4).columns[0].get(0), 123)
@@ -225,13 +224,49 @@ class BufferPoolTest(unittest.TestCase):
         self.assertFalse(self.bufferpool.mark_dirty(0, False))
 
     def test_evict_all_pinned(self):
-        pass
+        # Create a base page with index 0
+        wide_page = Wide_Page(4, 0)
+        self.bufferpool.base_pages[0] = {
+            'semaphore_count': 1,
+            'dirty': False,
+            'wide_page': wide_page
+        }
+        self.bufferpool.deque.append({
+            'index': 0,
+            'base_page': True
+        })
 
-    def test_evict_success(self):
-        pass
+        # Try to evict the page and check that the method returns False
+        self.assertFalse(self.bufferpool.evict())
 
-    def test_evict_no_pages(self):
-        pass 
+    def test_evict(self):
+        # Fill up the buffer pool with pages
+        for i in range(MAX_PAGES):
+            wide_page = Wide_Page(4, i)
+            self.bufferpool.base_pages[i] = {
+                'semaphore_count': 0,
+                'dirty': False,
+                'wide_page': wide_page
+            }
+            self.bufferpool.num_pages += 1
+            self.bufferpool.deque.append({
+                'index': i,
+                'base_page': True
+            })
+
+        # Evict a page from the buffer pool
+        self.assertTrue(self.bufferpool.evict())
+        self.assertNotIn(0, self.bufferpool.base_pages)
+
+        self.assertNotIn(0, [page['index'] for page in self.bufferpool.deque])
+        self.assertEqual(self.bufferpool.num_pages, MAX_PAGES-1)
+
+        # Evict all pages from the buffer pool
+        for i in range(MAX_PAGES - 1):
+            self.assertTrue(self.bufferpool.evict())
+        self.assertEqual(self.bufferpool.num_pages, 0)
+        self.assertFalse(self.bufferpool.evict())
+
 
     def test_touch_page(self):
         # Create a base page with index 0
