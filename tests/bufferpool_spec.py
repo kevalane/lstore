@@ -122,11 +122,16 @@ class BufferPoolTest(unittest.TestCase):
                 'wide_page': wide_page
             }
             self.bufferpool.num_pages += 1
+            self.bufferpool.deque.append({
+                'index': i,
+                'base_page': True
+            })
         
         seventeenth = Wide_Page(4, 0)
         seventeenth.columns[0].write(123)
         seventeenth.write_to_disk(44, False)
-
+        self.assertIsNotNone(self.bufferpool.retrieve_page(44, False, 4))
+        print(self.bufferpool.retrieve_page(44, False, 4))
         self.assertEqual(self.bufferpool.retrieve_page(44, False, 4).columns[0].get(0), 
                         seventeenth.columns[0].get(0))
         self.assertEqual(self.bufferpool.retrieve_page(44, False, 4).columns[0].get(0), 123)
@@ -218,4 +223,19 @@ class BufferPoolTest(unittest.TestCase):
         # Mark a non-existent page as dirty and check that the method returns False
         self.assertFalse(self.bufferpool.mark_dirty(0, True))
         self.assertFalse(self.bufferpool.mark_dirty(0, False))
+
+    def test_evict_all_pinned(self):
+        pass
+
+    def test_evict_success(self):
+        pass
+
+    def test_evict_no_pages(self):
+        pass
+
+    def test_touch_page_success(self):
+        pass
+
+    def test_touch_page_fail(self):
+        pass
 

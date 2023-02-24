@@ -60,7 +60,7 @@ class Bufferpool:
 
         if self.num_pages == self.max_pages:
             if not self.evict():
-                return False
+                return None
 
         wide_page = Wide_Page(num_columns, 0)
 
@@ -114,7 +114,7 @@ class Bufferpool:
                 # write page to disk
                 self.write_page(self.deque[i]['index'], self.deque[i]['base_page'])
                 # remove from deque
-                self.deque.remove(i)
+                self.deque.pop(i)
                 # remove from base_pages or tail_pages
                 del obj[self.deque[i]['index']]
                 # decrease num_pages
