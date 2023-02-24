@@ -231,11 +231,56 @@ class BufferPoolTest(unittest.TestCase):
         pass
 
     def test_evict_no_pages(self):
-        pass
+        pass 
 
-    def test_touch_page_success(self):
-        pass
+    def test_touch_page(self):
+        # Create a base page with index 0
+        wide_page = Wide_Page(4, 0)
+        self.bufferpool.base_pages[0] = {
+            'semaphore_count': 0,
+            'dirty': False,
+            'wide_page': wide_page
+        }
+        self.bufferpool.deque.append({
+            'index': 0,
+            'base_page': True
+        })
+
+        # Touch the base page with index 0
+        self.assertTrue(self.bufferpool.touch_page(0, True))
+        self.assertEqual(self.bufferpool.deque[-1]['index'], 0)
+
+        # Create a tail page with index 1
+        wide_page = Wide_Page(4, 1)
+        self.bufferpool.tail_pages[1] = {
+            'semaphore_count': 0,
+            'dirty': False,
+            'wide_page': wide_page
+        }
+        self.bufferpool.deque.append({
+            'index': 1,
+            'base_page': False
+        })
+
+        # now our new tail page should be most recent
+        self.assertEqual(self.bufferpool.deque[-1]['index'], 1)
+
+        # touch first one again
+        self.assertTrue(self.bufferpool.touch_page(0, True))
+        self.assertEqual(self.bufferpool.deque[-1]['index'], 0)
 
     def test_touch_page_fail(self):
-        pass
+        # Touch a non-existent page
+        self.assertFalse(self.bufferpool.touch_page(2, True))
+        self.assertFalse(self.bufferpool.touch_page(2, False))
+
+        # Create a base page with index 0
+        wide_page = Wide_Page(4, 0)
+        self.bufferpool.base_pages[0] = {
+            'semaphore_count': 0,
+            'dirty': False,
+            'wide_page': wide_page
+        }
+        # let's not append it to deque
+        self.assertFalse(self.bufferpool.touch_page(0, True))
 

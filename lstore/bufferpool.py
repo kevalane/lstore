@@ -141,7 +141,7 @@ class Bufferpool:
                 # check if index is equal
                 if self.deque[i]['index'] == index:
                     # remove from deque
-                    self.deque.remove(i)
+                    self.deque.pop(i)
                     # add to end of deque
                     self.deque.append({
                         'index': index,
