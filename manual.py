@@ -5,4 +5,7 @@ table = Table("test", 5, 0)
 table.add_record([444444, 1, 2, 3, 4])
 
 for i in range(600):
-    table.add_record([i, 1, 2, 3, 4])
+    table.add_record([44444+i, 1 + i, 2 + i, 3 + i, 4 + i])
+
+# 32nd insert
+print(table.get_record(44476, True))

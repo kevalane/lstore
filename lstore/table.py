@@ -78,20 +78,23 @@ class Table:
         """
         # Get the relevant page and information from the page directory.
         page_type, page_num, offset = self.page_directory[rid]
-        page = self.base_pages if page_type == 'base' else self.tail_pages
+
+        # retrieve the page
+        page = self.bufferpool.retrieve_page(page_num, (page_type == 'base'), self.num_columns)
+        # page = self.base_pages if page_type == 'base' else self.tail_pages
         
         # check if updated
-        update = page[page_num].columns[SCHEMA_ENCODING_COLUMN].get(offset)
+        update = page.columns[SCHEMA_ENCODING_COLUMN].get(offset)
         update_str = self._pad_with_leading_zeros(update)
 
         # adds all base page values to vals
         vals = []
-        for column in range(len(page[page_num].columns)):
-            vals.append(page[page_num].columns[column].get(offset))
+        for column in range(len(page.columns)):
+            vals.append(page.columns[column].get(offset))
 
         if not (update == 0 or type(page) == Tail_Page):
             # we're only here if base page that's updated
-            latest_tail_rid = page[page_num].columns[INDIRECTION_COLUMN].get(offset)
+            latest_tail_rid = page.columns[INDIRECTION_COLUMN].get(offset)
             tail_vals = self.get_tail_page(latest_tail_rid)
 
             for i in range(len(vals[META_COLUMNS:])):
@@ -263,9 +266,6 @@ class Table:
         
         # check if there is capacity in the last base page
         if not last_base_page.columns[0].has_capacity():
-            # OLD
-            self.base_pages.append(Base_Page(len(columns), self.key))
-
             # if not, create a new base page
             new_last_base_page = Wide_Page(self.num_columns, self.key)
             self.latest_base_page_index += 1
@@ -282,9 +282,6 @@ class Table:
         
         # add record to index
         self.index.push_record_to_index(record)
-
-        # OLD
-        # base_page = self.base_pages[-1]
 
         # next, add the metadata to columns
         base_page = last_base_page
