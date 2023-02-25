@@ -23,7 +23,7 @@ class Bufferpool:
         self.num_pages = 0
         self.max_pages = max_pages
         self.deque = []
-
+    
     def write_page(self, index: int, base_page: bool) -> bool:
         """
         :param index: index to write

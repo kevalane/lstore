@@ -1,6 +1,8 @@
 from lstore.index import Index
 from lstore.page import Page
 from lstore.record import Record
+from lstore.bufferpool import Bufferpool
+from lstore.wide_page import Wide_Page
 from time import time
 
 # page access indexes
@@ -56,7 +58,15 @@ class Table:
         self.base_pages = [Base_Page(num_columns, key_index)]
         self.tail_pages = []
         # Keeps track of the RID to be generated each time a tail record is added
-        self.rid_generator = 0 
+        self.rid_generator = 0
+
+        # keep track of latest base page
+        self.latest_base_page_index = 0
+        self.bufferpool = Bufferpool(16)
+
+        # create a base page
+        last_base_page = Wide_Page(num_columns, key_index)
+        last_base_page.write_to_disk(0, True)
 
     def get_record(self, rid: int, with_meta=False) -> list[int]:
         """
@@ -244,9 +254,25 @@ class Table:
         """
         :param columns: list    # List of column values
         """
+        # get last base page
+        last_base_page = self.bufferpool.retrieve_page(
+            self.latest_base_page_index,
+            True,
+            self.num_columns
+        )
+        
         # check if there is capacity in the last base page
-        if not self.base_pages[-1].columns[0].has_capacity():
+        if not last_base_page.columns[0].has_capacity():
+            # OLD
             self.base_pages.append(Base_Page(len(columns), self.key))
+
+            # if not, create a new base page
+            new_last_base_page = Wide_Page(self.num_columns, self.key)
+            self.latest_base_page_index += 1
+
+            # write to disk
+            new_last_base_page.write_to_disk(self.latest_base_page_index, True)
+
             # recursive call tries to add record again, now that there is capacity
             return self.add_record(columns)
 
@@ -257,8 +283,11 @@ class Table:
         # add record to index
         self.index.push_record_to_index(record)
 
+        # OLD
+        # base_page = self.base_pages[-1]
+
         # next, add the metadata to columns
-        base_page = self.base_pages[-1]
+        base_page = last_base_page
         base_page.columns[INDIRECTION_COLUMN].write(rid)
         base_page.columns[RID_COLUMN].write(rid)
         base_page.columns[TIMESTAMP_COLUMN].write(0)
@@ -274,6 +303,7 @@ class Table:
                     base_page.columns[0].num_records-1)
 
         self.page_directory[rid] = location
+        last_base_page.write_to_disk(self.latest_base_page_index, True)
 
     def assign_rid(self):
         """
