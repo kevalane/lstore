@@ -1,5 +1,6 @@
 from lstore.table import Table
 from lstore.bufferpool import Bufferpool
+import os
 
 class Database:
     """
@@ -15,14 +16,24 @@ class Database:
         """
         self.tables = {}
         self.bufferpool = None
+        self.path = './data'
 
     def open(self, path: str, max_pages_in_bufferpool=16) -> None:
         """
         Not required for Milestone 1.
         """
+        if not path.startswith('./'):
+            path = './' + path
+
+        try:
+            os.mkdir(path)
+            os.mkdir(path + '/base')
+            os.mkdir(path + '/tail')
+        except FileExistsError:
+            pass
+        self.path = path
         # we need to add path here so disk is stored to specidied folder
         self.bufferpool = Bufferpool(max_pages_in_bufferpool, path)
-        pass
 
     def close(self) -> None:
         """
@@ -43,7 +54,7 @@ class Database:
         """
         if name not in self.tables:
             # Table does not exist, create it
-            table = Table(name, num_columns, key_index)
+            table = Table(name, num_columns, key_index, self.path)
             self.tables[name] = table
             return table
         else:

@@ -23,6 +23,7 @@ class Bufferpool:
         self.num_pages = 0
         self.max_pages = max_pages
         self.deque = []
+        self.path = path
     
     def write_page(self, index: int, base_page: bool) -> bool:
         """
@@ -39,7 +40,7 @@ class Bufferpool:
         wide_page = obj[index]['wide_page']
 
         if dirty:
-            if not wide_page.write_to_disk(index, base_page):
+            if not wide_page.write_to_disk(index, base_page, self.path):
                 return False
             obj[index]['dirty'] = False
             return True
@@ -63,7 +64,7 @@ class Bufferpool:
 
         wide_page = Wide_Page(num_columns, 0)
 
-        if not wide_page.read_from_disk(index, is_base_page):
+        if not wide_page.read_from_disk(index, is_base_page, self.path):
             return None
             
         obj[index] = {

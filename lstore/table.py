@@ -48,7 +48,7 @@ class Table:
     :param page_directory: dict # Directory of all base and tail pages
     :param index: object        # Index object
     """
-    def __init__(self, name: str, num_columns: int, key_index: int) -> None:
+    def __init__(self, name: str, num_columns: int, key_index: int, path='data') -> None:
         self.name = name
         self.key = key_index
         self.num_columns = num_columns
@@ -63,11 +63,11 @@ class Table:
         # keep track of latest base page
         self.latest_base_page_index = 0
         self.latest_tail_page_index = -1
-        self.bufferpool = Bufferpool(10)
+        self.bufferpool = Bufferpool(10, path)
 
         # create a base page
         last_base_page = Wide_Page(num_columns, key_index)
-        last_base_page.write_to_disk(0, True)
+        last_base_page.write_to_disk(0, True, path)
 
     def get_record(self, rid: int, with_meta=False) -> list[int]:
         """
