@@ -21,7 +21,7 @@ class Database:
         Not required for Milestone 1.
         """
         # we need to add path here so disk is stored to specidied folder
-        self.bufferpool = Bufferpool(max_pages_in_bufferpool)
+        self.bufferpool = Bufferpool(max_pages_in_bufferpool, path)
         pass
 
     def close(self) -> None:

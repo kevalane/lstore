@@ -2,7 +2,7 @@ from lstore.wide_page import Wide_Page
 
 class Bufferpool:
 
-    def __init__(self, max_pages: int):
+    def __init__(self, max_pages: int, path='data'):
         """
         self.{base, tail}_pages = {
             'index': {
