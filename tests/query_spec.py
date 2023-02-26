@@ -32,12 +32,16 @@ class QuerySpec(unittest.TestCase):
     def test_delete_fail(self):
         self.assertFalse(self.query.delete(1))
         self.query.insert(1, 123, 456, 18, 1)
+        print("ERROR")
         self.assertFalse(self.query.delete(2))
 
     def test_delete_invalid_primary_key(self):
         self.query.insert(134134134, 123, 456, 18, 1)
         # mess up memory, corrupting indirection column
-        self.table.base_pages[0].columns[0].put(31431741374613, 0)
+        base_page = self.table.bufferpool.retrieve_page(0, True, 5)
+        base_page.columns[0].put(111, 0)
+        self.table.bufferpool.touch_page(0, True)
+        self.table.bufferpool.write_page(0, True)
         self.assertFalse(self.query.delete(134134134))
 
     def test_select_success(self):

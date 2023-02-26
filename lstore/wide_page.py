@@ -1,5 +1,6 @@
 from lstore.page import Page
 import json
+import os
 
 META_COLUMNS = 4
 
@@ -33,10 +34,14 @@ class Wide_Page:
         
         try:
             if base_page:
-                with open(f'./data/base/{index}.json', 'w') as f:
+                with open(f'./data/base/{index}.json', 'w+') as f:
+                    f.seek(0)
+                    f.truncate()
                     json.dump(data, f)
             else:
-                with open(f'./data/tail/{index}.json', 'w') as f:
+                with open(f'./data/tail/{index}.json', 'w+') as f:
+                    f.seek(0)
+                    f.truncate()
                     json.dump(data, f)
             
             f.close()
@@ -60,7 +65,7 @@ class Wide_Page:
         self.key_index = data['key_index']
         for i, column in enumerate(data['columns']):
             self.columns[i].num_records = column['num_records']
-            self.columns[i].data = column['data'].encode('iso-8859-1')
+            self.columns[i].data = bytearray(column['data'].encode('iso-8859-1'))
         
         f.close()
         return True
