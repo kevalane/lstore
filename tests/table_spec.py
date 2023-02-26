@@ -67,18 +67,19 @@ class TableTestCase(unittest.TestCase):
             table.add_record(column)
             RID = table.rid_generator
             if (i % 512 == 0):
-                self.assertEqual(len(table.base_pages), i // 512 + 1)
+                self.assertEqual(table.latest_base_page_index, i // 512)
 
         for col in range(table.num_columns):
-            self.assertEqual(table.base_pages[1]
-                             .columns[META_COLUMNS + col]
-                             .get(table.page_directory[575][2]), 
+            record = table.get_base_record(575)
+            self.assertEqual(record[META_COLUMNS:][col], 
                              [575, 72, 252, 911][col])
-        self.assertEqual(table.base_pages[1].columns[RID_COLUMN].get(0), 513)
-        self.assertEqual(table.base_pages[1].columns[INDIRECTION_COLUMN].get(575 % 513), 575)
-        self.assertEqual(table.base_pages[1].columns[RID_COLUMN].get(575 % 513), 575)
-        self.assertEqual(table.base_pages[1].columns[TIMESTAMP_COLUMN].get(575 % 513), 0)
-        self.assertEqual(table.base_pages[1].columns[SCHEMA_ENCODING_COLUMN].get(575 % 513), 0)
+            
+        base_page = table.bufferpool.retrieve_page(1, True, 5)
+        self.assertEqual(base_page.columns[RID_COLUMN].get(0), 513)
+        self.assertEqual(base_page.columns[INDIRECTION_COLUMN].get(575 % 513), 575)
+        self.assertEqual(base_page.columns[RID_COLUMN].get(575 % 513), 575)
+        self.assertEqual(base_page.columns[TIMESTAMP_COLUMN].get(575 % 513), 0)
+        self.assertEqual(base_page.columns[SCHEMA_ENCODING_COLUMN].get(575 % 513), 0)
 
 
     def test_simple_get(self):
