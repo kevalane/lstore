@@ -115,8 +115,9 @@ class Table:
         page_num = self.page_directory[tail_rid][PAGE_NUM]
         page_offset = self.page_directory[tail_rid][OFFSET]
         retvals = []
-        for column in range(len(self.tail_pages[page_num].columns)):
-            retvals.append(self.tail_pages[page_num].columns[column].get(page_offset))
+        tail_page = self.bufferpool.retrieve_page(page_num, False, self.num_columns)
+        for column in range(len(tail_page.columns)):
+            retvals.append(tail_page.columns[column].get(page_offset))
         
         return retvals
 
@@ -127,8 +128,9 @@ class Table:
         page_num = self.page_directory[base_rid][PAGE_NUM]
         page_offset = self.page_directory[base_rid][OFFSET]
         retvals = []
-        for column in range(len(self.base_pages[page_num].columns)):
-            retvals.append(self.base_pages[page_num].columns[column].get(page_offset))
+        base_page = self.bufferpool.retrieve_page(page_num, True, self.num_columns)
+        for column in range(len(base_page.columns)):
+            retvals.append(base_page.columns[column].get(page_offset))
         
         return retvals
 
@@ -269,6 +271,8 @@ class Table:
 
         # update indexing
         self.index.update_index(base_rec, tail_record, str(encoding))
+        base_page.write_to_disk(base_record[PAGE_NUM], True)
+        last_tail_page.write_to_disk(self.latest_tail_page_index, False)
 
 
     def add_record(self, columns: list[int]) -> None:
