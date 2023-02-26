@@ -78,7 +78,7 @@ class Query:
                 
             return res
         
-        except: 
+        except Exception as e:
             return False
     
     """

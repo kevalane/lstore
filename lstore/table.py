@@ -63,7 +63,7 @@ class Table:
         # keep track of latest base page
         self.latest_base_page_index = 0
         self.latest_tail_page_index = -1
-        self.bufferpool = Bufferpool(16)
+        self.bufferpool = Bufferpool(10)
 
         # create a base page
         last_base_page = Wide_Page(num_columns, key_index)
@@ -246,7 +246,9 @@ class Table:
 
             # write all old info to new tail page
             for i in range(len(old_tail_info[META_COLUMNS:])):
-                if (old_tail_info[i+META_COLUMNS] != 0 and last_tail_page.columns[i+META_COLUMNS].get(location[OFFSET]) == 0):
+                # if (old_tail_info[i+META_COLUMNS] != 0 and last_tail_page.columns[i+META_COLUMNS].get(location[OFFSET]) == 0):
+                if (old_tail_info[i+META_COLUMNS] != 0 and last_tail_page.columns[i+META_COLUMNS].get(location[OFFSET]) == 0
+                    and new_cols[i] == None):
                     last_tail_page.columns[i+META_COLUMNS].put(old_tail_info[i+META_COLUMNS], location[OFFSET])
         
         previous_encoding = self._pad_with_leading_zeros(previous_encoding)

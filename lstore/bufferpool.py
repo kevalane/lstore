@@ -54,7 +54,6 @@ class Bufferpool:
         :return: Wide_Page
         """
         obj = self.base_pages if is_base_page else self.tail_pages
-
         if index in obj:
             return obj[index]['wide_page']
 
