@@ -48,15 +48,15 @@ class TableTestCase(unittest.TestCase):
         self.assertEqual(table.index.indices[0], {1: [1]})
 
         for col in range(table.num_columns):
-            self.assertEqual(table.base_pages[0]
-                             .columns[META_COLUMNS + col]
-                             .get(0), 
+            base_page = table.get_base_record(1)
+            self.assertEqual(base_page[META_COLUMNS:][col], 
                              columns[col])
 
-        self.assertEqual(table.base_pages[0].columns[INDIRECTION_COLUMN].get(0), 1)
-        self.assertEqual(table.base_pages[0].columns[RID_COLUMN].get(0), 1)
-        self.assertEqual(table.base_pages[0].columns[TIMESTAMP_COLUMN].get(0), 0)
-        self.assertEqual(table.base_pages[0].columns[SCHEMA_ENCODING_COLUMN].get(0), 0)
+        base_page = table.bufferpool.retrieve_page(0, True, 5)
+        self.assertEqual(base_page.columns[INDIRECTION_COLUMN].get(0), 1)
+        self.assertEqual(base_page.columns[RID_COLUMN].get(0), 1)
+        self.assertEqual(base_page.columns[TIMESTAMP_COLUMN].get(0), 0)
+        self.assertEqual(base_page.columns[SCHEMA_ENCODING_COLUMN].get(0), 0)
 
     def test_add_2000_records(self):
         key = 0
