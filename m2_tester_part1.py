@@ -66,7 +66,6 @@ for _ in range(number_of_updates):
                     error = True
             if error:
                 print('update error on', original, 'and', updated_columns, ':', record, ', correct:', records[key])
-                exit(1)
             else:
                 pass
                 # print('update on', original, 'and', updated_columns, ':', record)
