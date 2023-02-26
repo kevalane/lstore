@@ -106,12 +106,14 @@ class BufferPoolTest(unittest.TestCase):
 
     def test_retrieve_page_not_exist(self):
         try:
-            os.remove('./data/base/0.json')
+            shutil.rmtree('./data/base')
             del self.bufferpool.base_pages[0]
-        except:
-            print()
+        except Exception as e:
+            print(e)
+        
         return_obj = self.bufferpool.retrieve_page(0, True, 4)
         self.assertEqual(return_obj, None)
+        os.mkdir('./data/base')
 
     def test_retrieve_max_pages(self):
         for i in range(MAX_PAGES):
