@@ -63,7 +63,7 @@ class Table:
         # keep track of latest base page
         self.latest_base_page_index = 0
         self.latest_tail_page_index = -1
-        self.bufferpool = Bufferpool(16)
+        self.bufferpool = Bufferpool(10)
 
         # create a base page
         last_base_page = Wide_Page(num_columns, key_index)

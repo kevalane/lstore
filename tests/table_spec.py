@@ -176,11 +176,13 @@ class TableTestCase(unittest.TestCase):
         table.update_record(11, [None, 10, None, None])
         table.update_record(11, [None, None, None, 15])
         rid = 11
+        print("BEFORE")
         self.assertEqual(table.get_tail_page(1), [11, 1, 0, 1, 0, 0, 0, 9])
         self.assertEqual(table.get_tail_page(2), [1, 2, 0, 101, 0, 10, 0, 9])
         self.assertEqual(table.get_tail_page(3), [2, 3, 0, 101, 0, 10, 0, 15])        
         self.assertEqual(table.get_record(11), [11, 10, 2, 15])
         self.assertTrue(table.delete_record(rid))
+        print("AFTER")
         
         with self.assertRaises(KeyError):
                 table.get_record(rid)
