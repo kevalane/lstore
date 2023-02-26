@@ -142,7 +142,7 @@ class Table:
         """
         if rid not in self.page_directory:
             return False
-
+        
         # get the indirection rid of base record
         indir_rid = self.get_base_record(rid)[INDIRECTION_COLUMN]
 
