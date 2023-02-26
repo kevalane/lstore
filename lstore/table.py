@@ -62,6 +62,7 @@ class Table:
 
         # keep track of latest base page
         self.latest_base_page_index = 0
+        self.latest_tail_page_index = -1
         self.bufferpool = Bufferpool(16)
 
         # create a base page
@@ -92,6 +93,8 @@ class Table:
         for column in range(len(page.columns)):
             vals.append(page.columns[column].get(offset))
 
+        # NEEDS TO TAKE INTO ACCOUNT IF THE TAIL PAGE IS UPDATED
+        # TODO
         if not (update == 0 or type(page) == Tail_Page):
             # we're only here if base page that's updated
             latest_tail_rid = page.columns[INDIRECTION_COLUMN].get(offset)
@@ -179,13 +182,26 @@ class Table:
         :param new_cols: list   # List of new column values
         :param rid: int         # RID of the previous record being updated
         """
-        # create tail page if none exist
-        if not self.tail_pages:
-            self.tail_pages.append(Tail_Page(len(new_cols), self.key))
+
+        # if no tail pages exist, create one
+        if (self.latest_tail_page_index == -1):
+            self.latest_tail_page_index += 1
+            new_last_tail_page = Wide_Page(self.num_columns, self.key)
+            new_last_tail_page.write_to_disk(self.latest_tail_page_index, False)
+            return self.update_record(rid, new_cols)
+        
+        # get the latest tail page
+        last_tail_page = self.bufferpool.retrieve_page(
+            self.latest_tail_page_index, 
+            False, 
+            self.num_columns
+        )
 
         # check if there's capacity in last tail_page, recursive if not 
-        if not self.tail_pages[-1].columns[INDIRECTION_COLUMN].has_capacity():
-            self.tail_pages.append(Tail_Page(len(new_cols), self.key))
+        if not last_tail_page.columns[INDIRECTION_COLUMN].has_capacity():
+            self.latest_tail_page_index += 1
+            new_last_tail_page = Wide_Page(self.num_columns, self.key)
+            new_last_tail_page.write_to_disk(self.latest_tail_page_index, False)
             return self.update_record(rid, new_cols)
 
         # create a record object
@@ -196,26 +212,28 @@ class Table:
         for index, item in enumerate(new_cols):
             if item is None:
                 item = 0
-            self.tail_pages[-1].columns[index+META_COLUMNS].write(item)
+            last_tail_page.columns[index+META_COLUMNS].write(item)
         
         # add rid to page directory
-        location = ('tail', len(self.tail_pages)-1, 
-                    self.tail_pages[-1].columns[INDIRECTION_COLUMN].num_records)
+        location = ('tail', self.latest_tail_page_index, 
+                    last_tail_page.columns[INDIRECTION_COLUMN].num_records)
+        
         self.page_directory[tail_rid] = location
 
         # tail_rid must be written to indir column of base page,
         base_record = self.page_directory[rid]
-        base_page = self.base_pages[base_record[PAGE_NUM]]
+        # base_page = self.base_pages[base_record[PAGE_NUM]]
+        base_page = self.bufferpool.retrieve_page(base_record[PAGE_NUM], True, self.num_columns)
         old_tail_rid = base_page.columns[INDIRECTION_COLUMN].get(base_record[OFFSET])
         
         # write new tail_rid to base page
         base_page.columns[INDIRECTION_COLUMN].put(tail_rid, base_record[OFFSET])
 
         # add metadata to columns
-        self.tail_pages[-1].columns[INDIRECTION_COLUMN].write(old_tail_rid)
+        last_tail_page.columns[INDIRECTION_COLUMN].write(old_tail_rid)
         if (tail_rid != rid):
-            self.tail_pages[-1].columns[RID_COLUMN].write(tail_rid)
-        self.tail_pages[-1].columns[TIMESTAMP_COLUMN].write(0)
+            last_tail_page.columns[RID_COLUMN].write(tail_rid)
+        last_tail_page.columns[TIMESTAMP_COLUMN].write(0)
 
         # HANDLE CUMULATIVE SCHEMA UPDATES
         previous_encoding = 0
@@ -226,8 +244,8 @@ class Table:
 
             # write all old info to new tail page
             for i in range(len(old_tail_info[META_COLUMNS:])):
-                if (old_tail_info[i+META_COLUMNS] != 0 and self.tail_pages[-1].columns[i+META_COLUMNS].get(location[OFFSET]) == 0):
-                    self.tail_pages[-1].columns[i+META_COLUMNS].put(old_tail_info[i+META_COLUMNS], location[OFFSET])
+                if (old_tail_info[i+META_COLUMNS] != 0 and last_tail_page.columns[i+META_COLUMNS].get(location[OFFSET]) == 0):
+                    last_tail_page.columns[i+META_COLUMNS].put(old_tail_info[i+META_COLUMNS], location[OFFSET])
         
         previous_encoding = self._pad_with_leading_zeros(previous_encoding)
 
@@ -237,7 +255,7 @@ class Table:
             if (new_cols[i] != None or previous_encoding[i] == '1'):
                 encoding = encoding[:i] + '1' + encoding[i + 1:]
 
-        self.tail_pages[-1].columns[SCHEMA_ENCODING_COLUMN].write(int(encoding))
+        last_tail_page.columns[SCHEMA_ENCODING_COLUMN].write(int(encoding))
         base_page.columns[SCHEMA_ENCODING_COLUMN].put(int(encoding), base_record[OFFSET])
 
         # create base record
@@ -296,7 +314,7 @@ class Table:
         
         # add this rid to the page directory
         location = ('base', 
-                    len(self.base_pages)-1, 
+                    self.latest_base_page_index, 
                     base_page.columns[0].num_records-1)
 
         self.page_directory[rid] = location
