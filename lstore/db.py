@@ -42,7 +42,7 @@ class Database:
         for table in self.tables.values():
             table._write_metadata()
         
-    def create_table(self, name: str, num_columns: int, key_index: int) -> Table:
+    def create_table(self, name: str, num_columns: int, key_index: int, new=True) -> Table:
         """
         Creates a new table in the database.
 
@@ -55,7 +55,7 @@ class Database:
         """
         if name not in self.tables:
             # Table does not exist, create it
-            table = Table(name, num_columns, key_index, self.path)
+            table = Table(name, num_columns, key_index, self.path, new)
             self.tables[name] = table
             self.table_array.append(name)
             return table
@@ -96,6 +96,7 @@ class Database:
                 loaded_table._load_metadata(data)
                 return loaded_table
         except Exception as e:
+            print(f'Error loading table {name} from disk')
             print(e)
             return None
         
