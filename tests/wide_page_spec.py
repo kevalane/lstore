@@ -60,7 +60,6 @@ class Wide_Page_Test(unittest.TestCase):
         self.wide_page.columns[6].put(135, 222)
         self.wide_page.columns[7].put(136, 333)
         self.wide_page.columns[8].put(1354135135, 444)
-        print(self.wide_page.columns[5].get(111))
         self.assertTrue(self.wide_page.write_to_disk(32, False))
 
         read_page = Wide_Page(5, 0)

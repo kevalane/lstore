@@ -61,12 +61,14 @@ class Query:
         try:
             if (len(projected_columns_index) > self.table.num_columns):
                 return False
-            
-            selected = self.table.index.indices[search_key_index].get(search_key)
+
+            try:
+                selected = self.table.index.indices[search_key_index].get(search_key)
+            except:
+                selected = self.table.index.indices[str(search_key_index)].get(str(search_key))
 
             for rid in selected:
                 record = self.table.get_record(rid)
-                
                 cols = list()
                 for i in range(len(projected_columns_index)):
                     if projected_columns_index[i] == 1:

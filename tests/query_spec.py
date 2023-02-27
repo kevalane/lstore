@@ -32,7 +32,6 @@ class QuerySpec(unittest.TestCase):
     def test_delete_fail(self):
         self.assertFalse(self.query.delete(1))
         self.query.insert(1, 123, 456, 18, 1)
-        print("ERROR")
         self.assertFalse(self.query.delete(2))
 
     def test_delete_invalid_primary_key(self):

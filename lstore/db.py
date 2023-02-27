@@ -42,7 +42,6 @@ class Database:
         for table in self.tables.values():
             table._write_metadata()
         
-
     def create_table(self, name: str, num_columns: int, key_index: int) -> Table:
         """
         Creates a new table in the database.
@@ -91,9 +90,29 @@ class Database:
         
         try:
             with open(f'{self.path}/{name}/metadata.json', 'r') as f:
-                data = json.load(f)
-                loaded_table = self.create_table(name, data['num_columns'], data['key'])
+                json_data = f.read()
+                data = json.loads(json_data, object_hook=jsonKeys2int)
+                loaded_table = self.create_table(name, data['num_columns'], data['key'], new=False)
                 loaded_table._load_metadata(data)
                 return loaded_table
-        except:
+        except Exception as e:
+            print(e)
             return None
+        
+# @staticmethod
+def jsonKeys2int(x):
+    # if isinstance(x, dict):
+    #     return {int(k):v for k,v in x.items()}
+    # return x
+
+    if isinstance(x, dict):
+        new_dict = {}
+        for k, v in x.items():
+            if isinstance(k, str) and k.isnumeric():
+                k = int(k)
+            new_dict[k] = jsonKeys2int(v)
+        return new_dict
+    elif isinstance(x, list):
+        return [jsonKeys2int(item) for item in x]
+    else:
+        return x

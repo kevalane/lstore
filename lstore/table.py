@@ -50,7 +50,7 @@ class Table:
     :param page_directory: dict # Directory of all base and tail pages
     :param index: object        # Index object
     """
-    def __init__(self, name: str, num_columns: int, key_index: int, path='data') -> None:
+    def __init__(self, name: str, num_columns: int, key_index: int, path='data', new=True) -> None:
         self.name = name
         self.key = key_index
         self.num_columns = num_columns
@@ -80,8 +80,9 @@ class Table:
         self.bufferpool = Bufferpool(10, self.path)
 
         # create a base page
-        last_base_page = Wide_Page(num_columns, key_index)
-        last_base_page.write_to_disk(0, True, self.path)
+        if new:
+            last_base_page = Wide_Page(num_columns, key_index)
+            last_base_page.write_to_disk(0, True, self.path)
 
     def get_record(self, rid: int, with_meta=False) -> list[int]:
         """
@@ -97,11 +98,11 @@ class Table:
         # retrieve the page
         page = self.bufferpool.retrieve_page(page_num, (page_type == 'base'), self.num_columns)
         # page = self.base_pages if page_type == 'base' else self.tail_pages
-        
+           
         # check if updated
         update = page.columns[SCHEMA_ENCODING_COLUMN].get(offset)
         update_str = self._pad_with_leading_zeros(update)
-
+          
         # adds all base page values to vals
         vals = []
         for column in range(len(page.columns)):
@@ -111,9 +112,11 @@ class Table:
         # TODO
         if not (update == 0 or type(page) == Tail_Page):
             # we're only here if base page that's updated
+            # print(offset)
             latest_tail_rid = page.columns[INDIRECTION_COLUMN].get(offset)
+            # print(latest_tail_rid)
             tail_vals = self.get_tail_page(latest_tail_rid)
-
+            
             for i in range(len(vals[META_COLUMNS:])):
                 if (update_str[i] == '1'):
                     # if the column is updated, replace the value with the tail value
@@ -126,7 +129,9 @@ class Table:
         """
         :param tail_rid: int     # RID of the tail page to be retrieved
         """
+        # print(tail_rid)
         page_num = self.page_directory[tail_rid][PAGE_NUM]
+        
         page_offset = self.page_directory[tail_rid][OFFSET]
         retvals = []
         tail_page = self.bufferpool.retrieve_page(page_num, False, self.num_columns)
@@ -379,7 +384,6 @@ class Table:
         self.rid_generator = data['rid_generator']
         self.page_directory = data['page_directory']
         self.index.indices = data['indices']
-        # print(self.index.indices['0'])
 
     '''
     MERGE WILL BE IMPLEMENTED IN MILESTONE 2
