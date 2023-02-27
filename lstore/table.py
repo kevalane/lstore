@@ -189,7 +189,7 @@ class Table:
         if (self.latest_tail_page_index == -1):
             self.latest_tail_page_index += 1
             new_last_tail_page = Wide_Page(self.num_columns, self.key)
-            new_last_tail_page.write_to_disk(self.latest_tail_page_index, False)
+            new_last_tail_page.write_to_disk(self.latest_tail_page_index, False, self.path)
             return self.update_record(rid, new_cols)
         
         # get the latest tail page
@@ -203,7 +203,7 @@ class Table:
         if not last_tail_page.columns[INDIRECTION_COLUMN].has_capacity():
             self.latest_tail_page_index += 1
             new_last_tail_page = Wide_Page(self.num_columns, self.key)
-            new_last_tail_page.write_to_disk(self.latest_tail_page_index, False)
+            new_last_tail_page.write_to_disk(self.latest_tail_page_index, False, self.path)
             return self.update_record(rid, new_cols)
 
         # create a record object
@@ -273,8 +273,8 @@ class Table:
 
         # update indexing
         self.index.update_index(base_rec, tail_record, str(encoding))
-        base_page.write_to_disk(base_record[PAGE_NUM], True)
-        last_tail_page.write_to_disk(self.latest_tail_page_index, False)
+        base_page.write_to_disk(base_record[PAGE_NUM], True, self.path)
+        last_tail_page.write_to_disk(self.latest_tail_page_index, False, self.path)
 
 
     def add_record(self, columns: list[int]) -> None:
@@ -295,7 +295,7 @@ class Table:
             self.latest_base_page_index += 1
 
             # write to disk
-            new_last_base_page.write_to_disk(self.latest_base_page_index, True)
+            new_last_base_page.write_to_disk(self.latest_base_page_index, True, self.path)
 
             # recursive call tries to add record again, now that there is capacity
             return self.add_record(columns)
@@ -324,7 +324,7 @@ class Table:
                     base_page.columns[0].num_records-1)
 
         self.page_directory[rid] = location
-        last_base_page.write_to_disk(self.latest_base_page_index, True)
+        last_base_page.write_to_disk(self.latest_base_page_index, True, self.path)
 
     def assign_rid(self):
         """
