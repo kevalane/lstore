@@ -29,7 +29,7 @@ class Database:
             os.mkdir(path)
             # os.mkdir(path + '/base')
             # os.mkdir(path + '/tail')
-        except FileExistsError:
+        except FileExistsError: 
             pass
         self.path = path
         # we need to add path here so disk is stored to specidied folder

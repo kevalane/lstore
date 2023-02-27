@@ -5,6 +5,7 @@ from lstore.bufferpool import Bufferpool
 from lstore.wide_page import Wide_Page
 from time import time
 import os
+import json
 
 # page access indexes
 INDIRECTION_COLUMN = 0
@@ -81,6 +82,8 @@ class Table:
         # create a base page
         last_base_page = Wide_Page(num_columns, key_index)
         last_base_page.write_to_disk(0, True, self.path)
+
+        self._write_metadata()
 
     def get_record(self, rid: int, with_meta=False) -> list[int]:
         """
@@ -356,6 +359,20 @@ class Table:
         :return: str            # The padded encoding
         """
         return '0'*(self.num_columns - len(str(encoding))) + str(encoding)
+    
+    def _write_metadata(self) -> None:
+        data = {
+            'num_columns': self.num_columns,
+            'key': self.key,
+            'latest_base_page_index': self.latest_base_page_index,
+            'latest_tail_page_index': self.latest_tail_page_index,
+            'rid_generator': self.rid_generator,
+            'page_directory': self.page_directory,
+            'indices': self.index.indices
+        }
+
+        with open(self.path + '/metadata.json', 'w') as f:
+            json.dump(data, f)
 
     '''
     MERGE WILL BE IMPLEMENTED IN MILESTONE 2
