@@ -83,7 +83,7 @@ class Table:
         # keep track of latest base page
         self.latest_base_page_index = 0
         self.latest_tail_page_index = -1
-        self.bufferpool = Bufferpool(10, self.path)
+        self.bufferpool = Bufferpool(100, self.path)
 
         # create a base page
         if new:
