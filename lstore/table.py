@@ -60,6 +60,8 @@ class Table:
         # Keeps track of the RID to be generated each time a tail record is added
         self.rid_generator = 0
 
+        self.path = path
+
         # keep track of latest base page
         self.latest_base_page_index = 0
         self.latest_tail_page_index = -1
