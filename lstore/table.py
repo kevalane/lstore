@@ -4,6 +4,7 @@ from lstore.record import Record
 from lstore.bufferpool import Bufferpool
 from lstore.wide_page import Wide_Page
 from time import time
+import os
 
 # page access indexes
 INDIRECTION_COLUMN = 0
@@ -60,16 +61,26 @@ class Table:
         # Keeps track of the RID to be generated each time a tail record is added
         self.rid_generator = 0
 
-        self.path = path
+        self.path = path + '/' + name
+        try:
+            os.mkdir(self.path)
+        except FileExistsError:
+            pass
+        
+        try:
+            os.mkdir(self.path + '/base')
+            os.mkdir(self.path + '/tail')
+        except FileExistsError:
+            pass
 
         # keep track of latest base page
         self.latest_base_page_index = 0
         self.latest_tail_page_index = -1
-        self.bufferpool = Bufferpool(10, path)
+        self.bufferpool = Bufferpool(10, self.path)
 
         # create a base page
         last_base_page = Wide_Page(num_columns, key_index)
-        last_base_page.write_to_disk(0, True, path)
+        last_base_page.write_to_disk(0, True, self.path)
 
     def get_record(self, rid: int, with_meta=False) -> list[int]:
         """

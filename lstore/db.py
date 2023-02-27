@@ -27,8 +27,8 @@ class Database:
 
         try:
             os.mkdir(path)
-            os.mkdir(path + '/base')
-            os.mkdir(path + '/tail')
+            # os.mkdir(path + '/base')
+            # os.mkdir(path + '/tail')
         except FileExistsError:
             pass
         self.path = path
