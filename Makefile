@@ -10,8 +10,11 @@ test:
 	echo "Running m1_tester.py..." && \
 	$(PYTHON) m1_tester.py && \
 	echo "\nRunning __main__.py..." && \
-	$(PYTHON) __main__.py \
-
+	$(PYTHON) __main__.py && \
+	echo "\nRunning m2_tester_part1.py..." && \
+	$(PYTHON) m2_tester_part1.py && \
+	echo "\nRunning m2_tester_part2.py..." && \
+	$(PYTHON) m2_tester_part2.py
 
 clean:
-	rm -rf htmlcov/ .coverage */__pycache__/
+	rm -rf htmlcov/ .coverage */__pycache__/ data/ ECS165/

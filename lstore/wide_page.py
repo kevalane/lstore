@@ -16,7 +16,7 @@ class Wide_Page:
             # Add a column for every column being added, plus 4 for the metadata columns
             self.columns.append(Page())
 
-    def write_to_disk(self, index: int, base_page: bool) -> bool:
+    def write_to_disk(self, index: int, base_page: bool, path='./data') -> bool:
         """
         :param index: index to write
         :param base_page: bool to determine if base page or tail page
@@ -34,12 +34,12 @@ class Wide_Page:
         
         try:
             if base_page:
-                with open(f'./data/base/{index}.json', 'w+') as f:
+                with open(f'{path}/base/{index}.json', 'w+') as f:
                     f.seek(0)
                     f.truncate()
                     json.dump(data, f)
             else:
-                with open(f'./data/tail/{index}.json', 'w+') as f:
+                with open(f'{path}/tail/{index}.json', 'w+') as f:
                     f.seek(0)
                     f.truncate()
                     json.dump(data, f)
@@ -50,16 +50,17 @@ class Wide_Page:
             print("Error writing to disk")
             return False
 
-    def read_from_disk(self, index: int, is_base_page: bool) -> bool:
+    def read_from_disk(self, index: int, is_base_page: bool, path='./data') -> bool:
         try:
             if is_base_page:
-                with open(f'./data/base/{index}.json', 'r') as f:
+                with open(f'{path}/base/{index}.json', 'r') as f:
                     data = json.load(f)
             else:
-                with open(f'./data/tail/{index}.json', 'r') as f:
+                with open(f'{path}/tail/{index}.json', 'r') as f:
                     data = json.load(f)
-        except:
+        except Exception as e:
             print("Error reading from disk")
+            print(e)
             return False
 
         self.key_index = data['key_index']

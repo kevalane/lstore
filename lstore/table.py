@@ -5,6 +5,8 @@ from lstore.bufferpool import Bufferpool
 from lstore.wide_page import Wide_Page
 from copy import deepcopy
 from time import time
+import os
+import json
 import threading
 
 # page access indexes
@@ -54,7 +56,7 @@ class Table:
     :param page_directory: dict # Directory of all base and tail pages
     :param index: object        # Index object
     """
-    def __init__(self, name: str, num_columns: int, key_index: int) -> None:
+    def __init__(self, name: str, num_columns: int, key_index: int, path='data', new=True) -> None:
         self.name = name
         self.key = key_index
         self.num_columns = num_columns
@@ -66,14 +68,27 @@ class Table:
         # Keeps track of the RID to be generated each time a tail record is added
         self.rid_generator = 0
 
+        self.path = path + '/' + name
+        try:
+            os.mkdir(self.path)
+        except FileExistsError:
+            pass
+        
+        try:
+            os.mkdir(self.path + '/base')
+            os.mkdir(self.path + '/tail')
+        except FileExistsError:
+            pass
+
         # keep track of latest base page
         self.latest_base_page_index = 0
         self.latest_tail_page_index = -1
-        self.bufferpool = Bufferpool(10)
+        self.bufferpool = Bufferpool(100, self.path)
 
         # create a base page
-        last_base_page = Wide_Page(num_columns, key_index)
-        last_base_page.write_to_disk(0, True)
+        if new:
+            last_base_page = Wide_Page(num_columns, key_index)
+            last_base_page.write_to_disk(0, True, self.path)
 
     def get_record(self, rid: int, with_meta=False) -> list[int]:
         """
@@ -89,11 +104,11 @@ class Table:
         # retrieve the page
         page = self.bufferpool.retrieve_page(page_num, (page_type == 'base'), self.num_columns)
         # page = self.base_pages if page_type == 'base' else self.tail_pages
-        
+           
         # check if updated
         update = page.columns[SCHEMA_ENCODING_COLUMN].get(offset)
         update_str = self._pad_with_leading_zeros(update)
-
+          
         # adds all base page values to vals
         vals = []
         for column in range(len(page.columns)):
@@ -103,9 +118,11 @@ class Table:
         # TODO
         if not (update == 0 or self.page_directory[rid][PAGE_TYPE]=='tail'): # Used to include: "or type(page) == Tail_Page" but tail page object no longer in use
             # we're only here if base page that's updated
+            # print(offset)
             latest_tail_rid = page.columns[INDIRECTION_COLUMN].get(offset)
+            # print(latest_tail_rid)
             tail_vals = self.get_tail_page(latest_tail_rid)
-
+            
             for i in range(len(vals[META_COLUMNS:])):
                 if (update_str[i] == '1'):
                     # if the column is updated, replace the value with the tail value
@@ -118,7 +135,9 @@ class Table:
         """
         :param tail_rid: int     # RID of the tail page to be retrieved
         """
+        # print(tail_rid)
         page_num = self.page_directory[tail_rid][PAGE_NUM]
+        
         page_offset = self.page_directory[tail_rid][OFFSET]
         retvals = []
         tail_page = self.bufferpool.retrieve_page(page_num, False, self.num_columns)
@@ -195,7 +214,7 @@ class Table:
         if (self.latest_tail_page_index == -1):
             self.latest_tail_page_index += 1
             new_last_tail_page = Wide_Page(self.num_columns, self.key)
-            new_last_tail_page.write_to_disk(self.latest_tail_page_index, False)
+            new_last_tail_page.write_to_disk(self.latest_tail_page_index, False, self.path)
             return self.update_record(rid, new_cols)
         
         # get the latest tail page
@@ -209,7 +228,7 @@ class Table:
         if not last_tail_page.columns[INDIRECTION_COLUMN].has_capacity():
             self.latest_tail_page_index += 1
             new_last_tail_page = Wide_Page(self.num_columns, self.key)
-            new_last_tail_page.write_to_disk(self.latest_tail_page_index, False)
+            new_last_tail_page.write_to_disk(self.latest_tail_page_index, False, self.path)
             return self.update_record(rid, new_cols)
 
         # create a record object
@@ -279,9 +298,8 @@ class Table:
 
         # update indexing
         self.index.update_index(base_rec, tail_record, str(encoding))
-        base_page.write_to_disk(base_record[PAGE_NUM], True)
-        last_tail_page.write_to_disk(self.latest_tail_page_index, False)
-
+        base_page.write_to_disk(base_record[PAGE_NUM], True, self.path)
+        last_tail_page.write_to_disk(self.latest_tail_page_index, False, self.path)
 
     def add_record(self, columns: list[int]) -> None:
         """
@@ -301,7 +319,7 @@ class Table:
             self.latest_base_page_index += 1
 
             # write to disk
-            new_last_base_page.write_to_disk(self.latest_base_page_index, True)
+            new_last_base_page.write_to_disk(self.latest_base_page_index, True, self.path)
 
             # recursive call tries to add record again, now that there is capacity
             return self.add_record(columns)
@@ -330,7 +348,7 @@ class Table:
                     base_page.columns[0].num_records-1)
 
         self.page_directory[rid] = location
-        last_base_page.write_to_disk(self.latest_base_page_index, True)
+        last_base_page.write_to_disk(self.latest_base_page_index, True, self.path)
 
     def assign_rid(self):
         """
@@ -349,6 +367,29 @@ class Table:
         :return: str            # The padded encoding
         """
         return '0'*(self.num_columns - len(str(encoding))) + str(encoding)
+    
+    def _write_metadata(self) -> None:
+        data = {
+            'num_columns': self.num_columns,
+            'key': self.key,
+            'latest_base_page_index': self.latest_base_page_index,
+            'latest_tail_page_index': self.latest_tail_page_index,
+            'rid_generator': self.rid_generator,
+            'page_directory': self.page_directory,
+            'indices': self.index.indices
+        }
+
+        with open(self.path + '/metadata.json', 'w+') as f:
+            json.dump(data, f)
+
+    def _load_metadata(self, data) -> None:
+        self.num_columns = data['num_columns']
+        self.key = data['key']
+        self.latest_base_page_index = data['latest_base_page_index']
+        self.latest_tail_page_index = data['latest_tail_page_index']
+        self.rid_generator = data['rid_generator']
+        self.page_directory = data['page_directory']
+        self.index.indices = data['indices']
 
     '''
     MERGE WILL BE IMPLEMENTED IN MILESTONE 2

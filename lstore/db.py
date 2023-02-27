@@ -1,5 +1,7 @@
 from lstore.table import Table
 from lstore.bufferpool import Bufferpool
+import os
+import json
 
 class Database:
     """
@@ -14,23 +16,33 @@ class Database:
         empty dictionary.
         """
         self.tables = {}
+        self.table_array = []
         self.bufferpool = None
+        self.path = './data'
 
     def open(self, path: str, max_pages_in_bufferpool=16) -> None:
         """
         Not required for Milestone 1.
         """
+        if not path.startswith('./'):
+            path = './' + path
+
+        try:
+            os.mkdir(path)
+        except FileExistsError: 
+            pass
+        self.path = path
         # we need to add path here so disk is stored to specidied folder
-        self.bufferpool = Bufferpool(max_pages_in_bufferpool)
-        pass
+        self.bufferpool = Bufferpool(max_pages_in_bufferpool, path)
 
     def close(self) -> None:
         """
         Not required for Milestone 1.
         """
-        pass
-
-    def create_table(self, name: str, num_columns: int, key_index: int) -> Table:
+        for table in self.tables.values():
+            table._write_metadata()
+        
+    def create_table(self, name: str, num_columns: int, key_index: int, new=True) -> Table:
         """
         Creates a new table in the database.
 
@@ -43,8 +55,9 @@ class Database:
         """
         if name not in self.tables:
             # Table does not exist, create it
-            table = Table(name, num_columns, key_index)
+            table = Table(name, num_columns, key_index, self.path, new)
             self.tables[name] = table
+            self.table_array.append(name)
             return table
         else:
             return None
@@ -72,4 +85,35 @@ class Database:
 
         :returns: Table | None      The table with the given name or None if the table does not exist.
         """
-        return self.tables.get(name, None)
+        if name in self.tables:
+            return self.tables[name]
+        
+        try:
+            with open(f'{self.path}/{name}/metadata.json', 'r') as f:
+                json_data = f.read()
+                data = json.loads(json_data, object_hook=jsonKeys2int)
+                loaded_table = self.create_table(name, data['num_columns'], data['key'], new=False)
+                loaded_table._load_metadata(data)
+                return loaded_table
+        except Exception as e:
+            print(f'Error loading table {name} from disk')
+            print(e)
+            return None
+        
+# @staticmethod
+def jsonKeys2int(x):
+    # if isinstance(x, dict):
+    #     return {int(k):v for k,v in x.items()}
+    # return x
+
+    if isinstance(x, dict):
+        new_dict = {}
+        for k, v in x.items():
+            if isinstance(k, str) and k.isnumeric():
+                k = int(k)
+            new_dict[k] = jsonKeys2int(v)
+        return new_dict
+    elif isinstance(x, list):
+        return [jsonKeys2int(item) for item in x]
+    else:
+        return x
