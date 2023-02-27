@@ -371,6 +371,16 @@ class Table:
         with open(self.path + '/metadata.json', 'w+') as f:
             json.dump(data, f)
 
+    def _load_metadata(self, data) -> None:
+        self.num_columns = data['num_columns']
+        self.key = data['key']
+        self.latest_base_page_index = data['latest_base_page_index']
+        self.latest_tail_page_index = data['latest_tail_page_index']
+        self.rid_generator = data['rid_generator']
+        self.page_directory = data['page_directory']
+        self.index.indices = data['indices']
+        # print(self.index.indices['0'])
+
     '''
     MERGE WILL BE IMPLEMENTED IN MILESTONE 2
     def __merge__(self):

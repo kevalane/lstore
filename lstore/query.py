@@ -12,8 +12,6 @@ class Query:
     """
     def __init__(self, table):
         self.table = table
-        pass
-
     
     """
     # internal Method
@@ -65,7 +63,7 @@ class Query:
                 return False
             
             selected = self.table.index.indices[search_key_index].get(search_key)
-        
+
             for rid in selected:
                 record = self.table.get_record(rid)
                 

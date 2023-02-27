@@ -1,6 +1,7 @@
 from lstore.table import Table
 from lstore.bufferpool import Bufferpool
 import os
+import json
 
 class Database:
     """
@@ -85,4 +86,14 @@ class Database:
 
         :returns: Table | None      The table with the given name or None if the table does not exist.
         """
-        return self.tables.get(name, None)
+        if name in self.tables:
+            return self.tables[name]
+        
+        try:
+            with open(f'{self.path}/{name}/metadata.json', 'r') as f:
+                data = json.load(f)
+                loaded_table = self.create_table(name, data['num_columns'], data['key'])
+                loaded_table._load_metadata(data)
+                return loaded_table
+        except:
+            return None
