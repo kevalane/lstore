@@ -76,12 +76,14 @@ class Index:
         else:
             return False
 
-    def push_record_to_index(self, record) -> None:
+    def push_record_to_index(self, record, index_column = 1) -> None:
         """
         # Add a record to all relevant indices
         :param  record: Record       The record to add to the indices
+        :param index_column: int     Column for record to be indexed on, defaults to RID if no argument given
         """
-        RID = record.rid
+        indexed_value = record.columns[index_column]
+        # RID = record.rid
         # print(self.indices)
         # iterate through each column in the record
         for i, value in enumerate(record.columns):
@@ -91,46 +93,52 @@ class Index:
 
             # get the index {} associated with the column number
             working_index = self.indices.get(i)
+            if value in working_index and indexed_value not in working_index[value]:
+                working_index[value].append(indexed_value)
 
-            if value not in working_index:
-                # create a list for the value if it doesn't exist
+
+            if value not in working_index and indexed_value not in working_index[value]:
+            # create a list for the value if it doesn't exist
                 working_index[value] = []
+                working_index[value].append(indexed_value)
 
-            if RID not in working_index[value]:
-                # add the RID to the list if it's not already there
-                working_index[value].append(RID)
+
         # print(self.indices)
-    def remove_record_from_index(self,record) -> None:
+    def remove_record_from_index(self,record, index_column = 1) -> None:
         """
         # Remove a record from all relevant indices
         :param  record: Record       The record to remove from the indices
+        :param index_column: int     Column for record to be indexed on, defaults to RID if no argument given
         """
-        RID = record.rid
+        #RID = record.rid
+        indexed_value = record.columns[index_column]
         for i, value in enumerate(record.columns):
             if self.indices.get(i):
                 # get the index {} associated with the column number
                 working_index = self.indices.get(i)
 
-                if value in working_index and RID in working_index[value]:
+                if value in working_index and indexed_value in working_index[value]:
                     # remove the RID from the list if found
-                    working_index[value].remove(RID)
+                    working_index[value].remove(indexed_value)
 
-    def update_index(self, base_record: Record, tail_record: Record, 
-                     schema_encoding: str) -> None:
+    def update_index(self, base_record: Record, tail_record: Record,
+                     schema_encoding: str, index_column = 1 ) -> None:
         """
         # Update index after a record is updated
         :param  base_page: Page      The page containing the old base record
         :param  tail_page: Page      The page containing the new tail record
         :param  schema_encoding: str The schema encoding of updated fields, e.g. 1011
+        :param index_column: int     Column for record to be indexed on, defaults to RID if no argument given
         """
         self.remove_record_from_index(base_record)
-        
+
         # create the combined record
         new_rid = base_record.rid
+        new_indexed_value = base_record.columns[index_column]
         new_key = base_record.key
         new_columns = [0]*len(base_record.columns)
 
-        # if the tail page has a value for a column, use it, 
+        # if the tail page has a value for a column, use it,
         # otherwise use the base page's value
         for i in range(len(base_record.columns)):
             if schema_encoding[i] == '1':
@@ -138,7 +146,7 @@ class Index:
             else:
                 new_columns[i] = base_record.columns[i]
 
-        new_record = Record(new_key, new_columns, new_rid)
+        new_record = Record(new_key, new_columns, new_indexed_value)
         self.push_record_to_index(new_record)
 
     def drop_index(self, column_number: int) -> bool:
