@@ -15,6 +15,7 @@ class Database:
         empty dictionary.
         """
         self.tables = {}
+        self.table_array = []
         self.bufferpool = None
         self.path = './data'
 
@@ -27,8 +28,6 @@ class Database:
 
         try:
             os.mkdir(path)
-            # os.mkdir(path + '/base')
-            # os.mkdir(path + '/tail')
         except FileExistsError: 
             pass
         self.path = path
@@ -39,7 +38,9 @@ class Database:
         """
         Not required for Milestone 1.
         """
-        pass
+        for table in self.tables.values():
+            table._write_metadata()
+        
 
     def create_table(self, name: str, num_columns: int, key_index: int) -> Table:
         """
@@ -56,6 +57,7 @@ class Database:
             # Table does not exist, create it
             table = Table(name, num_columns, key_index, self.path)
             self.tables[name] = table
+            self.table_array.append(name)
             return table
         else:
             return None

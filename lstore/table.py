@@ -83,8 +83,6 @@ class Table:
         last_base_page = Wide_Page(num_columns, key_index)
         last_base_page.write_to_disk(0, True, self.path)
 
-        self._write_metadata()
-
     def get_record(self, rid: int, with_meta=False) -> list[int]:
         """
         Get a record from the table with the given rid
@@ -292,7 +290,6 @@ class Table:
         base_page.write_to_disk(base_record[PAGE_NUM], True, self.path)
         last_tail_page.write_to_disk(self.latest_tail_page_index, False, self.path)
 
-
     def add_record(self, columns: list[int]) -> None:
         """
         :param columns: list    # List of column values
@@ -371,7 +368,7 @@ class Table:
             'indices': self.index.indices
         }
 
-        with open(self.path + '/metadata.json', 'w') as f:
+        with open(self.path + '/metadata.json', 'w+') as f:
             json.dump(data, f)
 
     '''
