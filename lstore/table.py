@@ -3,20 +3,25 @@ from lstore.page import Page
 from lstore.record import Record
 from lstore.bufferpool import Bufferpool
 from lstore.wide_page import Wide_Page
+from copy import deepcopy
 from time import time
+import threading
 
 # page access indexes
 INDIRECTION_COLUMN = 0
 RID_COLUMN = 1
-TIMESTAMP_COLUMN = 2
+BASE_RID_COLUMN = 2
 SCHEMA_ENCODING_COLUMN = 3
 META_COLUMNS = 4
 
 # page directory indexes
 PAGE_TYPE = 0
+# PAGE_RANGE
 PAGE_NUM = 1
 OFFSET = 2
 
+'''
+BASE PAGE AND TAIL PAGE CLASS ARE NOW WIDE_PAGE
 class Base_Page:
     """
     :param num_columns: string  # Number of columns in the table
@@ -38,6 +43,7 @@ class Tail_Page:
         for _ in range(num_columns+4):
             # Add a column for every column being added, plus 4 for the metadata columns
             self.columns.append(Page())
+'''
 
 class Table:
 
@@ -55,7 +61,7 @@ class Table:
         self.page_directory = {}
         self.index = Index(self)
         self.index.create_index(key_index)
-        self.base_pages = [Base_Page(num_columns, key_index)]
+        self.base_pages = [Wide_Page(num_columns, key_index)]
         self.tail_pages = []
         # Keeps track of the RID to be generated each time a tail record is added
         self.rid_generator = 0
@@ -95,7 +101,7 @@ class Table:
 
         # NEEDS TO TAKE INTO ACCOUNT IF THE TAIL PAGE IS UPDATED
         # TODO
-        if not (update == 0 or type(page) == Tail_Page):
+        if not (update == 0 or self.page_directory[rid][PAGE_TYPE]=='tail'): # Used to include: "or type(page) == Tail_Page" but tail page object no longer in use
             # we're only here if base page that's updated
             latest_tail_rid = page.columns[INDIRECTION_COLUMN].get(offset)
             tail_vals = self.get_tail_page(latest_tail_rid)
@@ -235,7 +241,7 @@ class Table:
         last_tail_page.columns[INDIRECTION_COLUMN].write(old_tail_rid)
         if (tail_rid != rid):
             last_tail_page.columns[RID_COLUMN].write(tail_rid)
-        last_tail_page.columns[TIMESTAMP_COLUMN].write(0)
+        last_tail_page.columns[BASE_RID_COLUMN].write(rid) # Write the rid of the base page to be referenced during merge
 
         # HANDLE CUMULATIVE SCHEMA UPDATES
         previous_encoding = 0
@@ -311,7 +317,7 @@ class Table:
         base_page = last_base_page
         base_page.columns[INDIRECTION_COLUMN].write(rid)
         base_page.columns[RID_COLUMN].write(rid)
-        base_page.columns[TIMESTAMP_COLUMN].write(0)
+        base_page.columns[BASE_RID_COLUMN].write(0)
         base_page.columns[SCHEMA_ENCODING_COLUMN].write(0)
 
         # write to columns
@@ -346,7 +352,19 @@ class Table:
 
     '''
     MERGE WILL BE IMPLEMENTED IN MILESTONE 2
-    def __merge__(self):
+    def merge(page_range):
         print("merge is happening")
-        pass
+        last_tail_rid = the rid of the most recent tail page (if there is a rid larger than this after we finish, we know that the record has been updated since the merge started)
+        start a new thread
+        create a copy of the base page(s)
+        for each base record:
+            if it has been updated:
+                follow the indirection to the collect the (near) most updated version of each value
+                apply those values to the base page copy
+        join the thread
+        update the page directory
+        for each base record:
+        if the record has been updated since the merge started:
+            set the indirection column of the new merged base record to the rid of the new tail record
+
     '''
