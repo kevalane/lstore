@@ -86,7 +86,7 @@ class Table:
         # check if updated
         update = page.columns[SCHEMA_ENCODING_COLUMN].get(offset)
         update_str = self._pad_with_leading_zeros(update)
-          
+
         # adds all base page values to vals
         vals = []
         for column in range(len(page.columns)):
@@ -239,6 +239,8 @@ class Table:
         if (tail_rid != rid):
             last_tail_page.columns[RID_COLUMN].write(tail_rid)
         last_tail_page.columns[BASE_RID_COLUMN].write(rid) # Write the rid of the base page to be referenced during merge
+        last_tail_page.columns[TPS_COLUMN].write(0)
+        last_tail_page.columns[TIMESTAMP_COLUMN].write(0)
 
         # HANDLE CUMULATIVE SCHEMA UPDATES
         previous_encoding = 0
@@ -311,10 +313,14 @@ class Table:
         self.index.push_record_to_index(record)
 
         # next, add the metadata to columns
+        # since this is a base page, cols that are not used in base pages
+        # will initialize to -1
         base_page = last_base_page
         base_page.columns[INDIRECTION_COLUMN].write(rid)
         base_page.columns[RID_COLUMN].write(rid)
-        base_page.columns[BASE_RID_COLUMN].write(0)
+        base_page.columns[TIMESTAMP_COLUMN].write(0)
+        base_page.columns[TPS_COLUMN].write(-1)
+        base_page.columns[BASE_RID_COLUMN].write(-1)
         base_page.columns[SCHEMA_ENCODING_COLUMN].write(0)
 
         # write to columns
