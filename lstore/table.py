@@ -376,22 +376,19 @@ class Table:
         self.page_directory = data['page_directory']
         self.index.indices = data['indices']
 
-    '''
-    def merge(page_range):
-        print("merge is happening")
-        ok = True
+    def merge(self, rid):
+        # Retrieve the page being merged
+        page_type, page_num, offset = self.page_directory[rid]
+        page = self.bufferpool.retrieve_page(page_num, (page_type == 'base'), self.num_columns)
         
-        for page in page_range.base_pages:
-            try:
-                # merge each record on the page
-                    
-            except:
-                ok = False
-                continue
-                
-        if not ok:
-            print("")
-            
+        # Retrieve the latest tail page
+        latest_tail_rid = page.columns[INDIRECTION_COLUMN].get(offset)
+        tail_page = self.get_tail_page(latest_tail_rid)
+        
+        # Make a copy of the base page
+        page_copy = deepcopy(page)
+
+'''          
         last_tail_rid = the rid of the most recent tail page (if there is a rid larger than this after we finish, we know that the record has been updated since the merge started)
         start a new thread
         create a copy of the base page(s)
