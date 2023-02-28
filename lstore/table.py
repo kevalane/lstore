@@ -220,7 +220,8 @@ class Table:
             last_tail_page.columns[index+META_COLUMNS].write(item)
         
         # add rid to page directory
-        location = ('tail', self.latest_tail_page_index, 
+        location = ('tail', 
+                    self.latest_tail_page_index, 
                     last_tail_page.columns[INDIRECTION_COLUMN].num_records)
         
         self.page_directory[tail_rid] = location
@@ -230,6 +231,10 @@ class Table:
         # base_page = self.base_pages[base_record[PAGE_NUM]]
         base_page = self.bufferpool.retrieve_page(base_record[PAGE_NUM], True, self.num_columns)
         old_tail_rid = base_page.columns[INDIRECTION_COLUMN].get(base_record[OFFSET])
+
+        # add the tail page to the base page's page directory if it wasn't there already
+        if self.latest_tail_page_index not in base_page.page_range_items:
+            base_page.page_range_items.append(self.latest_tail_page_index)
         
         # write new tail_rid to base page
         base_page.columns[INDIRECTION_COLUMN].put(tail_rid, base_record[OFFSET])

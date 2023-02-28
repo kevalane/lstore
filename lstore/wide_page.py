@@ -15,6 +15,7 @@ class Wide_Page:
         for _ in range(num_columns+META_COLUMNS):
             # Add a column for every column being added, plus 4 for the metadata columns
             self.columns.append(Page())
+        self.page_range_items = []
 
     def write_to_disk(self, index: int, base_page: bool, path='./data') -> bool:
         """
