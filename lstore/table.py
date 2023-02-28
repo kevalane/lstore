@@ -3,11 +3,13 @@ from lstore.page import Page
 from lstore.record import Record
 from lstore.bufferpool import Bufferpool
 from lstore.wide_page import Wide_Page
+from lstore.page_range import Page_Range
 from copy import deepcopy
 from time import time
 import os
 import json
 import threading
+from queue import Queue
 
 # page access indexes
 INDIRECTION_COLUMN = 0
@@ -18,34 +20,9 @@ META_COLUMNS = 4
 
 # page directory indexes
 PAGE_TYPE = 0
-# PAGE_RANGE
-PAGE_NUM = 1
-OFFSET = 2
-
-'''
-BASE PAGE AND TAIL PAGE CLASS ARE NOW WIDE_PAGE
-class Base_Page:
-    """
-    :param num_columns: string  # Number of columns in the table
-    :param key_index: int       # Index of the key column
-     """
-    def __init__(self, num_columns: int, key_index: int) -> None:
-        self.key_index = key_index
-        self.columns = []
-        for _ in range(num_columns+4):
-            # Add a column for every column being added, plus 4 for the metadata columns
-            self.columns.append(Page())
-
-
-class Tail_Page:
-
-    def __init__(self, num_columns: int, key_index: int) -> None:
-        key_index = key_index
-        self.columns = []
-        for _ in range(num_columns+4):
-            # Add a column for every column being added, plus 4 for the metadata columns
-            self.columns.append(Page())
-'''
+PAGE_RANGE = 1
+PAGE_NUM = 2
+OFFSET = 3
 
 class Table:
 
@@ -65,8 +42,10 @@ class Table:
         self.index.create_index(key_index)
         self.base_pages = [Wide_Page(num_columns, key_index)]
         self.tail_pages = []
+        self.page_ranges = [Page_Range()]
         # Keeps track of the RID to be generated each time a tail record is added
         self.rid_generator = 0
+        merge_queue = Queue()
 
         self.path = path + '/' + name
         try:
@@ -305,6 +284,12 @@ class Table:
         """
         :param columns: list    # List of column values
         """
+
+        # See if a new page range needs to be created and add the page to that range
+
+        if not self.page_ranges[-1].has_capacity():
+            self.page_ranges.append()
+
         # get last base page
         last_base_page = self.bufferpool.retrieve_page(
             self.latest_base_page_index,
@@ -343,7 +328,8 @@ class Table:
             base_page.columns[index+4].write(item)
         
         # add this rid to the page directory
-        location = ('base', 
+        location = ('base',
+                    self.page_ranges[-1],
                     self.latest_base_page_index, 
                     base_page.columns[0].num_records-1)
 
@@ -419,5 +405,4 @@ class Table:
         for each base record:
         if the record has been updated since the merge started:
             set the indirection column of the new merged base record to the rid of the new tail record
-
-    '''
+'''
