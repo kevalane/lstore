@@ -40,8 +40,11 @@ class BufferPoolTest(unittest.TestCase):
             'dirty': True,
             'wide_page': Wide_Page(4, 0)
         }
-        shutil.rmtree('./data/base')
-        shutil.rmtree('./data/tail')
+        try:
+            shutil.rmtree('./data/base')
+            shutil.rmtree('./data/tail')
+        except:
+            pass
         self.assertFalse(self.bufferpool.write_page(0, True))
         self.assertEqual(self.bufferpool.base_pages[0]['dirty'], True)
         os.mkdir('./data/base')
