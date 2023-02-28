@@ -2,7 +2,7 @@ from lstore.page import Page
 import json
 import os
 
-META_COLUMNS = 4
+META_COLUMNS = 6
 
 class Wide_Page:
     """
