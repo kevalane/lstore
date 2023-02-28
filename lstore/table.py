@@ -382,7 +382,7 @@ class Table:
         print("merge is happening")
         ok = True
         
-        for page in page_range:
+        for page in page_range.base_pages:
                 try:
                     # merge each record on the page
                     
