@@ -3,7 +3,6 @@ from lstore.page import Page
 from lstore.record import Record
 from lstore.bufferpool import Bufferpool
 from lstore.wide_page import Wide_Page
-from lstore.page_range import Page_Range
 from copy import deepcopy
 from time import time
 import os
@@ -16,13 +15,14 @@ INDIRECTION_COLUMN = 0
 RID_COLUMN = 1
 BASE_RID_COLUMN = 2
 SCHEMA_ENCODING_COLUMN = 3
-META_COLUMNS = 4
+TIMESTAMP_COLUMN = 4
+TPS_COLUMN = 5
+META_COLUMNS = 6
 
 # page directory indexes
 PAGE_TYPE = 0
-PAGE_RANGE = 1
-PAGE_NUM = 2
-OFFSET = 3
+PAGE_NUM = 1
+OFFSET = 2
 
 class Table:
 
@@ -42,7 +42,6 @@ class Table:
         self.index.create_index(key_index)
         self.base_pages = [Wide_Page(num_columns, key_index)]
         self.tail_pages = []
-        self.page_ranges = [Page_Range()]
         # Keeps track of the RID to be generated each time a tail record is added
         self.rid_generator = 0
         merge_queue = Queue()
@@ -285,11 +284,6 @@ class Table:
         :param columns: list    # List of column values
         """
 
-        # See if a new page range needs to be created and add the page to that range
-
-        if not self.page_ranges[-1].has_capacity():
-            self.page_ranges.append()
-
         # get last base page
         last_base_page = self.bufferpool.retrieve_page(
             self.latest_base_page_index,
@@ -329,7 +323,6 @@ class Table:
         
         # add this rid to the page directory
         location = ('base',
-                    self.page_ranges[-1],
                     self.latest_base_page_index, 
                     base_page.columns[0].num_records-1)
 
