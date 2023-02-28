@@ -383,12 +383,12 @@ class Table:
         ok = True
         
         for page in page_range.base_pages:
-                try:
-                    # merge each record on the page
+            try:
+                # merge each record on the page
                     
-                except:
-                    ok = False
-                    continue
+            except:
+                ok = False
+                continue
                 
         if not ok:
             print("")
