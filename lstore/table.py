@@ -392,9 +392,21 @@ class Table:
         self.index.indices = data['indices']
 
     '''
-    MERGE WILL BE IMPLEMENTED IN MILESTONE 2
     def merge(page_range):
         print("merge is happening")
+        ok = True
+        
+        for page in page_range:
+                try:
+                    # merge each record on the page
+                    
+                except:
+                    ok = False
+                    continue
+                
+        if not ok:
+            print("")
+            
         last_tail_rid = the rid of the most recent tail page (if there is a rid larger than this after we finish, we know that the record has been updated since the merge started)
         start a new thread
         create a copy of the base page(s)
