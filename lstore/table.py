@@ -11,6 +11,9 @@ import threading
 from queue import Queue
 from lstore.config import *
 
+# merge constant
+MERGE_COUNTER = 3
+
 class Table:
 
     """
@@ -231,14 +234,15 @@ class Table:
         if (tail_rid != rid):
             last_tail_page.columns[RID_COLUMN].write(tail_rid)
         last_tail_page.columns[BASE_RID_COLUMN].write(rid) # Write the rid of the base page to be referenced during merge
-        last_tail_page.columns[TPS_COLUMN].write(0)
         last_tail_page.columns[TIMESTAMP_COLUMN].write(0)
 
+        old_tail_tps = 0
         # HANDLE CUMULATIVE SCHEMA UPDATES
         previous_encoding = 0
         if (old_tail_rid != rid):
             old_tail_info = self.get_tail_page(old_tail_rid)
             old_tail_encoding = old_tail_info[SCHEMA_ENCODING_COLUMN]
+            old_tail_tps = old_tail_info[TPS_COLUMN]
             previous_encoding = old_tail_encoding
 
             # write all old info to new tail page
@@ -257,6 +261,7 @@ class Table:
                 encoding = encoding[:i] + '1' + encoding[i + 1:]
 
         last_tail_page.columns[SCHEMA_ENCODING_COLUMN].write(int(encoding))
+        last_tail_page.columns[TPS_COLUMN].write(int(old_tail_tps) + 1)
         base_page.columns[SCHEMA_ENCODING_COLUMN].put(int(encoding), base_record[OFFSET])
 
         # create base record
@@ -272,11 +277,21 @@ class Table:
         self.index.update_index(base_rec, tail_record, str(encoding))
         base_page.write_to_disk(base_record[PAGE_NUM], True, self.path)
         last_tail_page.write_to_disk(self.latest_tail_page_index, False, self.path)
+        
+        num_updates = (old_tail_tps + 1) - (base_page.columns[TPS_COLUMN].get(base_record[OFFSET]))
+        
+        # merge if needed
+        if  num_updates >= MERGE_COUNTER:
+            self.merge(rid)
 
     def add_record(self, columns: list[int]) -> None:
         """
         :param columns: list    # List of column values
         """
+        
+        # check if record with this rid already exists
+        if columns[0] in self.page_directory:
+            return
 
         # get last base page
         last_base_page = self.bufferpool.retrieve_page(
@@ -375,22 +390,31 @@ class Table:
         
         # Retrieve the latest tail page
         latest_tail_rid = page.columns[INDIRECTION_COLUMN].get(offset)
-        tail_page = self.get_tail_page(latest_tail_rid)
+        page_type, page_num, t_offset = self.page_directory[latest_tail_rid]
+        
+        tail_page = self.bufferpool.retrieve_page(page_num, (page_type == 'base'), self.num_columns)
         
         # Make a copy of the base page
         page_copy = deepcopy(page)
-
-'''          
-        last_tail_rid = the rid of the most recent tail page (if there is a rid larger than this after we finish, we know that the record has been updated since the merge started)
-        start a new thread
-        create a copy of the base page(s)
-        for each base record:
-            if it has been updated:
-                follow the indirection to the collect the (near) most updated version of each value
-                apply those values to the base page copy
-        join the thread
-        update the page directory
-        for each base record:
-        if the record has been updated since the merge started:
-            set the indirection column of the new merged base record to the rid of the new tail record
-'''
+        
+        # Set column counter
+        col = 0
+        
+        # Iterate through schema encoding column and update values
+        for i in tail_page.columns[SCHEMA_ENCODING_COLUMN].get(t_offset):
+            if i == '1':
+                page_copy.columns[col].put(tail_page.columns[col].get(t_offset), offset)
+                
+            col+=1
+                
+        # Set the tps column
+        page_copy.columns[TPS_COLUMN].put(tail_page.columns[TPS_COLUMN].get(t_offset), offset)
+        
+        # Update indirection column
+        page_copy.columns[INDIRECTION_COLUMN].put(page.columns[INDIRECTION_COLUMN].get(offset), offset)
+        
+        # Need to add code here to update page directory
+        page = deepcopy(page_copy)
+        
+        # Delete the copy
+        del page_copy
