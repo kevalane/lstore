@@ -1,6 +1,5 @@
 from lstore import wide_page
 from lstore.record import Record
-from lstore.table import Table
 from lstore.page import Page
 from lstore.wide_page import Wide_Page
 
@@ -13,12 +12,12 @@ class Index:
     through this object.
     """
 
-    def __init__(self, table, num_columns, key_index):
+    def __init__(self, table, num_columns=5, key_index=0):
         """
         # Initializes an empty indices dictionary for a table
         :param  table: Table         The table to index
         """
-        self.table = Table(table)
+        self.table = table
         self.indices = {}
         self.wide_page = Wide_Page(num_columns, key_index)
     
