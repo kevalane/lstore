@@ -40,7 +40,8 @@ class Query:
             return False
         
         try:
-            self.table.add_record(columns)
+            if not self.table.add_record(columns):
+                return False
             return True
             
         except Exception as e:
@@ -134,7 +135,9 @@ class Query:
             return False
         
         try:
-            self.table.update_record(primary_key, columns)
+            if not self.table.update_record(primary_key, columns):
+                return False
+
             return True
             
         except:

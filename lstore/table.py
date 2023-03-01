@@ -175,6 +175,11 @@ class Table:
         :param rid: int         # RID of the previous record being updated
         """
 
+        # check if new primary key is already in use
+        if new_cols[self.key] in self.page_directory.keys() and rid != new_cols[self.key]:
+            print(self.page_directory)
+            return False
+
         # if no tail pages exist, create one
         if (self.latest_tail_page_index == -1):
             self.latest_tail_page_index += 1
@@ -280,14 +285,14 @@ class Table:
         if  num_updates >= MERGE_COUNTER:
             self.merge(rid)
 
-    def add_record(self, columns: list[int]) -> None:
+    def add_record(self, columns: list[int]) -> bool:
         """
         :param columns: list    # List of column values
         """
         
         # check if record with this rid already exists
-        if columns[0] in self.page_directory:
-            return
+        if columns[self.key] in self.page_directory.keys():
+            return False
 
         # get last base page
         last_base_page = self.bufferpool.retrieve_page(
@@ -337,6 +342,7 @@ class Table:
 
         self.page_directory[rid] = location
         last_base_page.write_to_disk(self.latest_base_page_index, True, self.path)
+        return True
 
     def assign_rid(self):
         """
