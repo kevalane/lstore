@@ -14,6 +14,7 @@ class Index:
         # Initializes an empty indices dictionary for a table
         :param  table: Table         The table to index
         """
+        self.table = table
         self.indices = {}
     
     def locate(self, column: int, value: int) -> list[int]:
@@ -76,7 +77,7 @@ class Index:
         else:
             return False
 
-    def push_record_to_index(self, record, index_column = None ) -> None:
+    def push_record_to_index(self, record: Record, index_column = None ) -> None:
         """
         # Add a record to all relevant indices
         :param  record: Record       The record to add to the indices
