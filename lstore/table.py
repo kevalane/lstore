@@ -326,13 +326,13 @@ class Table:
         base_page.columns[INDIRECTION_COLUMN].write(rid)
         base_page.columns[RID_COLUMN].write(rid)
         base_page.columns[TIMESTAMP_COLUMN].write(0)
-        base_page.columns[TPS_COLUMN].write(-1)
-        base_page.columns[BASE_RID_COLUMN].write(-1)
+        base_page.columns[TPS_COLUMN].write(0)
+        base_page.columns[BASE_RID_COLUMN].write(0)
         base_page.columns[SCHEMA_ENCODING_COLUMN].write(0)
 
         # write to columns
         for index, item in enumerate(columns):
-            base_page.columns[index+4].write(item)
+            base_page.columns[index+META_COLUMNS].write(item)
         
         # add this rid to the page directory
         location = ('base',

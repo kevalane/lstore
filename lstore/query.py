@@ -43,7 +43,8 @@ class Query:
             self.table.add_record(columns)
             return True
             
-        except:
+        except Exception as e:
+            print(e)
             return False
     
     """
@@ -79,6 +80,7 @@ class Query:
             return res
         
         except Exception as e:
+            print(e)
             return False
     
     """
