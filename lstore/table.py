@@ -30,8 +30,6 @@ class Table:
         self.page_directory = {}
         self.index = Index(self)
         self.index.create_index(key_index)
-        self.base_pages = [Wide_Page(num_columns, key_index)]
-        self.tail_pages = []
         # Keeps track of the RID to be generated each time a tail record is added
         self.rid_generator = 0
         merge_queue = Queue()
@@ -71,7 +69,6 @@ class Table:
 
         # retrieve the page
         page = self.bufferpool.retrieve_page(page_num, (page_type == 'base'), self.num_columns)
-        # page = self.base_pages if page_type == 'base' else self.tail_pages
            
         # check if updated
         update = page.columns[SCHEMA_ENCODING_COLUMN].get(offset)
@@ -218,7 +215,6 @@ class Table:
 
         # tail_rid must be written to indir column of base page,
         base_record = self.page_directory[rid]
-        # base_page = self.base_pages[base_record[PAGE_NUM]]
         base_page = self.bufferpool.retrieve_page(base_record[PAGE_NUM], True, self.num_columns)
         old_tail_rid = base_page.columns[INDIRECTION_COLUMN].get(base_record[OFFSET])
 

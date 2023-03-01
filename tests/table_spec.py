@@ -15,8 +15,6 @@ class TableTestCase(unittest.TestCase):
         self.assertEqual(table.num_columns, columns)
         self.assertEqual(table.page_directory, {})
         self.assertEqual(table.index.indices, {key: {}}, "Table should create index for primary key column on init")
-        self.assertEqual(type(table.base_pages[0]), Wide_Page)
-        self.assertEqual(table.tail_pages, [])
         self.assertEqual(table.rid_generator, 0)
     
     def test_init_tail(self):
