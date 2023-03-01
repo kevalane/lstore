@@ -6,9 +6,11 @@ run:
 test:
 	echo "\n*** Running unit tests... ***\n" && \
 	$(PYTHON) run_unit_tests.py && \
-	echo "\n*** Running integration tests... ***\n" && \
+	echo "\n\n*** Running integration tests... ***\n\n" && \
 	echo "Running m1_tester.py..." && \
 	$(PYTHON) m1_tester.py && \
+	echo "\nRunning testM1.py..." && \
+	$(PYTHON) testM1.py && \
 	echo "\nRunning __main__.py..." && \
 	$(PYTHON) __main__.py && \
 	echo "\nRunning m2_tester_part1.py..." && \
