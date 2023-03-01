@@ -2,8 +2,7 @@ import unittest
 from lstore.wide_page import Wide_Page
 import os
 import shutil
-
-META_COLUMNS = 4
+from lstore.config import *
 
 class Wide_Page_Test(unittest.TestCase):
 

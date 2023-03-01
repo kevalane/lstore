@@ -2,12 +2,7 @@ import unittest
 from lstore.table import Table, Record, Base_Page, Tail_Page
 from lstore.page import Page
 from random import randint, seed
-
-INDIRECTION_COLUMN = 0
-RID_COLUMN = 1
-TIMESTAMP_COLUMN = 2
-SCHEMA_ENCODING_COLUMN = 3
-META_COLUMNS = 4
+from lstore.config import *
 
 class TableTestCase(unittest.TestCase):
     def test_init_table(self):

@@ -9,20 +9,7 @@ import os
 import json
 import threading
 from queue import Queue
-
-# page access indexes
-INDIRECTION_COLUMN = 0
-RID_COLUMN = 1
-BASE_RID_COLUMN = 2
-SCHEMA_ENCODING_COLUMN = 3
-TIMESTAMP_COLUMN = 4
-TPS_COLUMN = 5
-META_COLUMNS = 6
-
-# page directory indexes
-PAGE_TYPE = 0
-PAGE_NUM = 1
-OFFSET = 2
+from lstore.config import *
 
 class Table:
 

@@ -1,5 +1,6 @@
 import unittest
 from lstore.record import Record
+from lstore.config import *
 
 class RecordTestCase(unittest.TestCase):
 

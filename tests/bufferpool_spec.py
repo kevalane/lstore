@@ -3,8 +3,7 @@ from lstore.bufferpool import Bufferpool
 from lstore.wide_page import Wide_Page
 import shutil
 import os
-
-MAX_PAGES = 16
+from lstore.config import *
 
 class BufferPoolTest(unittest.TestCase):
     def setUp(self):

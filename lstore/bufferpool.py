@@ -1,4 +1,5 @@
 from lstore.wide_page import Wide_Page
+from lstore.config import *
 
 class Bufferpool:
 

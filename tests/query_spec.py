@@ -1,6 +1,7 @@
 import unittest
 from lstore.query import Query
 from lstore.table import Table
+from lstore.config import *
 
 class QuerySpec(unittest.TestCase):
 

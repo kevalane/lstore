@@ -1,5 +1,6 @@
 import unittest
 from lstore.db import Database
+from lstore.config import *
 
 class DatabaseTestCase(unittest.TestCase):
     def test_init(self):

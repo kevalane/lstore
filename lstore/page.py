@@ -1,6 +1,4 @@
-DATA_SIZE       =    8       # int64
-PAGE_SIZE       =    4096
-STORAGE_OPTION  =    'big'
+from lstore.config import *
 
 """
 Class to represent a page in the database

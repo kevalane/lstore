@@ -1,6 +1,7 @@
 import unittest
 from lstore.index import Index
 from lstore.table import Table, Record
+from lstore.config import *
 
 class IndexTestCase(unittest.TestCase):
     def test_init(self):

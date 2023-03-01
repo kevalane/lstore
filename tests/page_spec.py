@@ -1,9 +1,6 @@
 import unittest
 from lstore.page import Page
-#import Page
-
-PAGE_SIZE = 4096
-DATA_SIZE = 8   # int64
+from lstore.config import *
 
 class PageTestCase(unittest.TestCase):
     def test_init(self):
