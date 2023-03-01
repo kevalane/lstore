@@ -24,6 +24,9 @@ PAGE_TYPE = 0
 PAGE_NUM = 1
 OFFSET = 2
 
+# merge constant
+MERGE_COUNTER = 3
+
 class Table:
 
     """
@@ -244,14 +247,15 @@ class Table:
         if (tail_rid != rid):
             last_tail_page.columns[RID_COLUMN].write(tail_rid)
         last_tail_page.columns[BASE_RID_COLUMN].write(rid) # Write the rid of the base page to be referenced during merge
-        last_tail_page.columns[TPS_COLUMN].write(0)
         last_tail_page.columns[TIMESTAMP_COLUMN].write(0)
 
+        old_tail_tps = 0
         # HANDLE CUMULATIVE SCHEMA UPDATES
         previous_encoding = 0
         if (old_tail_rid != rid):
             old_tail_info = self.get_tail_page(old_tail_rid)
             old_tail_encoding = old_tail_info[SCHEMA_ENCODING_COLUMN]
+            old_tail_tps = old_tail_info[TPS_COLUMN]
             previous_encoding = old_tail_encoding
 
             # write all old info to new tail page
@@ -270,6 +274,7 @@ class Table:
                 encoding = encoding[:i] + '1' + encoding[i + 1:]
 
         last_tail_page.columns[SCHEMA_ENCODING_COLUMN].write(int(encoding))
+        last_tail_page.columns[TPS_COLUMN].write(int(old_tail_tps) + 1)
         base_page.columns[SCHEMA_ENCODING_COLUMN].put(int(encoding), base_record[OFFSET])
 
         # create base record
@@ -285,11 +290,21 @@ class Table:
         self.index.update_index(base_rec, tail_record, str(encoding))
         base_page.write_to_disk(base_record[PAGE_NUM], True, self.path)
         last_tail_page.write_to_disk(self.latest_tail_page_index, False, self.path)
+        
+        num_updates = (old_tail_tps + 1) - (base_page.columns[TPS_COLUMN].get(base_record[OFFSET]))
+        
+        # merge if needed
+        if  num_updates >= MERGE_COUNTER:
+            self.merge(rid)
 
     def add_record(self, columns: list[int]) -> None:
         """
         :param columns: list    # List of column values
         """
+        
+        # check if record with this rid already exists
+        if columns[0] in self.page_directory:
+            return
 
         # get last base page
         last_base_page = self.bufferpool.retrieve_page(
