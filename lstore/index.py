@@ -76,7 +76,7 @@ class Index:
         else:
             return False
 
-        def push_record_to_index(self, record, index_column = None ) -> None:
+    def push_record_to_index(self, record, index_column = None ) -> None:
         """
         # Add a record to all relevant indices
         :param  record: Record       The record to add to the indices
