@@ -411,8 +411,7 @@ class Table:
         # Update indirection column
         page_copy.columns[INDIRECTION_COLUMN].put(page.columns[INDIRECTION_COLUMN].get(offset), offset)
         
-        # Set page to the merged page
-        page = deepcopy(page_copy)
+        # Need to add code here to update page directory
         
         # Delete the copy
         del page_copy
