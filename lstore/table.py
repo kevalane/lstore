@@ -12,7 +12,7 @@ from queue import Queue
 from lstore.config import *
 
 # merge constant
-MERGE_COUNTER = 3
+MERGE_COUNTER = 5
 
 class Table:
 

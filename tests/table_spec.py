@@ -117,10 +117,10 @@ class TableTestCase(unittest.TestCase):
         columns2 = [22, 4, 5, 6]
         table.add_record(columns)
         table.add_record(columns2)
-        self.assertEqual(table.get_record(11, True), [11, 11, 0, 0, 11, 1, 2, 3])
-        self.assertEqual(table.get_record(22, True), [22, 22, 0, 0, 22, 4, 5, 6])
+        self.assertEqual(table.get_record(11, True), [11, 11, 0, 0, 0, 0, 11, 1, 2, 3])
+        self.assertEqual(table.get_record(22, True), [22, 22, 0, 0, 0, 0, 22, 4, 5, 6])
         table.update_record(11, [None, None, 8, None])
-        # self.assertEqual(table.get_record(11, True), [1, 11, 0, 10, 11, 1, 8, 3])
+        self.assertEqual(table.get_record(11, True), [1, 11, 0, 10, 0, 0, 11, 1, 8, 3])
 
     def test_get_column(self):
         key = 0
@@ -172,19 +172,19 @@ class TableTestCase(unittest.TestCase):
         table.update_record(11, [None, 10, None, None])
         table.update_record(11, [None, None, None, 15])
         rid = 11
-        self.assertEqual(table.get_tail_page(1), [11, 1, 0, 1, 0, 0, 0, 9])
-        self.assertEqual(table.get_tail_page(2), [1, 2, 0, 101, 0, 10, 0, 9])
-        self.assertEqual(table.get_tail_page(3), [2, 3, 0, 101, 0, 10, 0, 15])        
+        self.assertEqual(table.get_tail_page(1), [11, 1, 11, 1, 0, 1, 0, 0, 0, 9])
+        self.assertEqual(table.get_tail_page(2), [1, 2, 11, 101, 0, 2, 0, 10, 0, 9])
+        self.assertEqual(table.get_tail_page(3), [2, 3, 11, 101, 0, 3, 0, 10, 0, 15])        
         self.assertEqual(table.get_record(11), [11, 10, 2, 15])
         self.assertTrue(table.delete_record(rid))
         
         with self.assertRaises(KeyError):
                 table.get_record(rid)
         
-        self.assertEqual(table.get_base_record(-11), [3, 11, 0, 101, 11, 1, 2, 3])
-        self.assertEqual(table.get_tail_page(-1), [11, 1, 0, 1, 0, 0, 0, 9])
-        self.assertEqual(table.get_tail_page(-2), [1, 2, 0, 101, 0, 10, 0, 9])
-        self.assertEqual(table.get_tail_page(-3), [2, 3, 0, 101, 0, 10, 0, 15])
+        self.assertEqual(table.get_base_record(-11), [3, 11, 0, 101, 0, 0, 11, 1, 2, 3])
+        self.assertEqual(table.get_tail_page(-1), [11, 1, 11, 1, 0, 1, 0, 0, 0, 9])
+        self.assertEqual(table.get_tail_page(-2), [1, 2, 11, 101, 0, 2, 0, 10, 0, 9])
+        self.assertEqual(table.get_tail_page(-3), [2, 3, 11, 101, 0, 3, 0, 10, 0, 15])
         self.assertEqual(table.get_record(22), columns2)
 
     def test_update_all_records(self):
