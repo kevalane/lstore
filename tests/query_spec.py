@@ -60,8 +60,8 @@ class QuerySpec(unittest.TestCase):
         self.assertFalse(self.query.select(1, 0, [1,1,1,1,1,1]))
 
     def test_update_success(self):
-        self.query.insert(4444, 123, 456, 18, 1)
-        self.assertTrue(self.query.update(4444, 0, 33, 2, 3, 4, None))
+        self.assertTrue(self.query.insert(4444, 123, 456, 18, 1))
+        self.assertTrue(self.query.update(4444, 33, 2, 3, 4, None))
         self.assertEqual(self.query.select(4444, 0, [1,1,1,1,1])[0].columns, [33, 2, 3, 4, 1])
 
     def test_update_failure(self):

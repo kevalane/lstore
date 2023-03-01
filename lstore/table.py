@@ -174,10 +174,8 @@ class Table:
         :param new_cols: list   # List of new column values
         :param rid: int         # RID of the previous record being updated
         """
-
         # check if new primary key is already in use
         if new_cols[self.key] in self.page_directory.keys() and rid != new_cols[self.key]:
-            print(self.page_directory)
             return False
 
         # if no tail pages exist, create one
@@ -284,6 +282,8 @@ class Table:
         # merge if needed
         if  num_updates >= MERGE_COUNTER:
             self.merge(rid)
+
+        return True
 
     def add_record(self, columns: list[int]) -> bool:
         """
