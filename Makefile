@@ -17,4 +17,4 @@ test:
 	$(PYTHON) m2_tester_part2.py
 
 clean:
-	rm -rf htmlcov/ .coverage */__pycache__/ data/ ECS165/
+	rm -rf htmlcov/ .coverage */__pycache__/ data/ ECS165/ test.db/

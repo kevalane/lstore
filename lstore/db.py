@@ -53,6 +53,7 @@ class Database:
 
         :returns: Table | None      The created table or None if the table already exists.
         """
+        self.open(self.path)
         if name not in self.tables:
             # Table does not exist, create it
             table = Table(name, num_columns, key_index, self.path, new)
