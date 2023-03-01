@@ -4,30 +4,6 @@ import streamlit as st
 from lstore.db import Database
 from lstore.query import Query
 
-def insert_record(query,key, val1, val2, val3, val4):
-    records ={}
-    records[key] = [key,val1, val2, val3, val4 ]
-    temp =query.insert(*records[key])
-    st.write("{}".format(temp))
-    st.write("Record with key {} inserted successfully.".format(key))
-
-
-def update_record(query,key, val1, val2, val3, val4):
-    query.update(key,val1, val2, val3, val4)
-    st.write("Record with key {} updated successfully.".format(key))
-    
-
-def delete_record(query,key):
-    st.write("Record with key {} deleted successfully.".format(key))
-    query.delete(key)
-    
-def sum_data(query,start_key, end_key,col_index):
-    sum = query.sum(start_key,end_key,col_index)
-    st.write("The requested sum ={}".format(sum))
-
-def select_data(query,search_key, search_key_index,projected_columns_index = [1, 1, 1, 1, 1]):
-    select = query.select(search_key,search_key_index,[projected_columns_index])
-    st.write("The requested record {}".format(select))
 
 # def display_table(data):
 #     st.write("| key | val1 | val2 | val3 | val4 |")
@@ -44,16 +20,16 @@ def main():
     operation = st.selectbox("Select Operation", ["Select", "Insert", "Update", "Delete", "Sum"])
     
     if operation == "Insert" or operation == "Update":
-        key, val1, val2, val3, val4 = 0,0,0,0,0
+        key, val = 0,0
         # if st.button("Generate Random Data"):
         #     key = 92106429 + randint(0,1000)
         #     val1, val2, val3, val4 = randint(0,20), randint(0,20), randint(0,20), randint(0,20)
         key = st.text_input("Enter key:",key)
-        val1 = st.text_input("Enter value 1:",val1)
-        val2 = st.text_input("Enter value 2:",val2)
-        val3 = st.text_input("Enter value 3:",val3)
-        val4 = st.text_input("Enter value 4:",val4)
-        
+        val = st.text_input("Enter values seperated by commas: ",val)
+        vals = val.split(',')
+        record = [key] + vals
+        records ={}
+        records[key] = [record]
             
     elif operation == "Delete":
         key = 0
@@ -85,19 +61,34 @@ def main():
 
     if st.button("Execute"):
         if operation == "Insert":
-            insert_record(query,key, val1, val2, val3, val4)
+            # print(len(*records[key]))
+            temp = query.insert(*records[key])
+            if temp:
+                st.write("Record with key {} inserted successfully.".format(key))
+            else: 
+                st.write("Record not inserted")
 
         elif operation == "Update":
-            update_record(query,key, val1, val2, val3, val4)
-            
+            temp = query.update(*records[key])
+            if temp:
+                st.write("Record with key {} updated successfully.".format(key))
+            else:
+                st.write("Record not updated succesfully")
+
         elif operation == "Delete":
-            delete_record(query,key)
-            
+            temp = query.delete(key)
+            if temp:
+                st.write("Record with key {} deleted successfully.".format(key))
+            else:
+                st.write("Record with key {} wasn't deleted.".format(key))
+
         elif operation == "Sum":
-            sum_data(query,start_range,end_range,col_index)
+            sum = query.sum(start_range,end_range,col_index)
+            st.write("The requested sum ={}".format(sum))
         
         elif operation == "Select":
-            select_data(query,search_key, search_key_index)
+            select = query.select(search_key,search_key_index,[projected_columns_index])
+            st.write("The requested record {}".format(select))
 
 
 main()
