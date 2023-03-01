@@ -427,6 +427,7 @@ class Table:
         page_copy.columns[INDIRECTION_COLUMN].put(page.columns[INDIRECTION_COLUMN].get(offset), offset)
         
         # Need to add code here to update page directory
+        page = deepcopy(page_copy)
         
         # Delete the copy
         del page_copy
