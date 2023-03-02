@@ -156,3 +156,40 @@ class QuerySpec(unittest.TestCase):
         self.assertTrue(self.query.insert(88, 5, 6, 7, 8))
         self.assertFalse(self.query.update(1337, 2, 1337, 1337, 1337, 1337))
 
+    def test_select_version(self):
+        self.assertTrue(self.query.insert(14, 2, 3, 4, 5))
+        self.assertTrue(self.query.update(14, None, 6, 7, 8, 9))
+        self.assertTrue(self.query.update(14, None, 4, 11, 12, 13))
+
+        # select the most recent version (version -1)
+        result = self.query.select_version(14, 0, [1, 1, 1, 1, 1], -1)
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0].columns, [14, 6, 7, 8, 9])
+
+        # select the oldest version (version -3)
+        result = self.query.select_version(14, 0, [1, 1, 1, 1, 1], -3)
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0].columns, [14, 2, 3, 4, 5])
+
+        # select a specific version (version -2)
+        result = self.query.select_version(1, 0, [1, 1, 1, 1, 1], -2)
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0].columns, [14, 2, 3, 4, 5])
+
+        # select version 0
+        result = self.query.select_version(14, 0, [1, 1, 1, 1, 1], 0)
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0].columns, [14, 4, 11, 12, 13])
+
+    def test_select_version_fail(self):
+        self.assertTrue(self.query.insert(14, 2, 3, 4, 5))
+        self.assertTrue(self.query.update(14, None, 6, 7, 8, 9))
+        self.assertTrue(self.query.update(14, None, 4, 11, 12, 13))
+
+        # select a rid that doesn't exist
+        self.assertFalse(self.query.select_version(67, 0, [1, 1, 1, 1, 1], -4))
+
+        # pass too many projected columns
+        self.assertFalse(self.query.select_version(14, 0, [1, 1, 1, 1, 1, 0, 0, 1], 1))
+
+

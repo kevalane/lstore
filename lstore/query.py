@@ -1,6 +1,7 @@
 from lstore.table import Table
 from lstore.index import Index
 from lstore.record import Record
+from lstore.config import *
 
 
 class Query:
@@ -108,25 +109,35 @@ class Query:
             selected = self.table.index.indices[search_key_index].get(search_key)
         
             for rid in selected:
-                record = self.table.get_record(rid)
+                record = self.table.get_base_record(rid)
+                base_record = record
                 
-                for j in abs(relative_version):
-                    if record[0] is not None:
-                        try:
-                            record = self.table.get_record(record[0])
-                        except Exception as e:
-                            continue
+                for j in range(abs(relative_version)+1):
+                    # how many times to go backwards
+                    indirection_tid = record[0]
+                    if (indirection_tid != rid):
+                        tail = self.table.get_tail_page(indirection_tid)
+                        record = tail
+                    else:
+                        record = self.table.get_base_record(indirection_tid)
+                        break
                 
+                schema_encoding = record[SCHEMA_ENCODING_COLUMN]
+                schema_encoding = self.table._pad_with_leading_zeros(schema_encoding)
+                for i in range(len(schema_encoding)):
+                    if schema_encoding[i] == '1':
+                        base_record[i+META_COLUMNS] = record[i+META_COLUMNS]
+
                 cols = list()
                 for i in range(len(projected_columns_index)):
                     if projected_columns_index[i] == 1:
-                        cols.append(record[i])
+                        cols.append(base_record[i+META_COLUMNS])
                 
                 res.append(Record(self.table.key, cols, rid))
                 
             return res
             
-        except:
+        except Exception as e:
             return False
 
     """
