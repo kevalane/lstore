@@ -50,14 +50,14 @@ class Table:
         self.latest_base_page_index = 0
         self.latest_tail_page_index = -1
         self.bufferpool = Bufferpool(100, self.path)
-
+        self.index = Index(self)
         # create a base page
         if new:
+            self.index.create_index(key_index)
             last_base_page = Wide_Page(num_columns, key_index)
             last_base_page.write_to_disk(0, True, self.path)
         
-        self.index = Index(self)
-        self.index.create_index(key_index)
+        
         
 
     def get_record(self, rid: int, with_meta=False) -> list[int]:

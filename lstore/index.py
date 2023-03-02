@@ -79,7 +79,7 @@ class Index:
         if column_number not in self.indices:
             # create index {} for column
             self.indices[column_number] = {}
-            self.push_initialized_records_to_index(self.initialize_index())
+            # self.push_initialized_records_to_index(self.initialize_index())
             return True
         else:
             return False
@@ -202,7 +202,7 @@ class Index:
                 record_as_list = self.table.get_record(rid)
                 initialized_record = Record(self.table.key, record_as_list, rid)
                 initialized_records.append(initialized_record)
-
+        print(initialized_records)
         return initialized_records
     
     # at time of index creation, below method to be called
