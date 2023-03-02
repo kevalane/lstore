@@ -29,8 +29,6 @@ class Table:
         self.key = key_index
         self.num_columns = num_columns
         self.page_directory = {}
-        self.index = Index(self)
-        self.index.create_index(key_index)
         # Keeps track of the RID to be generated each time a tail record is added
         self.rid_generator = 0
         merge_queue = Queue()
@@ -57,6 +55,9 @@ class Table:
         if new:
             last_base_page = Wide_Page(num_columns, key_index)
             last_base_page.write_to_disk(0, True, self.path)
+
+        self.index = Index(self)
+        self.index.create_index(key_index)
 
     def get_record(self, rid: int, with_meta=False) -> list[int]:
         """

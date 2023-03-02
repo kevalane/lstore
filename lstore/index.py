@@ -2,6 +2,7 @@ from lstore import wide_page
 from lstore.record import Record
 from lstore.page import Page
 from lstore.wide_page import Wide_Page
+from lstore.config import *
 
 INCLUSIVE = 1 # 0/1 for exclusive/inclusive range
 
@@ -185,8 +186,7 @@ class Index:
         else:
             return False
         
-        
-     def initialize_index(self):
+    def initialize_index(self):
         """
         """
         #intializing empty list to contain all records

@@ -34,7 +34,7 @@ class Query:
     # Returns False if insert fails for whatever reason
     """
     def insert(self, *columns):
-        if len(*columns) != self.table.num_columns:
+        if len(columns) != self.table.num_columns:
             return False
         
         try:
@@ -135,7 +135,7 @@ class Query:
     # Returns False if no records exist with given key or if the target record cannot be accessed due to 2PL locking
     """
     def update(self, primary_key, *columns):
-        if len(*columns) != self.table.num_columns:
+        if len(columns) != self.table.num_columns:
             return False
         
         try:
