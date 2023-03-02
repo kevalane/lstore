@@ -11,22 +11,22 @@ for i in range(40):
 
 table.add_record([444444, 1, 1, 1, 1])
 # 32nd insert
-print(table.get_record(44476, False))
+#print(table.get_record(44476, False))
 
 table.update_record(44476, [None, 1, 2, 3, 4])
-print(table.page_directory)
-print(table.get_record(44476, False))
+#print(table.page_directory)
+#print(table.get_record(44476, False))
 table.update_record(44476, [None, None, 22, None, None])
-print(table.page_directory)
-print(table.get_record(44476, False))
+#print(table.page_directory)
+#print(table.get_record(44476, False))
 table.update_record(44476, [None, None, None, 33, None])
-print(table.page_directory)
-print(table.get_record(44476, False))
+#print(table.page_directory)
+#print(table.get_record(44476, False))
 table.update_record(44476, [None, None, 44, None, None])
-print(table.page_directory)
-print(table.get_record(44476, False))
+#print(table.page_directory)
+#print(table.get_record(44476, False))
 
-print(table.get_record(44476, False))
+#print(table.get_record(44476, False))
 
 query.insert([1,2,3,4])
 
