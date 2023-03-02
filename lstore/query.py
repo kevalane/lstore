@@ -156,7 +156,6 @@ class Query:
             return True
             
         except Exception as e:
-            print(e)
             return False
 
     """
@@ -206,21 +205,9 @@ class Query:
             return False
         
         for i in range(start_range, end_range+1):
-            try:
-                record = self.table.get_record(i)
-                
-                for j in abs(relative_version):
-                    if record[0] is not None:
-                        try:
-                            record = self.table.get_record(record[0])
-                            
-                        except Exception as e:
-                            continue
-                        
-                recs.append(record)
-                
-            except Exception as e:
-                continue
+            record = self.select_version(i, 0, [1]*self.table.num_columns, relative_version)
+            if record:
+                recs.append(record[0].columns)
             
         if len(recs) == 0:
             return False
