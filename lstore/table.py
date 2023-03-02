@@ -379,11 +379,17 @@ class Table:
                 True,
                 self.num_columns
             )
+            if page == None:
+                return []
+            
             for i in range(page.columns[0].num_records):
                 rid = page.columns[RID_COLUMN].get(i)
-                record_as_list = self.get_record(rid)
-                initialized_record = Record(self.key, record_as_list, rid)
-                records.append(initialized_record)
+                try:
+                    record_as_list = self.get_record(rid)
+                    initialized_record = Record(self.key, record_as_list, rid)
+                    records.append(initialized_record)
+                except:
+                    continue
         return records
 
 

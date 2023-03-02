@@ -79,6 +79,7 @@ class Index:
         if column_number not in self.indices:
             # create index {} for column
             self.indices[column_number] = {}
+            self.index_existing_records(column_number)
             # self.push_initialized_records_to_index(self.initialize_index())
             return True
         else:
@@ -90,30 +91,33 @@ class Index:
         :param  record: Record       The record to add to the indices
         :param index_column: int     Column for record to be indexed on, defaults to RID if no argument given
         """
-        if index_column == None:
-            indexed_value = record.rid
-        else:
-            indexed_value = record.columns[index_column]
-        #print(indexed_value)
-        #RID = record.rid
-        # print(self.indices)
+        # if index_column == None:
+        #     indexed_value = record.rid
+        # else:
+        #     indexed_value = record.columns[index_column]
+
+        # we should always insert the rid, that's how we find the record
+        indexed_value = record.rid
+
         # iterate through each column in the record
         for i, value in enumerate(record.columns):
+            # if index not made for column, skip
             if i not in self.indices:
-                # skip index not made
                 continue
 
-            # get the index {} associated with the column number
+            # get all currently indexed values for the column
             working_index = self.indices.get(i)
             if value in working_index:
+                # it's already been indexed
                 if indexed_value in working_index[value]:
                     pass
                 else:
+                    # push rid to list of indexed values
                     working_index[value].append(indexed_value)
 
 
             if value not in working_index:
-            # create a list for the value if it doesn't exist
+                # create a list for the value if it doesn't exist
                 working_index[value] = []
                 working_index[value].append(indexed_value)
 
@@ -185,6 +189,12 @@ class Index:
             return True
         else:
             return False
+        
+    def index_existing_records(self, column_number: int) -> None:
+        records = self.table.get_all_records_in_database()
+        for record in records:
+            self.push_record_to_index(record, column_number)
+
         
     def initialize_index(self):
         """
