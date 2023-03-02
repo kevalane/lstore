@@ -194,4 +194,37 @@ class QuerySpec(unittest.TestCase):
         # pass too many projected columns
         self.assertFalse(self.query.select_version(14, 0, [1, 1, 1, 1, 1, 0, 0, 1], 1))
 
+    def test_sum_version(self):
+        # insert some records
+        self.assertTrue(self.query.insert(55, 10, 20, 30, 3))
+        self.assertTrue(self.query.insert(56, 20, 30, 40, 3))
+        self.assertTrue(self.query.insert(57, 30, 40, 50, 3))
+        self.assertTrue(self.query.insert(58, 40, 50, 60, 3))
+        self.assertTrue(self.query.insert(59, 50, 60, 70, 3))
+
+        # test with valid parameters
+        self.assertEqual(self.query.sum_version(55, 59, 1, -1), 150)
+        self.assertEqual(self.query.sum_version(56, 58, 2, -1), 120)
+        self.assertEqual(self.query.sum_version(57, 57, 3, -1), 50)
+
+        # test with invalid range
+        self.assertFalse(self.query.sum_version(6, 10, 0, -1))
+        self.assertFalse(self.query.sum_version(1, 0, 1, -1))
+        self.assertFalse(self.query.sum_version(4, 2, 2, -1))
+
+        # test with invalid column index
+        self.assertFalse(self.query.sum_version(1, 5, 5, -1))
+
+        # do some updates
+        self.assertTrue(self.query.update(55, None, 400, 20, 30, 3))
+        self.assertTrue(self.query.update(56, None, 400, 400, 40, 3))
+        self.assertTrue(self.query.update(57, None, 400, 40, 400, 3))
+        self.assertTrue(self.query.update(58, None, 400, 50, 60, 3))
+
+        # test with valid parameters
+        self.assertEqual(self.query.sum_version(55, 59, 1, -1), 150)
+        self.assertEqual(self.query.sum_version(55, 59, 1, 0), 1650)
+
+        self.assertEqual(self.query.sum_version(55, 500, 1, -1), 150)
+
 
