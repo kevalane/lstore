@@ -74,10 +74,10 @@ class Query:
                         cols.append(record[i])
                 
                 res.append(Record(self.table.key, cols, rid))
-                
             return res
         
         except Exception as e:
+            res = list()
             # Using indices did not work
             records = self.table.brute_force_search(search_key, search_key_index)
             for record in records:

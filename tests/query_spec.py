@@ -65,7 +65,6 @@ class QuerySpec(unittest.TestCase):
         self.assertEqual(self.query.select(4444, 0, [1,1,1,1,1])[0].columns, [33, 2, 3, 4, 1])
 
     def test_update_failure(self):
-        print("test_update_failure")
         # record doesn't exist
         self.assertFalse(self.query.update(1, 1, 2, 19, 0, 1))
         # too many columns

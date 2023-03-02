@@ -376,6 +376,9 @@ class Table:
         :return: list[Record]
         """
         records = []
+        if self.page_directory == {}:
+            return records
+        
         for page_index in range(self.latest_base_page_index + 1):
             page = self.bufferpool.retrieve_page(
                 page_index,
