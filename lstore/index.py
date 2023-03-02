@@ -78,6 +78,8 @@ class Index:
         if column_number not in self.indices:
             # create index {} for column
             self.indices[column_number] = {}
+            self.initialize_index(self)
+            self.push_initialized_records_to_index(self.initialize_index())
             return True
         else:
             return False
@@ -185,26 +187,23 @@ class Index:
             return False
         
         
-    def initialize_index(self):
-        # j = counter for which record's values are being pulled
-        j = 0
-        # list of record objects created for each initialized records
+     def initialize_index(self):
+        """
+        """
+        #intializing empty list to contain all records
         initialized_records = []
-        # 511 needs to be changed - not hardcoded
-        while j<= 511:
-            # iterates through ecah column in wide page (other than metadata columns, 
-            # finds the jth value, and adds to a list (record columns)
-            # RID is found in the 1 page, set to var RID
-            # all column values at jth position are appended to list of column values
-            # record object made for each record based on list of column values and RID
-            # all record objects appended to initialized_records list
-                for i in range(self.wide_page.META_COLUMNS+0, len(self.wide_page.columns)):
-                    record_columns = []
-                    record_columns.append(wide_page.columns[{i}].get(j))
-                    RID = wide_page.columns[1].get(j)
-                    initialized_record = Record(self.table.key, record_columns, RID)
-                    initialized_records.append(initialized_record)
-                    j += 1
+        for page_index in range(self.latest_base_page_index + 1):
+            page = self.bufferpool.retrieve_page(
+                page_index,
+                True,
+                self.num_columns
+            )
+            for i in range(page.columns[0].num_records):
+                rid = page.columns[RID_COLUMN].get(i)
+                record_as_list = self.get_record(search_rid)
+                initialized_record = Record(self.table.key, record_as_list, rid)
+                initialized_records.append(initialized_record)
+
         return initialized_records
     
     # at time of index creation, below method to be called
