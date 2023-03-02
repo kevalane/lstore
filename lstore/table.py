@@ -179,6 +179,9 @@ class Table:
         :param rid: int         # RID of the previous record being updated
         """
         # check if new primary key is already in use
+        if rid not in self.page_directory.keys():
+            return False
+        
         if new_cols[self.key] in self.page_directory.keys() and rid != new_cols[self.key]:
             return False
 
