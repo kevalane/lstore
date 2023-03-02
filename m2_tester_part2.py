@@ -60,4 +60,6 @@ for key in deleted_keys:
     query.delete(key)
     records.pop(key, None)
 
+grades_table.index.create_index(1)
+
 db.close()

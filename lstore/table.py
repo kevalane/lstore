@@ -13,7 +13,7 @@ from queue import Queue
 from lstore.config import *
 
 # merge constant
-MERGE_COUNTER = 5
+MERGE_COUNTER = 3
 
 class Table:
 
@@ -179,6 +179,9 @@ class Table:
         :param rid: int         # RID of the previous record being updated
         """
         # check if new primary key is already in use
+        if rid not in self.page_directory.keys():
+            return False
+        
         if new_cols[self.key] in self.page_directory.keys() and rid != new_cols[self.key]:
             return False
 
@@ -281,12 +284,14 @@ class Table:
         base_page.write_to_disk(base_record[PAGE_NUM], True, self.path)
         last_tail_page.write_to_disk(self.latest_tail_page_index, False, self.path)
         
-        num_updates = (base_page.columns[TPS_COLUMN].get(base_record[OFFSET])) - (old_tail_tps + 1)
+        num_updates = (old_tail_tps + 1) - (base_page.columns[TPS_COLUMN].get(base_record[OFFSET]))
         
         # merge if needed
         if  num_updates >= MERGE_COUNTER:
-            self.merge(rid)
-
+            #need tp fix merge
+            #self.merge(rid)
+            pass
+            
         return True
 
     def add_record(self, columns: list[int]) -> bool:
@@ -367,6 +372,34 @@ class Table:
                     records.append(search_record)
                     
         return records
+    
+    def get_all_records_in_database(self) -> list[Record]:
+        """
+        :return: list[Record]
+        """
+        records = []
+        if self.page_directory == {}:
+            return records
+        
+        for page_index in range(self.latest_base_page_index + 1):
+            page = self.bufferpool.retrieve_page(
+                page_index,
+                True,
+                self.num_columns
+            )
+            if page == None:
+                return []
+            
+            for i in range(page.columns[0].num_records):
+                rid = page.columns[RID_COLUMN].get(i)
+                try:
+                    record_as_list = self.get_record(rid)
+                    initialized_record = Record(self.key, record_as_list, rid)
+                    records.append(initialized_record)
+                except:
+                    continue
+        return records
+
 
     def assign_rid(self):
         """
@@ -430,6 +463,7 @@ class Table:
         
         schema_encoding = tail_page.columns[SCHEMA_ENCODING_COLUMN].get(t_offset)
         schema_encoding = self._pad_with_leading_zeros(schema_encoding)
+        
         # Iterate through schema encoding column and update values
         for i in schema_encoding:
             if i == '1':
