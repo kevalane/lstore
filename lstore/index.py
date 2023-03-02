@@ -200,7 +200,7 @@ class Index:
             )
             for i in range(page.columns[0].num_records):
                 rid = page.columns[RID_COLUMN].get(i)
-                record_as_list = self.get_record(search_rid)
+                record_as_list = self.get_record(rid)
                 initialized_record = Record(self.table.key, record_as_list, rid)
                 initialized_records.append(initialized_record)
 
