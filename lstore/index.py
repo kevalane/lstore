@@ -194,30 +194,3 @@ class Index:
         records = self.table.get_all_records_in_database()
         for record in records:
             self.push_record_to_index(record, column_number)
-
-        
-    def initialize_index(self):
-        """
-        """
-        #intializing empty list to contain all records
-        initialized_records = []
-        for page_index in range(self.table.latest_base_page_index + 1):
-            page = self.table.bufferpool.retrieve_page(
-                page_index,
-                True,
-                self.table.num_columns
-            )
-            for i in range(page.columns[0].num_records):
-                rid = page.columns[RID_COLUMN].get(i)
-                record_as_list = self.table.get_record(rid)
-                initialized_record = Record(self.table.key, record_as_list, rid)
-                initialized_records.append(initialized_record)
-        print(initialized_records)
-        return initialized_records
-    
-    # at time of index creation, below method to be called
-    # pushes each record in initialized_records list to index
-    def push_initialized_records_to_index(self, initialized_records):
-        for i in range(0, len(initialized_records)):
-            self.push_record_to_index(initialized_records[i])
-
