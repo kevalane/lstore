@@ -286,8 +286,8 @@ class Table:
         # merge if needed
         if  num_updates >= MERGE_COUNTER:
             #need tp fix merge
-            self.merge(rid)
-            #pass
+            #self.merge(rid)
+            pass
             
         return True
 
