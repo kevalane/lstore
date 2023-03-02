@@ -192,10 +192,10 @@ class Index:
         #intializing empty list to contain all records
         initialized_records = []
         for page_index in range(self.table.latest_base_page_index + 1):
-            page = self.bufferpool.retrieve_page(
+            page = self.table.bufferpool.retrieve_page(
                 page_index,
                 True,
-                self.num_columns
+                self.table.num_columns
             )
             for i in range(page.columns[0].num_records):
                 rid = page.columns[RID_COLUMN].get(i)
