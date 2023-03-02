@@ -367,6 +367,25 @@ class Table:
                     records.append(search_record)
                     
         return records
+    
+    def get_all_records_in_database(self) -> list[Record]:
+        """
+        :return: list[Record]
+        """
+        records = []
+        for page_index in range(self.latest_base_page_index + 1):
+            page = self.bufferpool.retrieve_page(
+                page_index,
+                True,
+                self.num_columns
+            )
+            for i in range(page.columns[0].num_records):
+                rid = page.columns[RID_COLUMN].get(i)
+                record_as_list = self.get_record(rid)
+                initialized_record = Record(self.key, record_as_list, rid)
+                records.append(initialized_record)
+        return records
+
 
     def assign_rid(self):
         """
