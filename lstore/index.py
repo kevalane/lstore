@@ -79,7 +79,7 @@ class Index:
         if column_number not in self.indices:
             # create index {} for column
             self.indices[column_number] = {}
-            self.index_existing_records(column_number)
+            self.index_existing_records()
             # self.push_initialized_records_to_index(self.initialize_index())
             return True
         else:
@@ -91,10 +91,10 @@ class Index:
         :param  record: Record       The record to add to the indices
         :param index_column: int     Column for record to be indexed on, defaults to RID if no argument given
         """
-        # if index_column == None:
-        #     indexed_value = record.rid
-        # else:
-        #     indexed_value = record.columns[index_column]
+        if index_column == None:
+            indexed_value = record.rid
+        else:
+            indexed_value = record.columns[index_column]
 
         # we should always insert the rid, that's how we find the record
         indexed_value = record.rid
@@ -190,7 +190,7 @@ class Index:
         else:
             return False
         
-    def index_existing_records(self, column_number: int) -> None:
+    def index_existing_records(self) -> None:
         records = self.table.get_all_records_in_database()
         for record in records:
-            self.push_record_to_index(record, column_number)
+            self.push_record_to_index(record)
