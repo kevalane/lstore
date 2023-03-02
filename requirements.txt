@@ -2,3 +2,5 @@ colorama
 coverage
 unittest
 streamlit
+openpyxl
+pandas

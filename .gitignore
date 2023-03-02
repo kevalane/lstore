@@ -2,6 +2,7 @@
 **/**/__pycache__/
 data/
 ECS165
+*.xlsx
 
 # Test
 .coverage

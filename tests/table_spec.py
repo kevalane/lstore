@@ -6,6 +6,7 @@ from random import randint, seed
 from lstore.config import *
 import os
 import shutil
+import pandas as pd
 
 class TableTestCase(unittest.TestCase):
     def test_init_table(self):
@@ -266,3 +267,31 @@ class TableTestCase(unittest.TestCase):
         table.page_directory = {0: ('base', 0, 0)}
         shutil.rmtree("data/none")
         self.assertEqual(table.get_all_records_in_database(), [])
+
+    def test_dump(self):
+        key = 0
+        table = Table("test", 4, key)
+        seed(134134)
+        for i in range(1000):
+            columns = [i+1, randint(0, 1000), randint(0, 1000), randint(0, 1000)]
+            table.add_record(columns)
+
+        # Dump the data to a file
+        table.dump()
+        
+        # Load the file as a pandas dataframe
+        path = 'export_dataframe.xlsx'
+        df = pd.read_excel(path)
+
+        # Check if the number of rows in the dataframe matches the number of records in the table
+        self.assertEqual(len(df), 1000)
+
+        # Check if the columns in the dataframe match the columns in the table
+        expected_columns = [0, 1, 2, 3]
+        self.assertListEqual(list(df.columns), expected_columns)
+
+        # Check if the values in each row of the dataframe match the values in the corresponding record in the table
+        for i in range(1000):
+            record = table.get_record(i+1)
+            expected_row = [i+1] + record[1:]
+            self.assertListEqual(list(df.iloc[i]), expected_row)
