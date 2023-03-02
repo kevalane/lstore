@@ -78,7 +78,6 @@ class Index:
         if column_number not in self.indices:
             # create index {} for column
             self.indices[column_number] = {}
-            self.initialize_index(self)
             self.push_initialized_records_to_index(self.initialize_index())
             return True
         else:
