@@ -150,5 +150,9 @@ class QuerySpec(unittest.TestCase):
         self.assertEquals(result, [])
 
     def test_update_no_record(self):
-        pass
+        self.assertTrue(self.query.insert(55, 2, 3, 4, 5))
+        self.assertTrue(self.query.insert(66, 3, 4, 4, 6))
+        self.assertTrue(self.query.insert(77, 4, 5, 4, 7))
+        self.assertTrue(self.query.insert(88, 5, 6, 7, 8))
+        self.assertFalse(self.query.update(1337, 2, 1337, 1337, 1337, 1337))
 
