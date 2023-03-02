@@ -9,6 +9,8 @@ db.open('./ECS165')
 # Getting the existing Grades table
 grades_table = db.get_table('Grades')
 
+print(grades_table)
+
 # create a query class for the grades table
 query = Query(grades_table)
 
