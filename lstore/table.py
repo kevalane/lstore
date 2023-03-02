@@ -13,7 +13,7 @@ from queue import Queue
 from lstore.config import *
 
 # merge constant
-MERGE_COUNTER = 5
+MERGE_COUNTER = 3
 
 class Table:
 
@@ -281,12 +281,14 @@ class Table:
         base_page.write_to_disk(base_record[PAGE_NUM], True, self.path)
         last_tail_page.write_to_disk(self.latest_tail_page_index, False, self.path)
         
-        num_updates = (base_page.columns[TPS_COLUMN].get(base_record[OFFSET])) - (old_tail_tps + 1)
+        num_updates = (old_tail_tps + 1) - (base_page.columns[TPS_COLUMN].get(base_record[OFFSET]))
         
         # merge if needed
         if  num_updates >= MERGE_COUNTER:
-            self.merge(rid)
-
+            #need tp fix merge
+            #self.merge(rid)
+            pass
+            
         return True
 
     def add_record(self, columns: list[int]) -> bool:
@@ -430,6 +432,7 @@ class Table:
         
         schema_encoding = tail_page.columns[SCHEMA_ENCODING_COLUMN].get(t_offset)
         schema_encoding = self._pad_with_leading_zeros(schema_encoding)
+        
         # Iterate through schema encoding column and update values
         for i in schema_encoding:
             if i == '1':
