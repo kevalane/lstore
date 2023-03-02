@@ -198,7 +198,7 @@ class TableTestCase(unittest.TestCase):
         # Update all 1000 records
         for i in range(1000):
             new_columns = [None, randint(1001, 2000), randint(1001, 2000), randint(1001, 2000)]
-            table.update_record(i+1, new_columns)
+            table.update_record(34432332+i+1, new_columns)
             updated_cols.append([34432332+i+1, new_columns[1], new_columns[2], new_columns[3]])
 
         # Check if all records have the new column values
