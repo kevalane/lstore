@@ -402,10 +402,12 @@ class Table:
         # Set column counter
         col = 0
         
+        schema_encoding = tail_page.columns[SCHEMA_ENCODING_COLUMN].get(t_offset)
+        schema_encoding = self._pad_with_leading_zeros(schema_encoding)
         # Iterate through schema encoding column and update values
-        for i in tail_page.columns[SCHEMA_ENCODING_COLUMN].get(t_offset):
+        for i in schema_encoding:
             if i == '1':
-                page_copy.columns[col].put(tail_page.columns[col].get(t_offset), offset)
+                page_copy.columns[col+META_COLUMNS].put(tail_page.columns[col+META_COLUMNS].get(t_offset), offset)
                 
             col+=1
                 
