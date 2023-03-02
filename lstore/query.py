@@ -227,7 +227,7 @@ class Query:
     """
     def increment(self, key, column):
         r = self.select(key, self.table.key, [1] * self.table.num_columns)
-        if r is not False:
+        if r is not False and len(r) > 0:
             r = r[0]
             updated_columns = [None] * self.table.num_columns
             updated_columns[column] = r[column] + 1

@@ -124,8 +124,7 @@ class QuerySpec(unittest.TestCase):
         self.assertTrue(self.query.insert(66, 3, 4, 4, 6))
         self.assertTrue(self.query.insert(77, 4, 5, 4, 7))
         self.assertTrue(self.query.insert(88, 5, 6, 7, 8))
-        print("SELECT NO INDEX")
-        print("here it is: " + str(self.query.select(5, 4, [1, 1, 1, 1, 1])))
+        self.assertEquals(self.query.select(5, 4, [1, 1, 1, 1, 1]), [[55, 2, 3, 4, 5]])
         
         pass
 
