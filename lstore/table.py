@@ -8,6 +8,7 @@ from time import time
 import os
 import json
 import threading
+import pandas as pd
 from queue import Queue
 from lstore.config import *
 
@@ -35,8 +36,9 @@ class Table:
         merge_queue = Queue()
 
         self.path = path + '/' + name
+        
         try:
-            os.mkdir(self.path)
+            os.makedirs(self.path)
         except FileExistsError:
             pass
         
@@ -277,7 +279,7 @@ class Table:
         base_page.write_to_disk(base_record[PAGE_NUM], True, self.path)
         last_tail_page.write_to_disk(self.latest_tail_page_index, False, self.path)
         
-        num_updates = (old_tail_tps + 1) - (base_page.columns[TPS_COLUMN].get(base_record[OFFSET]))
+        num_updates = (base_page.columns[TPS_COLUMN].get(base_record[OFFSET])) - (old_tail_tps + 1)
         
         # merge if needed
         if  num_updates >= MERGE_COUNTER:
@@ -406,6 +408,8 @@ class Table:
         self.index.indices = data['indices']
 
     def merge(self, rid):
+        print('Merge is happening...')
+        
         # Retrieve the page being merged
         page_type, page_num, offset = self.page_directory[rid]
         page = self.bufferpool.retrieve_page(page_num, (page_type == 'base'), self.num_columns)
@@ -425,7 +429,7 @@ class Table:
         schema_encoding = tail_page.columns[SCHEMA_ENCODING_COLUMN].get(t_offset)
         schema_encoding = self._pad_with_leading_zeros(schema_encoding)
         # Iterate through schema encoding column and update values
-        for i in schema_encoding:
+        for i in tail_page.columns[SCHEMA_ENCODING_COLUMN].get(t_offset):
             if i == '1':
                 page_copy.columns[col+META_COLUMNS].put(tail_page.columns[col+META_COLUMNS].get(t_offset), offset)
                 
@@ -442,3 +446,15 @@ class Table:
         
         # Delete the copy
         del page_copy
+        
+    def dump(self):
+        data = []
+        
+        for rid in self.page_directory:
+            if self.page_directory[rid][0] == 'base':
+                data.append(self.get_record(rid, False))
+            
+        df = pd.DataFrame(data)
+        
+        path = 'export_dataframe.xlsx'
+        df.to_excel(path, index=False)
