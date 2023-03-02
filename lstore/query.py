@@ -104,7 +104,6 @@ class Query:
         
         try:
             if (len(projected_columns_index) > self.table.num_columns):
-                print('here1')
                 return False
             
             selected = self.table.index.indices[search_key_index].get(search_key)
@@ -139,7 +138,6 @@ class Query:
             return res
             
         except Exception as e:
-            print('here2')
             return False
 
     """

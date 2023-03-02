@@ -181,4 +181,15 @@ class QuerySpec(unittest.TestCase):
         self.assertEqual(len(result), 1)
         self.assertEqual(result[0].columns, [14, 4, 11, 12, 13])
 
+    def test_select_version_fail(self):
+        self.assertTrue(self.query.insert(14, 2, 3, 4, 5))
+        self.assertTrue(self.query.update(14, None, 6, 7, 8, 9))
+        self.assertTrue(self.query.update(14, None, 4, 11, 12, 13))
+
+        # select a rid that doesn't exist
+        self.assertFalse(self.query.select_version(67, 0, [1, 1, 1, 1, 1], -4))
+
+        # pass too many projected columns
+        self.assertFalse(self.query.select_version(14, 0, [1, 1, 1, 1, 1, 0, 0, 1], 1))
+
 
