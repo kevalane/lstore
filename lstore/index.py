@@ -186,7 +186,7 @@ class Index:
             return False
         
         
-     def initialize_index(self):
+    def initialize_index(self):
         """
         """
         #intializing empty list to contain all records
