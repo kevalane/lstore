@@ -1,4 +1,7 @@
+from lstore import wide_page
 from lstore.record import Record
+from lstore.page import Page
+from lstore.wide_page import Wide_Page
 
 INCLUSIVE = 1 # 0/1 for exclusive/inclusive range
 
@@ -9,13 +12,15 @@ class Index:
     through this object.
     """
 
-    def __init__(self, table):
+    def __init__(self, table, num_columns=5, key_index=0):
         """
         # Initializes an empty indices dictionary for a table
         :param  table: Table         The table to index
         """
         self.table = table
         self.indices = {}
+        self.wide_page = Wide_Page(num_columns, key_index)
+    
     
     def locate(self, column: int, value: int) -> list[int]:
         """
@@ -178,3 +183,33 @@ class Index:
             return True
         else:
             return False
+        
+        
+    def initialize_index(self):
+        # j = counter for which record's values are being pulled
+        j = 0
+        # list of record objects created for each initialized records
+        initialized_records = []
+        # 511 needs to be changed - not hardcoded
+        while j<= 511:
+            # iterates through ecah column in wide page (other than metadata columns, 
+            # finds the jth value, and adds to a list (record columns)
+            # RID is found in the 1 page, set to var RID
+            # all column values at jth position are appended to list of column values
+            # record object made for each record based on list of column values and RID
+            # all record objects appended to initialized_records list
+                for i in range(self.wide_page.META_COLUMNS+0, len(self.wide_page.columns)):
+                    record_columns = []
+                    record_columns.append(wide_page.columns[{i}].get(j))
+                    RID = wide_page.columns[1].get(j)
+                    initialized_record = Record(self.table.key, record_columns, RID)
+                    initialized_records.append(initialized_record)
+                    j += 1
+        return initialized_records
+    
+    # at time of index creation, below method to be called
+    # pushes each record in initialized_records list to index
+    def push_initialized_records_to_index(self, initialized_records):
+        for i in range(0, len(initialized_records)):
+            self.push_record_to_index(initialized_records[i])
+

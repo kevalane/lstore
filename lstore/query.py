@@ -40,7 +40,8 @@ class Query:
             return False
         
         try:
-            self.table.add_record(columns)
+            if not self.table.add_record(columns):
+                return False
             return True
             
         except Exception as e:
@@ -67,7 +68,6 @@ class Query:
                 selected = self.table.index.indices[search_key_index].get(search_key)
             except:
                 selected = self.table.index.indices[str(search_key_index)].get(str(search_key))
-
             for rid in selected:
                 record = self.table.get_record(rid)
                 cols = list()
@@ -80,8 +80,15 @@ class Query:
             return res
         
         except Exception as e:
-            print(e)
-            return False
+            # Using indices did not work
+            records = self.table.brute_force_search(search_key, search_key_index)
+            for record in records:
+                cols = list()
+                for i in range(len(projected_columns_index)):
+                    if projected_columns_index[i] == 1:
+                        cols.append(record[i])
+                res.append(Record(self.table.key, cols, record[1]))
+            return res
     
     """
     # Read matching record with specified search key
@@ -134,10 +141,13 @@ class Query:
             return False
         
         try:
-            self.table.update_record(primary_key, columns)
+            if not self.table.update_record(primary_key, columns):
+                return False
+
             return True
             
-        except:
+        except Exception as e:
+            print(e)
             return False
 
     """
@@ -222,7 +232,7 @@ class Query:
     """
     def increment(self, key, column):
         r = self.select(key, self.table.key, [1] * self.table.num_columns)
-        if r is not False:
+        if r is not False and len(r) > 0:
             r = r[0]
             updated_columns = [None] * self.table.num_columns
             updated_columns[column] = r[column] + 1

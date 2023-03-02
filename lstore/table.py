@@ -174,6 +174,9 @@ class Table:
         :param new_cols: list   # List of new column values
         :param rid: int         # RID of the previous record being updated
         """
+        # check if new primary key is already in use
+        if new_cols[self.key] in self.page_directory.keys() and rid != new_cols[self.key]:
+            return False
 
         # if no tail pages exist, create one
         if (self.latest_tail_page_index == -1):
@@ -280,14 +283,16 @@ class Table:
         if  num_updates >= MERGE_COUNTER:
             self.merge(rid)
 
-    def add_record(self, columns: list[int]) -> None:
+        return True
+
+    def add_record(self, columns: list[int]) -> bool:
         """
         :param columns: list    # List of column values
         """
         
         # check if record with this rid already exists
-        if columns[0] in self.page_directory:
-            return
+        if columns[self.key] in self.page_directory.keys():
+            return False
 
         # get last base page
         last_base_page = self.bufferpool.retrieve_page(
@@ -337,6 +342,27 @@ class Table:
 
         self.page_directory[rid] = location
         last_base_page.write_to_disk(self.latest_base_page_index, True, self.path)
+        return True
+    
+    def brute_force_search(self, search_key: int, search_column: int):
+        """
+        :param search_key: int      # The key to search for
+        :param search_column: int
+        """
+        records = []
+        for page_index in range(self.latest_base_page_index + 1):
+            page = self.bufferpool.retrieve_page(
+                page_index,
+                True,
+                self.num_columns
+            )
+            for i in range(page.columns[0].num_records):
+                search_rid = page.columns[RID_COLUMN].get(i)
+                search_record = self.get_record(search_rid)
+                if search_record[search_column] == search_key:
+                    records.append(search_record)
+                    
+        return records
 
     def assign_rid(self):
         """
@@ -396,10 +422,12 @@ class Table:
         # Set column counter
         col = 0
         
+        schema_encoding = tail_page.columns[SCHEMA_ENCODING_COLUMN].get(t_offset)
+        schema_encoding = self._pad_with_leading_zeros(schema_encoding)
         # Iterate through schema encoding column and update values
-        for i in tail_page.columns[SCHEMA_ENCODING_COLUMN].get(t_offset):
+        for i in schema_encoding:
             if i == '1':
-                page_copy.columns[col].put(tail_page.columns[col].get(t_offset), offset)
+                page_copy.columns[col+META_COLUMNS].put(tail_page.columns[col+META_COLUMNS].get(t_offset), offset)
                 
             col+=1
                 
