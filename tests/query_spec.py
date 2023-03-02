@@ -72,7 +72,9 @@ class QuerySpec(unittest.TestCase):
         # too few columns
         self.assertFalse(self.query.update(1, 1, 2, 19))        
         # non-integer column
-        self.assertFalse(self.query.update(1, 1, 'Doe', 19, 0))
+        self.query.insert(14, 123, 456, 18, 1)
+        print(self.table.page_directory)
+        self.assertFalse(self.query.update(14, 14, 'Doe', 19, 0, 5))
 
     def test_sum_success(self):
         self.query.insert(1, 123, 456, 18, 1)

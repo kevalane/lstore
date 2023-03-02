@@ -156,7 +156,6 @@ class Query:
             return True
             
         except Exception as e:
-            print(e)
             return False
 
     """
