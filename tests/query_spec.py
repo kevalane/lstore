@@ -118,8 +118,12 @@ class QuerySpec(unittest.TestCase):
         self.assertFalse(self.query.insert(1, 2, 3, 4, 5))
 
     def test_select_non_primary_index(self):
-
-        pass
+        self.assertTrue(self.query.insert(55, 2, 3, 4, 5))
+        self.assertTrue(self.query.insert(66, 3, 4, 4, 6))
+        self.assertTrue(self.query.insert(77, 4, 5, 4, 7))
+        self.assertTrue(self.query.insert(88, 5, 6, 7, 8))
+        self.table.index.create_index(3)
+        self.assertEquals(len(self.query.select(4, 3, [1, 1, 1, 1, 1])), 3)
 
     def test_select_no_index(self):
         self.assertTrue(self.query.insert(55, 2, 3, 4, 5))
