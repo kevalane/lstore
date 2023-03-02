@@ -68,7 +68,6 @@ class Query:
                 selected = self.table.index.indices[search_key_index].get(search_key)
             except:
                 selected = self.table.index.indices[str(search_key_index)].get(str(search_key))
-
             for rid in selected:
                 record = self.table.get_record(rid)
                 cols = list()
@@ -81,8 +80,10 @@ class Query:
             return res
         
         except Exception as e:
-            print(e)
-            return False
+            # Using indices did not work
+            records = self.table.brute_force_search(search_key, search_key_index)
+            return records
+            # return False
     
     """
     # Read matching record with specified search key

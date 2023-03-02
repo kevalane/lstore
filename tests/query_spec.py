@@ -111,3 +111,30 @@ class QuerySpec(unittest.TestCase):
         print(self.query.select(1, 0, [1, 1, 1, 1, 1]))
         self.assertFalse(self.query.update(1, 2, 33, 44, 55, 66))
         
+    def test_add_duplicate_key(self):
+        self.assertTrue(self.query.insert(1, 2, 3, 4, 5))
+        self.assertFalse(self.query.insert(1, 2, 3, 4, 5))
+
+    def test_select_non_primary_index(self):
+
+        pass
+
+    def test_select_no_index(self):
+        self.assertTrue(self.query.insert(55, 2, 3, 4, 5))
+        self.assertTrue(self.query.insert(66, 3, 4, 4, 6))
+        self.assertTrue(self.query.insert(77, 4, 5, 4, 7))
+        self.assertTrue(self.query.insert(88, 5, 6, 7, 8))
+        print("SELECT NO INDEX")
+        print("here it is: " + str(self.query.select(5, 4, [1, 1, 1, 1, 1])))
+        
+        pass
+
+    def test_select_multiple_records(self):
+        pass
+
+    def test_select_no_record(self):
+        pass
+
+    def test_update_no_record(self):
+        pass
+

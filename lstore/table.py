@@ -343,6 +343,26 @@ class Table:
         self.page_directory[rid] = location
         last_base_page.write_to_disk(self.latest_base_page_index, True, self.path)
         return True
+    
+    def brute_force_search(self, search_key: int, search_column: int):
+        """
+        :param search_key: int      # The key to search for
+        :param search_column: int
+        """
+        records = []
+        for page_index in range(self.latest_base_page_index + 1):
+            page = self.bufferpool.retrieve_page(
+                page_index,
+                True,
+                self.num_columns
+            )
+            for i in range(page.columns[0].num_records):
+                search_rid = page.columns[RID_COLUMN].get(i)
+                search_record = self.get_record(search_rid)
+                if search_record[search_column] == search_key:
+                    records.append(search_record)
+                    
+        return records
 
     def assign_rid(self):
         """
