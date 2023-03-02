@@ -142,7 +142,12 @@ class QuerySpec(unittest.TestCase):
         self.assertEquals(self.query.select(4, 3, [0, 1, 0, 0, 0])[2].columns, [4])
 
     def test_select_no_record(self):
-        pass
+        self.assertTrue(self.query.insert(55, 2, 3, 4, 5))
+        self.assertTrue(self.query.insert(66, 3, 4, 4, 6))
+        self.assertTrue(self.query.insert(77, 4, 5, 4, 7))
+        self.assertTrue(self.query.insert(88, 5, 6, 7, 8))
+        result = self.query.select(1337, 2, [1, 1, 1, 1, 1])
+        self.assertEquals(result, [])
 
     def test_update_no_record(self):
         pass
