@@ -37,15 +37,15 @@ class Table:
         
         try:
             os.makedirs(self.path)
-        except FileExistsError:
+        except:
             pass
         
         try:
             os.mkdir(self.path + '/base')
             os.mkdir(self.path + '/tail')
-        except FileExistsError:
+        except:
             pass
-
+        
         # keep track of latest base page
         self.latest_base_page_index = 0
         self.latest_tail_page_index = -1
@@ -55,9 +55,10 @@ class Table:
         if new:
             last_base_page = Wide_Page(num_columns, key_index)
             last_base_page.write_to_disk(0, True, self.path)
-
+        
         self.index = Index(self)
         self.index.create_index(key_index)
+        
 
     def get_record(self, rid: int, with_meta=False) -> list[int]:
         """
@@ -430,7 +431,7 @@ class Table:
         schema_encoding = tail_page.columns[SCHEMA_ENCODING_COLUMN].get(t_offset)
         schema_encoding = self._pad_with_leading_zeros(schema_encoding)
         # Iterate through schema encoding column and update values
-        for i in tail_page.columns[SCHEMA_ENCODING_COLUMN].get(t_offset):
+        for i in schema_encoding:
             if i == '1':
                 page_copy.columns[col+META_COLUMNS].put(tail_page.columns[col+META_COLUMNS].get(t_offset), offset)
                 
