@@ -82,8 +82,13 @@ class Query:
         except Exception as e:
             # Using indices did not work
             records = self.table.brute_force_search(search_key, search_key_index)
-            return records
-            # return False
+            for record in records:
+                cols = list()
+                for i in range(len(projected_columns_index)):
+                    if projected_columns_index[i] == 1:
+                        cols.append(record[i])
+                res.append(Record(self.table.key, cols, record[1]))
+            return res
     
     """
     # Read matching record with specified search key

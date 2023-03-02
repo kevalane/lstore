@@ -124,12 +124,22 @@ class QuerySpec(unittest.TestCase):
         self.assertTrue(self.query.insert(66, 3, 4, 4, 6))
         self.assertTrue(self.query.insert(77, 4, 5, 4, 7))
         self.assertTrue(self.query.insert(88, 5, 6, 7, 8))
-        self.assertEquals(self.query.select(5, 4, [1, 1, 1, 1, 1]), [[55, 2, 3, 4, 5]])
-        
-        pass
+        self.assertEquals(len(self.query.select(5, 4, [1, 1, 1, 1, 1])), 1)
+        self.assertEquals(self.query.select(5, 4, [1, 1, 1, 1, 1])[0].columns, [55, 2, 3, 4, 5])
+        self.assertEquals(self.query.select(5, 4, [1, 0, 0, 0, 0])[0].columns, [55])
 
     def test_select_multiple_records(self):
-        pass
+        self.assertTrue(self.query.insert(55, 2, 3, 4, 5))
+        self.assertTrue(self.query.insert(66, 3, 4, 4, 6))
+        self.assertTrue(self.query.insert(77, 4, 5, 4, 7))
+        self.assertTrue(self.query.insert(88, 5, 6, 7, 8))
+        self.assertEquals(self.query.select(4, 3, [1, 1, 1, 1, 1])[0].columns, [55, 2, 3, 4, 5])
+        self.assertEquals(self.query.select(4, 3, [1, 1, 1, 1, 1])[1].columns, [66, 3, 4, 4, 6])
+        self.assertEquals(self.query.select(4, 3, [1, 1, 1, 1, 1])[2].columns, [77, 4, 5, 4, 7])
+        self.assertEquals(len(self.query.select(4, 3, [1, 1, 1, 1, 1])), 3)
+        self.assertEquals(self.query.select(4, 3, [0, 1, 0, 0, 0])[0].columns, [2])
+        self.assertEquals(self.query.select(4, 3, [0, 1, 0, 0, 0])[1].columns, [3])
+        self.assertEquals(self.query.select(4, 3, [0, 1, 0, 0, 0])[2].columns, [4])
 
     def test_select_no_record(self):
         pass
