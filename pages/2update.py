@@ -9,10 +9,10 @@ st.set_page_config(
 
 db = Database()
 db.open('./ECS165')
-grades_table = db.get_table('Grades')
-query = Query(grades_table)
-
-st.title("DBMS Demo - You're Welcome.py")
+# grades_table = db.get_table('Grades')
+# query = Query(grades_table)
+query = st.session_state["q"]
+st.title("DBMS Demo - YW.py")
 st.subheader("Update")
 
 key, val = 0,0

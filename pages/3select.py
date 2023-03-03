@@ -8,12 +8,13 @@ import numpy as np
 st.set_page_config(
     page_title="Select"
 )
-st.title("DBMS Demo - You're Welcome.py")
+st.title("DBMS Demo - YW.py")
 st.subheader("Select")
 db = Database()
 db.open('./ECS165')
-grades_table = db.get_table('Grades')
-query = Query(grades_table)
+# grades_table = db.get_table('Grades')
+# query = Query(grades_table)
+query = st.session_state["q"]
 search_key = search_key_index =  0
 projected_columns_index = [1,1,1,1,1]
 # if st.button("Generate Random Data"):

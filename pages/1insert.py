@@ -6,13 +6,14 @@ from lstore.query import Query
 st.set_page_config(
     page_title="Insert"
 )
-st.title("DBMS Demo - You're Welcome.py")
+st.title("DBMS Demo - YW.py")
 st.subheader("Insert")
 db = Database()
-db.open('./ECS165')
-grades_table = db.get_table('Grades')
-query = Query(grades_table)
-
+# db.open('./ECS165')
+# name = st.session_state("table")
+# grades_table = db.get_table(name)
+# query = Query(grades_table)
+query = st.session_state["q"]
 key, val = 0,0
 # if st.button("Generate Random Data"):
 #     key = 92106429 + randint(0,1000)

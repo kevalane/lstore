@@ -6,13 +6,13 @@ from lstore.query import Query
 st.set_page_config(
     page_title="Delete"
 )
-st.title("DBMS Demo - You're Welcome.py")
+st.title("DBMS Demo - YW.py")
 st.subheader("Sum")
 db = Database()
 db.open('./ECS165')
-grades_table = db.get_table('Grades')
-query = Query(grades_table)
-
+# grades_table = db.get_table('Grades')
+# query = Query(grades_table)
+query = st.session_state["q"]
 start_range,end_range,col_index = 0 , 0 , 0
 
     #     start_range= 92106429 + randint(0,1000) 
