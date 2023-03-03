@@ -28,7 +28,8 @@ class Table:
         self.page_directory = {}
         # Keeps track of the RID to be generated each time a tail record is added
         self.rid_generator = 0
-        merge_queue = Queue()
+        self.merge_queue = Queue()
+        self.merge_lock = threading.Lock() # Used to lock attributes during merge to avoid contention
 
         self.path = path + '/' + name
         
@@ -285,7 +286,7 @@ class Table:
         
         # merge if needed
         if  num_updates >= MERGE_COUNTER:
-            self.merge(rid)
+            self.call_merge(rid)
             
         return True
 
@@ -437,7 +438,16 @@ class Table:
         self.page_directory = data['page_directory']
         self.index.indices = data['indices']
 
-    def merge(self, rid):
+    def call_merge(self, rid):
+        
+        # Create a thread
+        self.merge_thread = threading.Thread(target = self._merge, args=[rid])
+        # This needs to be a class attribute so that we can interact with it in other methods (i.e. locking the page range)
+        
+        # Start the thread
+        self.merge_thread.start()
+
+    def _merge(self, rid):
         # Retrieve the page being merged
         page_type, page_num, offset = self.page_directory[rid]
         page = self.bufferpool.retrieve_page(page_num, (page_type == 'base'), self.num_columns)
