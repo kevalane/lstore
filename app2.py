@@ -1,8 +1,10 @@
+from calendar import c
 from random import randint
-from turtle import onclick
+
 import streamlit as st
 from lstore.db import Database
 from lstore.query import Query
+from array import *
 
 
 # def display_table(data):
@@ -11,12 +13,14 @@ from lstore.query import Query
 #     for key in data:
 #         st.write("| {} | {} | {} | {} | {} |".format(key, data[key]['val1'], data[key]['val2'], data[key]['val3'], data[key]['val4']))
 
+db = Database()
+db.open('./ECS165')
+grades_table = db.create_table('Grades', 5, 0)
+query = Query(grades_table)
 def main():
-    db = Database()
-    grades_table = db.create_table('Grades', 5, 0)
-    st.title("DBMS Demo - Team sorry.py")
+    st.title("DBMS Demo - You're Welcome.py")
     st.subheader("Roshni Prasad, Rishabh Jain, Ashton Coates, Kevin Rasmusson, Catherine Yaroslavtseva")
-    query = Query(grades_table)
+    
     operation = st.selectbox("Select Operation", ["Select", "Insert", "Update", "Delete", "Sum"])
     
     if operation == "Insert" or operation == "Update":
@@ -24,18 +28,19 @@ def main():
         # if st.button("Generate Random Data"):
         #     key = 92106429 + randint(0,1000)
         #     val1, val2, val3, val4 = randint(0,20), randint(0,20), randint(0,20), randint(0,20)
-        key = st.text_input("Enter key:",key)
+        key = st.number_input("Enter key:",key)
         val = st.text_input("Enter values seperated by commas: ",val)
         vals = val.split(',')
-        record = [key] + vals
+        valsint = [eval(i) for i in vals]
+        record = [key] + valsint
         records ={}
-        records[key] = [record]
+        records[key] = record
             
     elif operation == "Delete":
         key = 0
         # if st.button("Generate Random Data"):
         #     key = 92106429 + randint(0,1000)
-        key = st.text_input("Enter key:",key) 
+        key = st.number_input("Enter key:",key) 
         
 
     elif operation == "Sum":
@@ -50,26 +55,28 @@ def main():
         
 
     elif operation == "Select":
-        search_key = search_key_index = projected_columns_index = 0
+        search_key = search_key_index =  0
+        projected_columns_index = [1,1,1,1]
         # if st.button("Generate Random Data"):
         #     search_key = 92106429 + randint(0,1000)
         #     search_key_index = 92106429 + randint(0,1000) 
         #     projected_columns_index = 92106429 + randint(0,1000)
-        search_key = st.text_input("Enter Search Key",search_key)
-        search_key_index = st.text_input("Enter Search Key Index",search_key_index)
+        search_key = st.number_input("Enter Search Key",search_key)
+        search_key_index = st.number_input("Enter Search Key Index",search_key_index)
         # projected_columns_index = st.text_input("Enter Projected Column Index",projected_columns_index)
 
     if st.button("Execute"):
         if operation == "Insert":
-            # print(len(*records[key]))
+            # print(records[key])
             temp = query.insert(*records[key])
+            # temp = query.insert(55, 2, 3, 4, 5)
             if temp:
                 st.write("Record with key {} inserted successfully.".format(key))
             else: 
                 st.write("Record not inserted")
 
         elif operation == "Update":
-            temp = query.update(*records[key])
+            temp = query.update(key,*records[key])
             if temp:
                 st.write("Record with key {} updated successfully.".format(key))
             else:
@@ -87,8 +94,8 @@ def main():
             st.write("The requested sum ={}".format(sum))
         
         elif operation == "Select":
-            select = query.select(search_key,search_key_index,[projected_columns_index])
+            select = query.select(search_key,search_key_index,projected_columns_index)
             st.write("The requested record {}".format(select))
-
-
+        db.close() 
+        
 main()
