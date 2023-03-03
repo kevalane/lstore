@@ -1,5 +1,10 @@
 from random import randint
+<<<<<<< Updated upstream
 from turtle import onclick
+=======
+from site import execsitecustomize
+
+>>>>>>> Stashed changes
 import streamlit as st
 from lstore.db import Database
 from lstore.query import Query
@@ -11,6 +16,7 @@ from lstore.query import Query
 #     for key in data:
 #         st.write("| {} | {} | {} | {} | {} |".format(key, data[key]['val1'], data[key]['val2'], data[key]['val3'], data[key]['val4']))
 
+<<<<<<< Updated upstream
 def main():
     db = Database()
     grades_table = db.create_table('Grades', 5, 0)
@@ -18,6 +24,10 @@ def main():
     st.subheader("Roshni Prasad, Rishabh Jain, Ashton Coates, Kevin Rasmusson, Catherine Yaroslavtseva")
     query = Query(grades_table)
     operation = st.selectbox("Select Operation", ["Select", "Insert", "Update", "Delete", "Sum"])
+=======
+
+def page(query,operation):
+>>>>>>> Stashed changes
     
     if operation == "Insert" or operation == "Update":
         key, val = 0,0
@@ -58,7 +68,7 @@ def main():
         search_key = st.text_input("Enter Search Key",search_key)
         search_key_index = st.text_input("Enter Search Key Index",search_key_index)
         # projected_columns_index = st.text_input("Enter Projected Column Index",projected_columns_index)
-
+    
     if st.button("Execute"):
         if operation == "Insert":
             # print(len(*records[key]))
@@ -91,4 +101,18 @@ def main():
             st.write("The requested record {}".format(select))
 
 
+<<<<<<< Updated upstream
 main()
+=======
+def main():
+    db = Database()
+    db.open('./ECS165')
+    grades_table = db.create_table('Grades', 5, 0)
+    query = Query(grades_table)
+    st.title("DBMS Demo - You're Welcome.py")
+    st.subheader("Roshni Prasad, Rishabh Jain, Ashton Coates, Kevin Rasmusson, Catherine Yaroslavtseva")
+    operation = st.sidebar.selectbox("Select Operation", ["Select", "Insert", "Update", "Delete", "Sum"])
+    page(query,operation)
+    db.close() 
+main()
+>>>>>>> Stashed changes
