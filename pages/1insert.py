@@ -33,3 +33,4 @@ if st.button("Execute"):
         st.write("Record with key {} inserted successfully.".format(key))
     else: 
         st.write("Record not inserted")
+db.close()

@@ -26,3 +26,4 @@ search_key_index = st.number_input("Enter Search Key Index",search_key_index)
 if st.button("Execute"):
     select = query.select(search_key,search_key_index,projected_columns_index)[0]
     st.write("The requested record {}".format(select))
+db.close()

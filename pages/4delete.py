@@ -23,4 +23,4 @@ if st.button("Execute"):
         st.write("Record with key {} deleted successfully.".format(key))
     else:
         st.write("Record with key {} wasn't deleted.".format(key))
-    
+db.close()  

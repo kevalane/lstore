@@ -23,4 +23,5 @@ end_range = st.number_input("Enter End Key",end_range,step = 1)
 col_index = st.number_input("Column Index to be summed up",step = 1)
 if st.button("Execute"):
     sum = query.sum(start_range,end_range,col_index)
-    st.write("The requested sum ={}".format(sum))
+    st.write("The requested sum = {}".format(sum))
+db.close()

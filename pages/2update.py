@@ -32,3 +32,4 @@ if st.button("Execute"):
         st.write("Record with key {} updated successfully.".format(key))
     else:
         st.write("Record not updated succesfully")
+db.close()
