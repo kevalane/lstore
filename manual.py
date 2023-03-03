@@ -25,6 +25,11 @@ table.update_record(44476, [None, None, None, 33, None])
 table.update_record(44476, [None, None, 44, None, None])
 #print(table.page_directory)
 #print(table.get_record(44476, False))
+table.update_record(44476, [None, None, 44, None, None])
+table.update_record(44476, [None, None, 44, None, None])
+table.update_record(44476, [None, None, 44, None, None])
+table.update_record(44476, [None, None, 44, None, None])
+table.update_record(44476, [None, None, 44, None, None])
 
 #print(table.get_record(44476, False))
 

@@ -285,9 +285,7 @@ class Table:
         
         # merge if needed
         if  num_updates >= MERGE_COUNTER:
-            #need tp fix merge
-            #self.merge(rid)
-            pass
+            self.merge(rid)
             
         return True
 
@@ -440,17 +438,15 @@ class Table:
         self.index.indices = data['indices']
 
     def merge(self, rid):
-        print('Merge is happening...')
-        
         # Retrieve the page being merged
         page_type, page_num, offset = self.page_directory[rid]
         page = self.bufferpool.retrieve_page(page_num, (page_type == 'base'), self.num_columns)
         
         # Retrieve the latest tail page
         latest_tail_rid = page.columns[INDIRECTION_COLUMN].get(offset)
-        page_type, page_num, t_offset = self.page_directory[latest_tail_rid]
+        page_type, t_page_num, t_offset = self.page_directory[latest_tail_rid]
         
-        tail_page = self.bufferpool.retrieve_page(page_num, (page_type == 'base'), self.num_columns)
+        tail_page = self.bufferpool.retrieve_page(t_page_num, (page_type == 'base'), self.num_columns)
         
         # Make a copy of the base page
         page_copy = deepcopy(page)
@@ -475,8 +471,10 @@ class Table:
         page_type, page_num, offset = self.page_directory[rid]
         page = self.bufferpool.retrieve_page(page_num, (page_type == 'base'), self.num_columns)
         page_copy.columns[INDIRECTION_COLUMN].put(page.columns[INDIRECTION_COLUMN].get(offset), offset)
-
-        page_copy.write_to_disk(self.page_directory[rid][1], True, self.path)
+ 
+        # Write the updated page to the bufferpool
+        self.bufferpool.base_pages[page_num]['wide_page'] = page_copy
+        self.bufferpool.mark_dirty(page_num, True)
         
         # Delete the copy
         del page_copy
