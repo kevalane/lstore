@@ -7,7 +7,7 @@ st.set_page_config(
     page_title="Delete"
 )
 st.title("DBMS Demo - You're Welcome.py")
-st.subheader("Delete")
+st.subheader("Sum")
 db = Database()
 db.open('./ECS165')
 grades_table = db.get_table('Grades')

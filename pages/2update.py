@@ -1,5 +1,5 @@
 import streamlit as st
-
+import pandas as pd
 from lstore.db import Database
 from lstore.query import Query
  
@@ -29,7 +29,10 @@ records[key] = record
 if st.button("Execute"):
     temp = query.update(key,*records[key])
     if temp:
+        d = {'Key/Col 0':[record[0]],'Col 1':[record[1]],"Col 2":[record[2]],"Col 3":[record[3]],"Col 4":[record[4]]}
+        df = pd.DataFrame(d)
         st.write("Record with key {} updated successfully.".format(key))
+        st.table(df)
     else:
         st.write("Record not updated succesfully")
 db.close()

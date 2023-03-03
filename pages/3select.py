@@ -2,7 +2,9 @@ import streamlit as st
 
 from lstore.db import Database
 from lstore.query import Query
- 
+import pandas as pd
+import numpy as np
+
 st.set_page_config(
     page_title="Select"
 )
@@ -23,7 +25,14 @@ search_key_index = st.number_input("Enter Search Key Index",search_key_index)
 # projected_columns_index = st.text_input("Enter Projected Column Index",projected_columns_index)
 
 
+
 if st.button("Execute"):
     select = query.select(search_key,search_key_index,projected_columns_index)[0]
-    st.write("The requested record {}".format(select))
+    temp = []
+    for i in select:
+        temp.append(i)
+    d = {'Key/Col 0':[temp[0]],'Col 1':[temp[1]],"Col 2":[temp[2]],"Col 3":[temp[3]],"Col 4":[temp[4]]}
+    df = pd.DataFrame(d)
+    st.markdown("The requested record is as follows")
+    st.table(df)
 db.close()
