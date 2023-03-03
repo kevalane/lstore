@@ -12,13 +12,13 @@ from array import *
 #     st.write("|:---:|:----:|:----:|:----:|:----:|")
 #     for key in data:
 #         st.write("| {} | {} | {} | {} | {} |".format(key, data[key]['val1'], data[key]['val2'], data[key]['val3'], data[key]['val4']))
-count = 0 
-print(count)
+
 db = Database()
+db.open('./ECS165')
 grades_table = db.create_table('Grades', 5, 0)
 query = Query(grades_table)
-def main(count):
-    st.title("DBMS Demo - Team sorry.py")
+def main():
+    st.title("DBMS Demo - You're Welcome.py")
     st.subheader("Roshni Prasad, Rishabh Jain, Ashton Coates, Kevin Rasmusson, Catherine Yaroslavtseva")
     
     operation = st.selectbox("Select Operation", ["Select", "Insert", "Update", "Delete", "Sum"])
@@ -96,5 +96,6 @@ def main(count):
         elif operation == "Select":
             select = query.select(search_key,search_key_index,projected_columns_index)
             st.write("The requested record {}".format(select))
-        count += 1 
-main(count)
+        db.close() 
+        
+main()
