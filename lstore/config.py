@@ -21,5 +21,4 @@ DATA_SIZE = 8 # int64
 STORAGE_OPTION = 'big'
 
 # Merge
-MERGE_FREQ = 64 # This can be threshold that we merge after, feel free to change name or value
-MERGE_COUNTER = 3
+MERGE_COUNTER = 8
