@@ -8,11 +8,12 @@ from time import time
 import os
 import json
 import threading
+import pandas as pd
 from queue import Queue
 from lstore.config import *
 
 # merge constant
-MERGE_COUNTER = 5
+MERGE_COUNTER = 3
 
 class Table:
 
@@ -28,33 +29,36 @@ class Table:
         self.key = key_index
         self.num_columns = num_columns
         self.page_directory = {}
-        self.index = Index(self)
-        self.index.create_index(key_index)
         # Keeps track of the RID to be generated each time a tail record is added
         self.rid_generator = 0
         merge_queue = Queue()
 
         self.path = path + '/' + name
+        
         try:
-            os.mkdir(self.path)
-        except FileExistsError:
+            os.makedirs(self.path)
+        except:
             pass
         
         try:
             os.mkdir(self.path + '/base')
             os.mkdir(self.path + '/tail')
-        except FileExistsError:
+        except:
             pass
-
+        
         # keep track of latest base page
         self.latest_base_page_index = 0
         self.latest_tail_page_index = -1
         self.bufferpool = Bufferpool(100, self.path)
-
+        self.index = Index(self)
         # create a base page
         if new:
+            self.index.create_index(key_index)
             last_base_page = Wide_Page(num_columns, key_index)
             last_base_page.write_to_disk(0, True, self.path)
+        
+        
+        
 
     def get_record(self, rid: int, with_meta=False) -> list[int]:
         """
@@ -175,6 +179,9 @@ class Table:
         :param rid: int         # RID of the previous record being updated
         """
         # check if new primary key is already in use
+        if rid not in self.page_directory.keys():
+            return False
+        
         if new_cols[self.key] in self.page_directory.keys() and rid != new_cols[self.key]:
             return False
 
@@ -281,8 +288,10 @@ class Table:
         
         # merge if needed
         if  num_updates >= MERGE_COUNTER:
-            self.merge(rid)
-
+            #need tp fix merge
+            #self.merge(rid)
+            pass
+            
         return True
 
     def add_record(self, columns: list[int]) -> bool:
@@ -363,6 +372,34 @@ class Table:
                     records.append(search_record)
                     
         return records
+    
+    def get_all_records_in_database(self) -> list[Record]:
+        """
+        :return: list[Record]
+        """
+        records = []
+        if self.page_directory == {}:
+            return records
+        
+        for page_index in range(self.latest_base_page_index + 1):
+            page = self.bufferpool.retrieve_page(
+                page_index,
+                True,
+                self.num_columns
+            )
+            if page == None:
+                return []
+            
+            for i in range(page.columns[0].num_records):
+                rid = page.columns[RID_COLUMN].get(i)
+                try:
+                    record_as_list = self.get_record(rid)
+                    initialized_record = Record(self.key, record_as_list, rid)
+                    records.append(initialized_record)
+                except:
+                    continue
+        return records
+
 
     def assign_rid(self):
         """
@@ -406,6 +443,8 @@ class Table:
         self.index.indices = data['indices']
 
     def merge(self, rid):
+        print('Merge is happening...')
+        
         # Retrieve the page being merged
         page_type, page_num, offset = self.page_directory[rid]
         page = self.bufferpool.retrieve_page(page_num, (page_type == 'base'), self.num_columns)
@@ -424,6 +463,7 @@ class Table:
         
         schema_encoding = tail_page.columns[SCHEMA_ENCODING_COLUMN].get(t_offset)
         schema_encoding = self._pad_with_leading_zeros(schema_encoding)
+        
         # Iterate through schema encoding column and update values
         for i in schema_encoding:
             if i == '1':
@@ -442,3 +482,15 @@ class Table:
         
         # Delete the copy
         del page_copy
+        
+    def dump(self):
+        data = []
+        
+        for rid in self.page_directory:
+            if self.page_directory[rid][0] == 'base':
+                data.append(self.get_record(rid, False))
+            
+        df = pd.DataFrame(data)
+        
+        path = 'export_dataframe.xlsx'
+        df.to_excel(path, index=False)

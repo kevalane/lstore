@@ -9,6 +9,8 @@ db.open('./ECS165')
 # Getting the existing Grades table
 grades_table = db.get_table('Grades')
 
+print(grades_table)
+
 # create a query class for the grades table
 query = Query(grades_table)
 
@@ -57,5 +59,7 @@ deleted_keys = sample(keys, 100)
 for key in deleted_keys:
     query.delete(key)
     records.pop(key, None)
+
+grades_table.index.create_index(1)
 
 db.close()

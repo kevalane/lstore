@@ -17,10 +17,9 @@ class Database:
         """
         self.tables = {}
         self.table_array = []
-        self.bufferpool = None
         self.path = './data'
 
-    def open(self, path: str, max_pages_in_bufferpool=16) -> None:
+    def open(self, path: str) -> None:
         """
         Not required for Milestone 1.
         """
@@ -32,8 +31,6 @@ class Database:
         except FileExistsError: 
             pass
         self.path = path
-        # we need to add path here so disk is stored to specidied folder
-        self.bufferpool = Bufferpool(max_pages_in_bufferpool, path)
 
     def close(self) -> None:
         """
@@ -56,7 +53,9 @@ class Database:
         self.open(self.path)
         if name not in self.tables:
             # Table does not exist, create it
+            print(num_columns, key_index, self.path, new)
             table = Table(name, num_columns, key_index, self.path, new)
+            
             self.tables[name] = table
             self.table_array.append(name)
             return table
@@ -94,19 +93,15 @@ class Database:
                 json_data = f.read()
                 data = json.loads(json_data, object_hook=jsonKeys2int)
                 loaded_table = self.create_table(name, data['num_columns'], data['key'], new=False)
+                print(loaded_table)
                 loaded_table._load_metadata(data)
                 return loaded_table
         except Exception as e:
             print(f'Error loading table {name} from disk')
-            print(e)
             return None
-        
-# @staticmethod
-def jsonKeys2int(x):
-    # if isinstance(x, dict):
-    #     return {int(k):v for k,v in x.items()}
-    # return x
 
+
+def jsonKeys2int(x):
     if isinstance(x, dict):
         new_dict = {}
         for k, v in x.items():

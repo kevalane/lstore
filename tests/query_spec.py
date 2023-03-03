@@ -72,7 +72,9 @@ class QuerySpec(unittest.TestCase):
         # too few columns
         self.assertFalse(self.query.update(1, 1, 2, 19))        
         # non-integer column
-        self.assertFalse(self.query.update(1, 1, 'Doe', 19, 0))
+        self.query.insert(14, 123, 456, 18, 1)
+        print(self.table.page_directory)
+        self.assertFalse(self.query.update(14, 14, 'Doe', 19, 0, 5))
 
     def test_sum_success(self):
         self.query.insert(1, 123, 456, 18, 1)
@@ -116,8 +118,12 @@ class QuerySpec(unittest.TestCase):
         self.assertFalse(self.query.insert(1, 2, 3, 4, 5))
 
     def test_select_non_primary_index(self):
-
-        pass
+        self.assertTrue(self.query.insert(55, 2, 3, 4, 5))
+        self.assertTrue(self.query.insert(66, 3, 4, 4, 6))
+        self.assertTrue(self.query.insert(77, 4, 5, 4, 7))
+        self.assertTrue(self.query.insert(88, 5, 6, 7, 8))
+        self.table.index.create_index(3)
+        self.assertEquals(len(self.query.select(4, 3, [1, 1, 1, 1, 1])), 3)
 
     def test_select_no_index(self):
         self.assertTrue(self.query.insert(55, 2, 3, 4, 5))
@@ -155,4 +161,74 @@ class QuerySpec(unittest.TestCase):
         self.assertTrue(self.query.insert(77, 4, 5, 4, 7))
         self.assertTrue(self.query.insert(88, 5, 6, 7, 8))
         self.assertFalse(self.query.update(1337, 2, 1337, 1337, 1337, 1337))
+
+    def test_select_version(self):
+        self.assertTrue(self.query.insert(14, 2, 3, 4, 5))
+        self.assertTrue(self.query.update(14, None, 6, 7, 8, 9))
+        self.assertTrue(self.query.update(14, None, 4, 11, 12, 13))
+
+        # select the most recent version (version -1)
+        result = self.query.select_version(14, 0, [1, 1, 1, 1, 1], -1)
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0].columns, [14, 6, 7, 8, 9])
+
+        # select the oldest version (version -3)
+        result = self.query.select_version(14, 0, [1, 1, 1, 1, 1], -3)
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0].columns, [14, 2, 3, 4, 5])
+
+        # select a specific version (version -2)
+        result = self.query.select_version(1, 0, [1, 1, 1, 1, 1], -2)
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0].columns, [14, 2, 3, 4, 5])
+
+        # select version 0
+        result = self.query.select_version(14, 0, [1, 1, 1, 1, 1], 0)
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0].columns, [14, 4, 11, 12, 13])
+
+    def test_select_version_fail(self):
+        self.assertTrue(self.query.insert(14, 2, 3, 4, 5))
+        self.assertTrue(self.query.update(14, None, 6, 7, 8, 9))
+        self.assertTrue(self.query.update(14, None, 4, 11, 12, 13))
+
+        # select a rid that doesn't exist
+        self.assertFalse(self.query.select_version(67, 0, [1, 1, 1, 1, 1], -4))
+
+        # pass too many projected columns
+        self.assertFalse(self.query.select_version(14, 0, [1, 1, 1, 1, 1, 0, 0, 1], 1))
+
+    def test_sum_version(self):
+        # insert some records
+        self.assertTrue(self.query.insert(55, 10, 20, 30, 3))
+        self.assertTrue(self.query.insert(56, 20, 30, 40, 3))
+        self.assertTrue(self.query.insert(57, 30, 40, 50, 3))
+        self.assertTrue(self.query.insert(58, 40, 50, 60, 3))
+        self.assertTrue(self.query.insert(59, 50, 60, 70, 3))
+
+        # test with valid parameters
+        self.assertEqual(self.query.sum_version(55, 59, 1, -1), 150)
+        self.assertEqual(self.query.sum_version(56, 58, 2, -1), 120)
+        self.assertEqual(self.query.sum_version(57, 57, 3, -1), 50)
+
+        # test with invalid range
+        self.assertFalse(self.query.sum_version(6, 10, 0, -1))
+        self.assertFalse(self.query.sum_version(1, 0, 1, -1))
+        self.assertFalse(self.query.sum_version(4, 2, 2, -1))
+
+        # test with invalid column index
+        self.assertFalse(self.query.sum_version(1, 5, 5, -1))
+
+        # do some updates
+        self.assertTrue(self.query.update(55, None, 400, 20, 30, 3))
+        self.assertTrue(self.query.update(56, None, 400, 400, 40, 3))
+        self.assertTrue(self.query.update(57, None, 400, 40, 400, 3))
+        self.assertTrue(self.query.update(58, None, 400, 50, 60, 3))
+
+        # test with valid parameters
+        self.assertEqual(self.query.sum_version(55, 59, 1, -1), 150)
+        self.assertEqual(self.query.sum_version(55, 59, 1, 0), 1650)
+
+        self.assertEqual(self.query.sum_version(55, 500, 1, -1), 150)
+
 

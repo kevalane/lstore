@@ -2,6 +2,7 @@ from lstore import wide_page
 from lstore.record import Record
 from lstore.page import Page
 from lstore.wide_page import Wide_Page
+from lstore.config import *
 
 INCLUSIVE = 1 # 0/1 for exclusive/inclusive range
 
@@ -78,6 +79,8 @@ class Index:
         if column_number not in self.indices:
             # create index {} for column
             self.indices[column_number] = {}
+            self.index_existing_records()
+            # self.push_initialized_records_to_index(self.initialize_index())
             return True
         else:
             return False
@@ -92,26 +95,29 @@ class Index:
             indexed_value = record.rid
         else:
             indexed_value = record.columns[index_column]
-        #print(indexed_value)
-        #RID = record.rid
-        # print(self.indices)
+
+        # we should always insert the rid, that's how we find the record
+        indexed_value = record.rid
+
         # iterate through each column in the record
         for i, value in enumerate(record.columns):
+            # if index not made for column, skip
             if i not in self.indices:
-                # skip index not made
                 continue
 
-            # get the index {} associated with the column number
+            # get all currently indexed values for the column
             working_index = self.indices.get(i)
             if value in working_index:
+                # it's already been indexed
                 if indexed_value in working_index[value]:
                     pass
                 else:
+                    # push rid to list of indexed values
                     working_index[value].append(indexed_value)
 
 
             if value not in working_index:
-            # create a list for the value if it doesn't exist
+                # create a list for the value if it doesn't exist
                 working_index[value] = []
                 working_index[value].append(indexed_value)
 
@@ -184,32 +190,7 @@ class Index:
         else:
             return False
         
-        
-    def initialize_index(self):
-        # j = counter for which record's values are being pulled
-        j = 0
-        # list of record objects created for each initialized records
-        initialized_records = []
-        # 511 needs to be changed - not hardcoded
-        while j<= 511:
-            # iterates through ecah column in wide page (other than metadata columns, 
-            # finds the jth value, and adds to a list (record columns)
-            # RID is found in the 1 page, set to var RID
-            # all column values at jth position are appended to list of column values
-            # record object made for each record based on list of column values and RID
-            # all record objects appended to initialized_records list
-                for i in range(self.wide_page.META_COLUMNS+0, len(self.wide_page.columns)):
-                    record_columns = []
-                    record_columns.append(wide_page.columns[{i}].get(j))
-                    RID = wide_page.columns[1].get(j)
-                    initialized_record = Record(self.table.key, record_columns, RID)
-                    initialized_records.append(initialized_record)
-                    j += 1
-        return initialized_records
-    
-    # at time of index creation, below method to be called
-    # pushes each record in initialized_records list to index
-    def push_initialized_records_to_index(self, initialized_records):
-        for i in range(0, len(initialized_records)):
-            self.push_record_to_index(initialized_records[i])
-
+    def index_existing_records(self) -> None:
+        records = self.table.get_all_records_in_database()
+        for record in records:
+            self.push_record_to_index(record)

@@ -4,6 +4,9 @@ from lstore.wide_page import Wide_Page
 from lstore.page import Page
 from random import randint, seed
 from lstore.config import *
+import os
+import shutil
+import pandas as pd
 
 class TableTestCase(unittest.TestCase):
     def test_init_table(self):
@@ -198,7 +201,7 @@ class TableTestCase(unittest.TestCase):
         # Update all 1000 records
         for i in range(1000):
             new_columns = [None, randint(1001, 2000), randint(1001, 2000), randint(1001, 2000)]
-            table.update_record(i+1, new_columns)
+            table.update_record(34432332+i+1, new_columns)
             updated_cols.append([34432332+i+1, new_columns[1], new_columns[2], new_columns[3]])
 
         # Check if all records have the new column values
@@ -206,3 +209,89 @@ class TableTestCase(unittest.TestCase):
             record = table.get_record(34432332+i+1)
             expected_columns = updated_cols[i]
             self.assertEqual(record, expected_columns)
+
+    def test_get_all_records_in_database_empty(self):
+        key = 0
+        table = Table("test", 4, key)
+        records = table.get_all_records_in_database()
+        self.assertEqual(len(records), 0)
+
+    def test_get_all_records_in_database_non_empty(self):
+        key = 0
+        table = Table("test", 4, key)
+        columns1 = [11, 1, 2, 3]
+        columns2 = [22, 4, 5, 6]
+        table.add_record(columns1)
+        table.add_record(columns2)
+        records = table.get_all_records_in_database()
+        self.assertEqual(len(records), 2)
+        self.assertEqual(records[0].columns, columns1)
+        self.assertEqual(records[1].columns, columns2)
+
+    def test_get_all_records_in_database_with_deleted_record(self):
+        key = 0
+        table = Table("test", 4, key)
+        columns1 = [11, 1, 2, 3]
+        columns2 = [22, 4, 5, 6]
+        table.add_record(columns1)
+        table.add_record(columns2)
+        table.delete_record(11)
+        records = table.get_all_records_in_database()
+        self.assertEqual(len(records), 1)
+        self.assertEqual(records[0].columns, columns2)
+
+    def test_get_all_records_in_database_with_tail_page(self):
+        key = 0
+        table = Table("test", 4, key)
+        columns1 = [11, 1, 2, 3]
+        columns2 = [22, 4, 5, 6]
+        columns3 = [33, 7, 8, 9]
+        columns4 = [44, 10, 11, 12]
+        table.add_record(columns1)
+        table.add_record(columns2)
+        table.add_record(columns3)
+        table.add_record(columns4)
+        table.update_record(11, [None, None, None, 9])
+        table.update_record(11, [None, 10, None, None])
+        table.update_record(11, [None, None, None, 15])
+        records = table.get_all_records_in_database()
+        self.assertEqual(len(records), 4)
+        self.assertEqual(records[0].columns, [11, 10, 2, 15])
+        self.assertEqual(records[1].columns, columns2)
+        self.assertEqual(records[2].columns, columns3)
+        self.assertEqual(records[3].columns, columns4)
+
+    def test_get_all_records_when_none(self):
+        key = 0
+        table = Table("none", 4, key)
+        table.page_directory = {0: ('base', 0, 0)}
+        shutil.rmtree("data/none")
+        self.assertEqual(table.get_all_records_in_database(), [])
+
+    def test_dump(self):
+        key = 0
+        table = Table("test", 4, key)
+        seed(134134)
+        for i in range(1000):
+            columns = [i+1, randint(0, 1000), randint(0, 1000), randint(0, 1000)]
+            table.add_record(columns)
+
+        # Dump the data to a file
+        table.dump()
+        
+        # Load the file as a pandas dataframe
+        path = 'export_dataframe.xlsx'
+        df = pd.read_excel(path)
+
+        # Check if the number of rows in the dataframe matches the number of records in the table
+        self.assertEqual(len(df), 1000)
+
+        # Check if the columns in the dataframe match the columns in the table
+        expected_columns = [0, 1, 2, 3]
+        self.assertListEqual(list(df.columns), expected_columns)
+
+        # Check if the values in each row of the dataframe match the values in the corresponding record in the table
+        for i in range(1000):
+            record = table.get_record(i+1)
+            expected_row = [i+1] + record[1:]
+            self.assertListEqual(list(df.iloc[i]), expected_row)

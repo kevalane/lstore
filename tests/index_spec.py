@@ -5,7 +5,7 @@ from lstore.config import *
 
 class IndexTestCase(unittest.TestCase):
     def test_init(self):
-        table = Table("test", 3, 0)
+        table = Table("test", 4, 0)
         index = table.index
         self.assertEquals(index.indices, {0: {}})
 
@@ -32,6 +32,7 @@ class IndexTestCase(unittest.TestCase):
         return index, table
 
     def test_create_index(self):
+        print("test_create_index")
         self.setup()
 
     def test_push_record_to_index(self):
