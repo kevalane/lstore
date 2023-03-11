@@ -8,7 +8,7 @@ from time import time
 import os
 import json
 import threading
-import pandas as pd
+import pandas as pd # only for excel dump
 from queue import Queue
 from lstore.config import *
 
