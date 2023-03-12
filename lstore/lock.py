@@ -37,7 +37,7 @@ class Lock:
 			return True
 		return False # Lock not found
 
-	def acquire_index_lock(self, index_column: int, index_value: int) -> bool:
+	def acquire_index(self, index_column: int, index_value: int) -> bool:
 		"""
 		Lock a specific index value in a column
 		For query updates(), a lock is required for both all the old indexes
@@ -61,7 +61,7 @@ class Lock:
 			self.index_locks[index_column][index_value].acquire()
 			return True
 
-	def release_index_lock(self, index_column: int, index_value: int) -> bool:
+	def release_index(self, index_column: int, index_value: int) -> bool:
 		"""
 		Release a specific index value in a column
 		:param index_column: int 	  # Index of the column to lock
