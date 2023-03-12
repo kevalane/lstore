@@ -48,7 +48,18 @@ class Lock:
 		:param index_value: int 	  # Value of the index to lock
 		:return: bool				  # True if lock is acquired, False otherwise
 		"""
-		pass
+		if index_column not in self.index_locks:
+			self.index_locks[index_column] = {}
+
+		if index_value in self.index_locks[index_column]:
+			if self.index_locks[index_column][index_value].acquire(False):
+				return True
+			else:
+				return False
+		else:
+			self.index_locks[index_column][index_value] = threading.Lock()
+			self.index_locks[index_column][index_value].acquire()
+			return True
 
 	def release_index_lock(self, index_column: int, index_value: int) -> bool:
 		"""
@@ -57,4 +68,7 @@ class Lock:
 		:param index_value: int 	  # Value of the index to lock
 		:return: bool				  # True if lock is released, False otherwise
 		"""
-		pass
+		if index_column in self.index_locks and index_value in self.index_locks[index_column]:
+			self.index_locks[index_column][index_value].release()
+			return True
+		return False
