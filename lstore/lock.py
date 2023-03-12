@@ -1,4 +1,4 @@
-
+import threading
 
 class Lock:
 	
@@ -16,7 +16,15 @@ class Lock:
 		:param rid: int  # Record id to lock
 		:return: bool	 # True if lock is acquired, False otherwise
 		"""
-		pass
+		if rid in self.rid_locks:
+			if self.rid_locks[rid].try_lock():
+				return True
+			else:
+				return False
+		else:
+			self.rid_locks[rid] = threading.Lock()
+			self.rid_locks[rid].acquire()
+			return True
 
 	def release_rid(self, rid: int) -> bool:
 		"""
