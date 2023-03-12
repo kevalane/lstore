@@ -17,7 +17,7 @@ class Lock:
 		:return: bool	 # True if lock is acquired, False otherwise
 		"""
 		if rid in self.rid_locks:
-			if self.rid_locks[rid].try_lock():
+			if self.rid_locks[rid].acquire(False):
 				return True
 			else:
 				return False
@@ -32,7 +32,10 @@ class Lock:
 		:param rid: int  # Record id to lock
 		:return: bool	 # True if lock is released, False otherwise
 		"""
-		pass
+		if rid in self.rid_locks:
+			self.rid_locks[rid].release()
+			return True
+		return False # Lock not found
 
 	def acquire_index_lock(self, index_column: int, index_value: int) -> bool:
 		"""
