@@ -483,14 +483,8 @@ class Table:
         page_copy.columns[INDIRECTION_COLUMN].put(page.columns[INDIRECTION_COLUMN].get(offset), offset)
  
         # Write the updated page to the bufferpool
-        # self.bufferpool.base_pages[page_num]['wide_page'] = page_copy
-        # self.bufferpool.mark_dirty(page_num, True)
-        
-        location = ('base',
-                    page_copy.key_index, 
-                    page_copy.columns[0].num_records-1)
-        
-        self.page_directory[rid] = location
+        self.bufferpool.base_pages[page_num]['wide_page'] = page_copy
+        self.bufferpool.mark_dirty(page_num, True)
         
         # Delete the copy
         del page_copy
