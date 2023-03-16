@@ -297,7 +297,7 @@ class Table:
         
         # check if record with this rid already exists
         if columns[self.key] in self.page_directory.keys():
-            return False
+            return True
 
         # get last base page
         last_base_page = self.bufferpool.retrieve_page(
