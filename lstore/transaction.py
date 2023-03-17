@@ -34,10 +34,13 @@ class Transaction:
         for query, args in self.queries:
             
             result = query(*args)
-            if 'Query.delete' in str(query):
-                args[0].acquire_rid()
-            elif 'Query.update' in str(query):
-                args[0].acquire_index()
+
+            # Implementing 2PL for update and delete
+            # if 'Query.delete' in str(query):
+            #     args[0].acquire_rid()
+            # elif 'Query.update' in str(query):
+            #     args[0].acquire_index()
+
             # If the query has failed the transaction should abort
             
             if result == False:
@@ -58,7 +61,8 @@ class Transaction:
             if 'Query.delete' in str(query):
                 try:
                     self.tables[count].delete_record(-args[0])
-                    args[0].release_rid()
+                    # Releasing locks as transactions are aborted
+                    #args[0].release_rid()
                 except:
                     continue
                 
@@ -81,8 +85,8 @@ class Transaction:
                     page.columns[INDIRECTION_COLUMN].put(tail_page.columns[INDIRECTION_COLUMN].get(offset), offset)
                     
                     self.tables[count].bufferpool.base_pages[page_num]['wide_page'] = page
-
-                    args[0].release_index()
+                    # Releasing locks as transactions are aborted
+                    # args[0].release_index()
                 except:
                     continue
                 
@@ -91,7 +95,8 @@ class Transaction:
 
     
     def commit(self):
-        self[0].release_index()
-        self[0].release_rid()
+        # Releasing locks as a part of the commit process
+        # self[0].release_index()
+        # self[0].release_rid()
         return True
 
