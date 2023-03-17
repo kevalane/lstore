@@ -362,11 +362,13 @@ class Table:
                 self.num_columns
             )
             for i in range(page.columns[0].num_records):
-                search_rid = page.columns[RID_COLUMN].get(i)
-                search_record = self.get_record(search_rid)
-                if search_record[search_column] == search_key:
-                    records.append(search_record)
-                    
+                try:
+                    search_rid = page.columns[RID_COLUMN].get(i)
+                    search_record = self.get_record(search_rid)
+                    if search_record[search_column] == search_key:
+                        records.append(search_record)
+                except Exception as e:
+                    pass
         return records
     
     def get_all_records_in_database(self) -> list[Record]:

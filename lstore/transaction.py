@@ -31,15 +31,20 @@ class Transaction:
         
     # If you choose to implement this differently this method must still return True if transaction commits or False on abort
     def run(self):
+        locked_rid = []
+        locked_index = []
+        locked_tables = []
         for index, (query, args) in enumerate(self.queries):
             
             result = query(*args)
-            
-            # Implementing 2PL for update and delete
-            self.tables[].lock.acquire_rid(args[0])
-            if 'Query.update' in str(query):
-                acquire_index(args[0])
 
+            # Implementing 2PL for update and delete
+            self.tables[index].lock.acquire_rid(args[0])
+            locked_tables.append(self.tables[index])
+            locked_rid.append(args[0])
+            if 'Query.update' in str(query):
+                self.tables[index].lock.acquire_index(0,args[0])
+            locked_index.append(args[0])
             # If the query has failed the transaction should abort
             
             if result == False:
@@ -47,13 +52,13 @@ class Transaction:
             
             self.success += 1
             
-        return self.commit()
+        return self.commit(locked_rid,locked_index,locked_tables)
 
     
     def abort(self):
         count = 0
         
-        for query, args in self.queries:
+        for index, (query, args) in enumerate(self.queries):
             if self.success - 1 == count:
                 return False
             
@@ -61,13 +66,15 @@ class Transaction:
                 try:
                     self.tables[count].delete_record(-args[0])
                     # Releasing locks as transactions are aborted
-                    #args[0].release_rid()
+                    self.tables[index].release_rid(args[0])
                 except:
                     continue
                 
             elif 'Query.insert' in str(query):
                 try:
                     self.tables[count].delete_record(args[0])
+                    # Releasing locks as transactions are aborted
+                    self.tables[index].release_rid(args[0])
                 except:
                     continue
                 
@@ -85,17 +92,24 @@ class Transaction:
                     
                     self.tables[count].bufferpool.base_pages[page_num]['wide_page'] = page
                     # Releasing locks as transactions are aborted
-                    # args[0].release_index()
+                    self.tables[index].release_rid(args[0])
+                    self.tables[index].release_index(0, args[0])
                 except:
                     continue
-                
+            else: 
+                self.tables[index].release_rid(args[0])
             count += 1
         return False
 
     
-    def commit(self):
+    def commit(self,locked_rid,locked_index,locked_tables):
+        # print(locked_index,locked_rid,locked_tables)
         # Releasing locks as a part of the commit process
-        # self[0].release_index()
-        # self[0].release_rid()
+
+        for table in locked_tables:
+            for rid in locked_rid:
+                table.lock.release_rid(rid)
+            for index in locked_index:
+                table.lock.release_index(0,index)
         return True
 

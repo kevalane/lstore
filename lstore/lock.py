@@ -33,8 +33,11 @@ class Lock:
 		:return: bool	 # True if lock is released, False otherwise
 		"""
 		if rid in self.rid_locks:
-			self.rid_locks[rid].release()
-			return True
+			try:
+				self.rid_locks[rid].release()
+				return True
+			except Exception as e: 
+				pass
 		return False # Lock not found
 
 	def acquire_index(self, index_column: int, index_value: int) -> bool:
@@ -69,6 +72,9 @@ class Lock:
 		:return: bool				  # True if lock is released, False otherwise
 		"""
 		if index_column in self.index_locks and index_value in self.index_locks[index_column]:
-			self.index_locks[index_column][index_value].release()
-			return True
+			try:
+				self.index_locks[index_column][index_value].release()
+				return True
+			except Exception as e:
+				pass
 		return False
