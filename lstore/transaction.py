@@ -54,7 +54,7 @@ class Transaction:
         count = 0
         
         for query, args in self.queries:
-            if self.success == count:
+            if self.success - 1 == count:
                 return False
             
             if 'Query.delete' in str(query):
