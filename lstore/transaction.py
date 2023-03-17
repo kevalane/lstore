@@ -31,15 +31,14 @@ class Transaction:
         
     # If you choose to implement this differently this method must still return True if transaction commits or False on abort
     def run(self):
-        for query, args in self.queries:
+        for index, (query, args) in enumerate(self.queries):
             
             result = query(*args)
-
+            
             # Implementing 2PL for update and delete
-            # if 'Query.delete' in str(query):
-            #     args[0].acquire_rid()
-            # elif 'Query.update' in str(query):
-            #     args[0].acquire_index()
+            self.tables[].lock.acquire_rid(args[0])
+            if 'Query.update' in str(query):
+                acquire_index(args[0])
 
             # If the query has failed the transaction should abort
             

@@ -11,7 +11,7 @@ import threading
 import pandas as pd # only for excel dump
 from queue import Queue
 from lstore.config import *
-
+from lstore.lock import Lock
 class Table:
 
     """
@@ -30,7 +30,7 @@ class Table:
         self.rid_generator = 0
         self.merge_queue = Queue()
         self.merge_lock = threading.Lock() # Used to lock attributes during merge to avoid contention
-
+        self.lock = Lock()
         self.path = path + '/' + name
         
         try:
