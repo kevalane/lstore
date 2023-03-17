@@ -35,5 +35,6 @@ if st.button("Execute"):
     d = {'Key/Col 0':[temp[0]],'Col 1':[temp[1]],"Col 2":[temp[2]],"Col 3":[temp[3]],"Col 4":[temp[4]]}
     df = pd.DataFrame(d)
     st.markdown("The requested record is as follows")
+    df.to_excel("select.xlsx",index=False)
     st.table(df)
 db.close()

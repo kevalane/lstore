@@ -1,7 +1,8 @@
+from imp import acquire_lock
 from lstore.table import Table, Record
 from lstore.index import Index
 from lstore.query import Query
-
+from lstore.lock import Lock
 from lstore.config import *
 
 class Transaction:
@@ -31,9 +32,14 @@ class Transaction:
     # If you choose to implement this differently this method must still return True if transaction commits or False on abort
     def run(self):
         for query, args in self.queries:
-            result = query(*args)
             
+            result = query(*args)
+            if 'Query.delete' in str(query):
+                args[0].acquire_rid()
+            elif 'Query.update' in str(query):
+                args[0].acquire_index()
             # If the query has failed the transaction should abort
+            
             if result == False:
                 return self.abort()
             
@@ -52,9 +58,10 @@ class Transaction:
             if 'Query.delete' in str(query):
                 try:
                     self.tables[count].delete_record(-args[0])
+                    args[0].release_rid()
                 except:
                     continue
-            
+                
             elif 'Query.insert' in str(query):
                 try:
                     self.tables[count].delete_record(args[0])
@@ -74,6 +81,8 @@ class Transaction:
                     page.columns[INDIRECTION_COLUMN].put(tail_page.columns[INDIRECTION_COLUMN].get(offset), offset)
                     
                     self.tables[count].bufferpool.base_pages[page_num]['wide_page'] = page
+
+                    args[0].release_index()
                 except:
                     continue
                 
@@ -82,6 +91,7 @@ class Transaction:
 
     
     def commit(self):
-        # TODO: commit to database
+        self[0].release_index()
+        self[0].release_rid()
         return True
 

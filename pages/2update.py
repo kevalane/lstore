@@ -32,6 +32,7 @@ if st.button("Execute"):
         d = {'Key/Col 0':[record[0]],'Col 1':[record[1]],"Col 2":[record[2]],"Col 3":[record[3]],"Col 4":[record[4]]}
         df = pd.DataFrame(d)
         st.write("Record with key {} updated successfully.".format(key))
+        df.to_excel("update.xlsx",index=False)
         st.table(df)
     else:
         st.write("Record not updated succesfully")
